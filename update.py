@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# update.py
+#
+# Perform a check on current environments and vms and make changes to Confluence
+# page(s) if necessary. (As of 12/15, currently incomplete)
+# -----------------------------------------------------------------------------
 
 import json
 import os
@@ -17,8 +25,8 @@ except ImportError:
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. " +
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
+    sys.stderr.write("You do not have the 'yaml' module installed. "
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
                      "for more information.")
     exit(1)
 
@@ -29,8 +37,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one " +
-                     "and then try again.\nFor reference, check config_" +
+    sys.stderr.write("There is no config.yml in the directory. Create one "
+                     "and then try again.\nFor reference, check config_"
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 

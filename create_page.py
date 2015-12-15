@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# create_page.py
+#
+# Initiate write_envs.py or write_vms.py depending on argument passed in. For
+# example, "python create_page.py env 5709327" will create a page for the
+# environment with ID 5709327, if such an environment exists.
+#
+# This script is used exclusively by update.py.
+# -----------------------------------------------------------------------------
 
 import json
 import os
@@ -20,8 +31,8 @@ except ImportError:
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. " +
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
+    sys.stderr.write("You do not have the 'yaml' module installed. "
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
                      "for more information.")
     exit(1)
 
@@ -32,8 +43,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one " +
-                     "and then try again.\nFor reference, check config_" +
+    sys.stderr.write("There is no config.yml in the directory. Create one "
+                     "and then try again.\nFor reference, check config_"
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 

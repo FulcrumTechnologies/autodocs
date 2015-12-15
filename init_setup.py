@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# init_setup.py
+#
+# Create pages for all environments and their respective vms. This is done by
+# getting a json of all environments (or "configurations") and calling
+# write_env.py for each one as well as write_vms.py for the number of vms
+# present.
+#
+# For testing purposes the loop responsible for writing the pages may be
+# restricted to only writing a small number of pages.
+# -----------------------------------------------------------------------------
+
 import json
 import os
 import os.path
@@ -19,8 +33,8 @@ except ImportError:
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. " +
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
+    sys.stderr.write("You do not have the 'yaml' module installed. "
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
                      "for more information.")
     exit(1)
 
@@ -31,8 +45,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one " +
-                     "and then try again.\nFor reference, check config_" +
+    sys.stderr.write("There is no config.yml in the directory. Create one "
+                     "and then try again.\nFor reference, check config_"
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 

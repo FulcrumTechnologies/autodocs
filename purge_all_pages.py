@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# purge_all_pages.py
+#
+# Destroy all pages that have been written by Wiki Warden.
+# -----------------------------------------------------------------------------
+
 import os
 
 # --------- Import yaml, then try to open config.yml -> store in list ---------
@@ -5,8 +13,8 @@ import os
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. " +
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
+    sys.stderr.write("You do not have the 'yaml' module installed. "
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
                      "for more information.")
     exit(1)
 
@@ -17,8 +25,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one " +
-                     "and then try again.\nFor reference, check config_" +
+    sys.stderr.write("There is no config.yml in the directory. Create one "
+                     "and then try again.\nFor reference, check config_"
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 

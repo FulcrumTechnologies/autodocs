@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# write_vms.py
+#
+# Creates content in xhtml that will be posted to new page. Also creates json
+# that will be used to hold information, stored in /JSONS directory. Lastly,
+# write_page.py is called to request the Confluence API and write the page.
+# -----------------------------------------------------------------------------
+
 
 def create_one(i, parentID, parentName):
     """Just make one vm page; primarily called by create(), seen below."""

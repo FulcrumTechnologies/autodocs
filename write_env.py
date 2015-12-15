@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+# -----------------------------------------------------------------------------
+# write_env.py
+#
+# Creates content in xhtml that will be posted to new page. Also creates json
+# that will be used to hold information, stored in /JSONS directory. Lastly,
+# write_page.py is called to request the Confluence API and write the page.
+# -----------------------------------------------------------------------------
+
 
 def checkUrl(url):
     """Check if given URL directs to existing page. Return true if so."""

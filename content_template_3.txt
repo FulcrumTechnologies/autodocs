@@ -1,2 +1,0 @@
-
-</tbody></table><table><tbody><tr><th>Mobility</th><th>&nbsp;</th></tr><tr><td colspan=\"1\">Version:</td><td colspan=\"1\">%s</td></tr><tr><td colspan=\"1\">APK Build:</td><td colspan=\"1\">%s</td></tr><tr><td colspan=\"1\">WAR Build:</td><td colspan=\"1\">%s</td></tr><tr><td colspan=\"1\">Internal Host IP:</td><td colspan=\"1\">%s</td></tr>

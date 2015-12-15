@@ -1,5 +1,12 @@
+#!/usr/bin/env python
 
-#!/usr/bin/python
+# -----------------------------------------------------------------------------
+# remove_page.py
+#
+# Remove one page. Call this method with "python remove_page.py [env/vm ID]".
+# Vm pages will be removed normally, but environment pages will be removed along
+# with all child pages (vm pages).
+# -----------------------------------------------------------------------------
 
 import json
 import os
@@ -55,8 +62,8 @@ def remove_env(username, password, location, data, path):
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. " +
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
+    sys.stderr.write("You do not have the 'yaml' module installed. "
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
                      "for more information.")
     exit(1)
 
@@ -67,8 +74,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one " +
-                     "and then try again.\nFor reference, check config_" +
+    sys.stderr.write("There is no config.yml in the directory. Create one "
+                     "and then try again.\nFor reference, check config_"
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 
