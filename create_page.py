@@ -59,18 +59,18 @@ skytap_token = config_data["skytap_token"]
 # --------------- Take argv[1] ("env" or "vm") and argv[2] (ID) ---------------
 
 try:
-    print "Creating " + sys.argv[1] + " with ID " + sys.argv[2]
+    print ("Creating " + sys.argv[1] + " with ID " + sys.argv[2])
 except IndexError:
-    print "IndexError: you did not supply two arguments, ya dingus."
+    print ("IndexError: you did not supply two arguments, ya dingus.")
 
 if sys.argv[1] == "vm" or sys.argv[1] == "env":
-    print "Requesting Skytap services..."
+    print ("Requesting Skytap services...")
     requisite_headers = {'Accept': 'application/json',
                          'Content-Type': 'application/json'}
     auth = (skytap_user, skytap_token)
 
 if sys.argv[1] == "env":
-    print "Preparing to write..."
+    print ("Preparing to write...")
     response = requests.get(skytap_url + "/configurations/" + str(sys.argv[2]),
                             headers=requisite_headers, auth=auth)
 

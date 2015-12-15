@@ -4,7 +4,7 @@
 # update.py
 #
 # Perform a check on current environments and vms and make changes to Confluence
-# page(s) if necessary. (As of 12/15, currently incomplete)
+# page(s) if necessary. (As of 12/15, incomplete)
 # -----------------------------------------------------------------------------
 
 import json
@@ -61,5 +61,5 @@ envs = json.loads(response.text)
 for i in envs:
     if len(i["error"]) is 0:
         if i["id"] not in open('allSkytapIDs.txt').read():
-            print "New environment detected. Creating page..."
+            print ("New environment detected. Creating page...")
             os.system("python create_page.py env " + str(i["id"]))

@@ -48,9 +48,9 @@ def create(pageName, parentID, pageContent, json_info):
     # ------------- Create page with gathered initial information -------------
 
     if parentID == envParent:
-        print "\nWriting new environment page: " + pageName
+        print ("\nWriting new environment page: " + pageName)
     else:
-        print "\nWriting new VM page: " + pageName
+        print ("\nWriting new VM page: " + pageName)
 
     curlCmd = ("curl -u " + username + ":" + password + " -X POST -H \'Content"
                "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
@@ -75,7 +75,7 @@ def create(pageName, parentID, pageContent, json_info):
         print ("Something went wrong; page was not generated. "
                "Error message returned: " + str(e))
         with open("temp.json", "r") as file:
-            print file.read()
+            print (file.read())
         return 999
 
     # Empties temp.json
