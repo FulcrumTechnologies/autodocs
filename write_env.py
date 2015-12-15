@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------------------
 
 
-def checkUrl(url):
+def check_url(url):
     """Check if given URL directs to existing page. Return true if so."""
     # Return true for now, until a better method can be concocted.
     # Current method works but takes up to 60 seconds before timing out and
@@ -25,7 +25,7 @@ def checkUrl(url):
     return resp.status < 400
 
 
-def create(data, parentID):
+def create(data, parent_id):
     """Create environment wiki page."""
     import json
     import os
@@ -39,13 +39,13 @@ def create(data, parentID):
 
     # Placeholder variables.
     undef = "Unavailable"
-    undefErr = "Unavailable: data missing"
+    undef_err = "Unavailable: data missing"
 
     # --- Writing content for all of row 1 of the environment page template ---
     # This content includes everything up until the "Server Access" tables.
 
     with open("content_1.txt", "r") as file:
-        toRead = file.read().replace('\n', '')
+        to_read = file.read().replace('\n', '')
 
     env_id = data["id"]
     env_name = data["name"]
@@ -54,7 +54,7 @@ def create(data, parentID):
     admin_access = undef
     user_access = undef
 
-    content = (toRead % (config_url, config_url, undef, undef, undef))
+    content = (to_read % (config_url, config_url, undef, undef, undef))
 
     json_info["id"] = env_id
 
@@ -78,24 +78,24 @@ def create(data, parentID):
         vm_id = i["id"]
         base_url = "https://" + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
 
-        newVM = {}
-        newVM["vm_name"] = vm_name
-        newVM["vm_ip"] = vm_ip
-        newVM["vm_id"] = vm_id
+        new_vm = {}
+        new_vm["vm_name"] = vm_name
+        new_vm["vm_ip"] = vm_ip
+        new_vm["vm_id"] = vm_id
         vm_user = undef
         vm_pass = undef
 
         try:
             internal_port = str(i["interfaces"][0]["services"][0]["internal_port"])
-            newVM["internal_port"] = str(i["interfaces"][0]["services"][0]["internal_port"])
+            new_vm["internal_port"] = str(i["interfaces"][0]["services"][0]["internal_port"])
         except IndexError:
-            internal_port = undefErr
+            internal_port = undef_err
 
         try:
             external_port = str(i["interfaces"][0]["services"][0]["external_port"])
-            newVM["external_port"] = str(i["interfaces"][0]["services"][0]["external_port"])
+            new_vm["external_port"] = str(i["interfaces"][0]["services"][0]["external_port"])
         except IndexError:
-            external_port = undefErr
+            external_port = undef_err
 
         ssh_enabled = undef
         ssl_enabled = undef
@@ -109,9 +109,9 @@ def create(data, parentID):
             content += ("<tr><td><p>User:</p></td><td>" + vm_user + "</td></tr>")
             content += ("<tr><td>Password:</td><td>" + vm_pass + "</td></tr>")
 
-            if internal_port != undefErr:
+            if internal_port != undef_err:
                 content += ("<tr><td>Internal Port:</td><td>" + internal_port + "</td></tr>")
-            if external_port != undefErr:
+            if external_port != undef_err:
                 content += ("<tr><td>External Port:</td><td>" + external_port + "</td></tr>")
 
             content += ("<tr><td>SSH:</td><td><ac:task-list><ac:task><ac:task-id>"
@@ -135,7 +135,7 @@ def create(data, parentID):
             db_port = 1521
             db_sid = "orcl"
 
-        json_info["vms"].append(newVM)
+        json_info["vms"].append(new_vm)
 
     # End of row 2, column 1.
     content += ("<p><strong><br /></strong></p></ac:layout-cell>")
@@ -166,7 +166,7 @@ def create(data, parentID):
         content += ("<tr><td>TEMP Tablespace Name:</td><td>" + undef + "</td></tr>")
         content += ("<tr><td>Version:</td><td>" + undef + "</td></tr>")
     else:
-        content += ("<th>" + undefErr + "</th></tr>")
+        content += ("<th>" + undef_err + "</th></tr>")
 
     content += ("</tbody></table>")
     content += ("<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
@@ -182,7 +182,7 @@ def create(data, parentID):
 
     # -------------------------------------------------------------------------
 
-    feedback, json_info = write_page.create(env_name, str(parentID), content, json_info)
+    feedback, json_info = write_page.create(env_name, str(parent_id), content, json_info)
 
     with open("JSONS/" + env_id + ".json", "w") as file:
         json.dump(json_info, file)

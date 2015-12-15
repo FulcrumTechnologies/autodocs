@@ -31,8 +31,8 @@ def get_cfg():
     return config_data
 
 
-def create(pageName, parentID, pageContent, json_info):
-    """Takes relevant data and uses it to create environment or vm page."""
+def create(page_name, parent_id, page_content, json_info):
+    """Take relevant data and use it to create environment or vm page."""
     import json
     import os
 
@@ -42,25 +42,25 @@ def create(pageName, parentID, pageContent, json_info):
     location = config_data["wiki_url"]
     username = config_data["wiki_user"]
     password = config_data["wiki_pass"]
-    spaceKey = config_data["wiki_space"]
-    envParent = config_data["wiki_parent"]
+    space_key = config_data["wiki_space"]
+    env_parent = config_data["wiki_parent"]
 
     # ------------- Create page with gathered initial information -------------
 
-    if parentID == envParent:
-        print ("\nWriting new environment page: " + pageName)
+    if parent_id == env_parent:
+        print ("\nWriting new environment page: " + page_name)
     else:
-        print ("\nWriting new VM page: " + pageName)
+        print ("\nWriting new VM page: " + page_name)
 
-    curlCmd = ("curl -u " + username + ":" + password + " -X POST -H \'Content"
+    curl_cmd = ("curl -u " + username + ":" + password + " -X POST -H \'Content"
                "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
-               "\"" + pageName + "\",\"ancestors\": [{\"id\": "
-               "" + parentID + "}],\"space\": {\"key\": \"" + spaceKey + "\""
-               "},\"body\": {\"storage\": {\"value\": \"" + pageContent + "\""
+               "\"" + page_name + "\",\"ancestors\": [{\"id\": "
+               "" + parent_id + "}],\"space\": {\"key\": \"" + space_key + "\""
+               "},\"body\": {\"storage\": {\"value\": \"" + page_content + "\""
                ",\"representation\": \"storage\"}}}\' " + location + " | "
                "python -mjson.tool > temp.json")
 
-    output = os.system(curlCmd)
+    output = os.system(curl_cmd)
 
     with open("temp.json") as file:
         data = json.load(file)

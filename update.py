@@ -63,3 +63,4 @@ for i in envs:
         if i["id"] not in open('allSkytapIDs.txt').read():
             print ("New environment detected. Creating page...")
             os.system("python create_page.py env " + str(i["id"]))
+

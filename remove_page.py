@@ -18,11 +18,11 @@ def remove(username, password, location, data, path):
     """Delete page, along with references in JSONS/ and allPageIDs.txt."""
     print "\n\nDeleting page with Skytap ID: " + str(data[0]["id"])
 
-    curlCmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE"
+    curl_cmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE"
                " " + location + str(data[0]["page_id"]) + " | python -m "
                "json.tool")
-    output = os.system(curlCmd)
-    print output
+    output = os.system(curl_cmd)
+    print (output)
 
     # Delete instance from allPageIDs.txt
     f = open("allPageIDs.txt", "r")
@@ -44,13 +44,13 @@ def remove_env(username, password, location, data, path):
     """Removes all vms associated with environment, then removes environment."""
     for i in data[0]["vms"]:
         try:
-            vmData = []
+            vm_data = []
 
             with open(path + str(i["vm_id"]) + ".json") as f:
                 for line in f:
-                    vmData.append(json.loads(line))
+                    vm_data.append(json.loads(line))
 
-            remove(username, password, location, vmData, path)
+            remove(username, password, location, vm_data, path)
         except IOError:
             print "Missed a vm? Something went wonky!"
 
@@ -62,8 +62,8 @@ def remove_env(username, password, location, data, path):
 try:
     import yaml
 except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. "
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
+    sys.stderr.write("You do not have the 'yaml' module installed. " +
+                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation " +
                      "for more information.")
     exit(1)
 
@@ -74,8 +74,8 @@ try:
     config_data = yaml.safe_load(f)
     f.close()
 except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one "
-                     "and then try again.\nFor reference, check config_"
+    sys.stderr.write("There is no config.yml in the directory. Create one " +
+                     "and then try again.\nFor reference, check config_" +
                      "template.yml and follow the listed guidelines.\n")
     exit(1)
 
@@ -90,13 +90,13 @@ location = config_data["wiki_url"]
 arg_id = sys.argv[1]
 path = "JSONS/"
 
-fileName = path + str(arg_id) + ".json"
+file_name = path + str(arg_id) + ".json"
 
-if os.path.isfile(fileName):
+if os.path.isfile(file_name):
     data = []
 
     # Make a JSON out of file info
-    with open(fileName) as f:
+    with open(file_name) as f:
         for line in f:
             data.append(json.loads(line))
 

@@ -18,7 +18,6 @@ import os.path
 import socket
 import write_env
 import write_vms
-import sys
 
 try:
     import requests
@@ -75,9 +74,10 @@ for i in range(2):
     if len(env_data[i]["error"]) is 0:
         response = requests.get(skytap_url + "/configurations/" + env_data[i]["id"],
                                 headers=requisite_headers, auth=auth)
-        envDetails = json.loads(response.text)
+        env_details = json.loads(response.text)
 
-        envPageID, parentName = write_env.create(envDetails, wiki_parent)
-        
-	if envPageID != 999:
-            write_vms.create(envDetails, envPageID, parentName)
+        env_page_id, parent_name = write_env.create(env_details, wiki_parent)
+
+    if env_page_id != 999:
+            write_vms.create(env_details, env_page_id, parent_name)
+

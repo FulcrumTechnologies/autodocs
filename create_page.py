@@ -74,10 +74,10 @@ if sys.argv[1] == "env":
     response = requests.get(skytap_url + "/configurations/" + str(sys.argv[2]),
                             headers=requisite_headers, auth=auth)
 
-    envDetails = json.loads(response.text)
+    env_details = json.loads(response.text)
 
-    envPageID, parentName = write_env.create(envDetails, wiki_parent)
+    env_page_id, parent_name = write_env.create(env_details, wiki_parent)
 
-    if envPageID != 999:
-        write_vms.create(envDetails, envPageID, parentName)
+    if env_page_id != 999:
+        write_vms.create(env_details, env_page_id, parent_name)
 

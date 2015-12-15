@@ -9,7 +9,7 @@
 # -----------------------------------------------------------------------------
 
 
-def create_one(i, parentID, parentName):
+def create_one(i, parent_id, parent_name):
     """Just make one vm page; primarily called by create(), seen below."""
     import json
     import write_page
@@ -24,9 +24,9 @@ def create_one(i, parentID, parentName):
 
     json_info["vm_name"] = vm_name
 
-    json_info["parent_page_id"] = parentID
+    json_info["parent_page_id"] = parent_id
 
-    json_info["parent_page_name"] = parentName
+    json_info["parent_page_name"] = parent_name
 
     content = "<p>"
 
@@ -66,14 +66,14 @@ def create_one(i, parentID, parentName):
     content += ("<br/>------------------------<br/>Note: Wiki Keeper is a WIP; ")
     content += ("other super fun and magical features are under development.</p>")
 
-    feedback, json_info = write_page.create("" + vm_name + " - [" + parentName + "]",
-                                            str(parentID), content, json_info)
+    feedback, json_info = write_page.create("" + vm_name + " - [" + parent_name + "]",
+                                            str(parent_id), content, json_info)
 
     with open("JSONS/" + vm_id + ".json", "w") as file:
         json.dump(json_info, file)
 
 
-def create(data, parentID, parentName):
+def create(data, parent_id, parent_name):
     """Create vm wiki page(s)."""
     import json
     import write_page
@@ -81,5 +81,5 @@ def create(data, parentID, parentName):
     # -------------------------------------------------------------------------
 
     for i in data["vms"]:
-        create_one(i, parentID, parentName)
+        create_one(i, parent_id, parent_name)
 

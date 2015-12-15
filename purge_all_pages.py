@@ -43,19 +43,20 @@ output = "No pages to purge."
 with open("allPageIDs.txt", 'r') as file:
     for line in file:
 
-	print ("\n\nDeleting page with ID: " + line)
+        print ("\n\nDeleting page with ID: " + line)
 
-        curlCmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE "
-                   "" + location + str(line).rstrip('\n') + " | python -m "
-                   "json.tool")
-        output = os.system(curlCmd)
+        curl_cmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE "
+                    "" + location + str(line).rstrip('\n') + " | python -m "
+                    "json.tool")
+        output = os.system(curl_cmd)
 
 print (output)
 
 # Empties allPageIDs.txt
 open("allPageIDs.txt", 'w').close()
 
-dirPath = "JSONS"
-fileList = os.listdir(dirPath)
-for fileName in fileList:
-    os.remove(dirPath + "/" + fileName)
+dir_path = "JSONS"
+file_list = os.listdir(dir_path)
+for file_name in file_list:
+    os.remove(dir_path + "/" + file_name)
+
