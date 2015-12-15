@@ -1,0 +1,15 @@
+# This file is what makes wiki_keeper work. Refer to wikiig_template.yml for
+# details on where to obtain the following information.
+
+gateway:        192.168.1.254
+
+wiki_url:       https://fulcrumtech.atlassian.net/wiki/rest/api/content/
+wiki_user:      chawkins
+wiki_pass:      rufus77
+wiki_space:     AutoDocs
+wiki_parent:    55115882
+
+skytap_url:     https://cloud.skytap.com
+skytap_user:    chawkins@fulcrum.net
+skytap_token:   25ae66d4ef9e5af05f402f1412a530f7fb7587b6
+

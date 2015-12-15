@@ -1,0 +1,1 @@
+{"page_id": "57246161", "id": "6336376", "config_url": "https://cloud.skytap.com/configurations/6336376", "vms": [{"vm_name": "db", "vm_ip": "172.16.0.123", "vm_id": "7871926"}, {"vm_name": "app1", "vm_ip": "172.16.0.124", "internal_port": "8446", "vm_id": "7871928", "external_port": "20289"}]}

@@ -1,0 +1,2 @@
+
+<tr><td colspan=\"1\">%s:</td><td colspan=\"1\">%s</td></tr><tr><td colspan=\"1\">%s API:</td><td colspan=\"1\"><a href=\"%s\">%s</a></td></tr><tr><td colspan=\"1\"><p>Internal Port %s:</p></td><td colspan=\"1\"><span style=\"color: rgb(69,69,69);\">%s</span></td></tr><tr><td colspan=\"1\"><p>External Port %s:</p></td><td colspan=\"1\"><span style=\"color: rgb(69,69,69);\">%s</span></td></tr>
