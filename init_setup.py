@@ -4,6 +4,7 @@ import os.path
 import socket
 import write_env
 import write_vms
+import sys
 
 try:
     import requests
