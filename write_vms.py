@@ -36,11 +36,19 @@ def create_one(i, parent_id, parent_name):
     content += ("Configuration URL: " + i["configuration_url"] + "<br/><br/>")
     json_info["config_url"] = i["configuration_url"]
 
-    content += ("NAT IP: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"] + "<br/>")
-    json_info["nat_ip"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+    try:
+        content += ("NAT IP: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"] + "<br/>")
+        json_info["nat_ip"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+    except KeyError:
+        # Can't find "nat_addresses"
+        pass
 
-    content += ("VPN ID: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"] + "<br/><br/>")
-    json_info["vpn_id"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"]
+    try:
+        content += ("VPN ID: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"] + "<br/><br/>")
+        json_info["vpn_id"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"]
+    except KeyError:
+        # Can't find "nat_addresses"
+        pass
 
     try:
         content += ("External IP: " + i["interfaces"][0]["services"][0]["external_ip"] + "<br/>")

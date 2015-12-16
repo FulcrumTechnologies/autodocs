@@ -50,7 +50,7 @@ requisite_headers = {'Accept': 'application/json',
                      'Content-Type': 'application/json'}
 auth = (skytap_user, skytap_token)
 
-response = requests.get(skytap_url + "/configurations",
+response = requests.get(skytap_url + "/configurations/995772",
                         headers=requisite_headers, auth=auth)
 
 #env_data = json.loads(response.text)

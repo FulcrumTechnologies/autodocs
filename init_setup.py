@@ -70,14 +70,14 @@ env_data = json.loads(response.text)
 
 # -------- Write specified amount of environments along with their vms --------
 
-for i in range(2):
-    if len(env_data[i]["error"]) is 0:
-        response = requests.get(skytap_url + "/configurations/" + env_data[i]["id"],
+for i in env_data:                # for i in range(2):
+    if len(i["error"]) is 0:
+        response = requests.get(skytap_url + "/configurations/" + i["id"],
                                 headers=requisite_headers, auth=auth)
         env_details = json.loads(response.text)
 
         env_page_id, parent_name = write_env.create(env_details, wiki_parent)
 
     if env_page_id != 999:
-            write_vms.create(env_details, env_page_id, parent_name)
+        write_vms.create(env_details, env_page_id, parent_name)
 

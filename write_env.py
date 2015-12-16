@@ -74,9 +74,14 @@ def create(data, parent_id):
 
     for i in data["vms"]:
         vm_name = i["interfaces"][0]["hostname"]
-        vm_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
         vm_id = i["id"]
-        base_url = "https://" + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+
+        try:
+            vm_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+            base_url = "https://" + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+        except KeyError:
+            vm_ip = undef_err
+            base_url = undef_err
 
         new_vm = {}
         new_vm["vm_name"] = vm_name
