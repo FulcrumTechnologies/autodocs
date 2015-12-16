@@ -1,5 +1,4 @@
-# This file is what makes wiki_keeper work. Refer to wikiig_template.yml for
-# details on where to obtain the following information.
+# Save this as config.yml when you're done.
 
 gateway:        192.168.1.254
 

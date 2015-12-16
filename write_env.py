@@ -8,6 +8,12 @@
 # write_page.py is called to request the Confluence API and write the page.
 # -----------------------------------------------------------------------------
 
+import httplib
+import json
+import os
+import urllib2
+import urlparse
+import write_page
 
 def check_url(url):
     """Check if given URL directs to existing page. Return true if so."""
@@ -15,8 +21,6 @@ def check_url(url):
     # Current method works but takes up to 60 seconds before timing out and
     # returning False.
     return True
-    import httplib
-    from urlparse import urlparse
 
     p = urlparse(url)
     conn = httplib.HTTPConnection(p.netloc)
@@ -25,12 +29,14 @@ def check_url(url):
     return resp.status < 400
 
 
+def clean_string(str):
+    """Clean up lone apostrophes and quotations in string."""
+    str = str.replace("\'", "")
+
+    return str
+
 def create(data, parent_id):
     """Create environment wiki page."""
-    import json
-    import os
-    import urllib2
-    import write_page
 
     # Making a json containing important information. This will be stored in a
     # file in JSONS directory and used to perform various functions related to
@@ -49,6 +55,8 @@ def create(data, parent_id):
 
     env_id = data["id"]
     env_name = data["name"]
+    env_name = clean_string(env_name)
+
     config_url = data["url"]
     puppet_enabled = undef
     admin_access = undef
@@ -184,6 +192,8 @@ def create(data, parent_id):
                 "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
                 "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><"
                 "/ac:layout-cell></ac:layout-section></ac:layout>")
+
+    content = clean_string(content)
 
     # -------------------------------------------------------------------------
 

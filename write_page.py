@@ -8,6 +8,8 @@
 # the name [Skytap ID].json.
 # -----------------------------------------------------------------------------
 
+import json
+import os
 
 def get_cfg():
     """Return config.yml as a yaml object."""
@@ -33,8 +35,6 @@ def get_cfg():
 
 def create(page_name, parent_id, page_content, json_info):
     """Take relevant data and use it to create environment or vm page."""
-    import json
-    import os
 
     config_data = get_cfg()
 
@@ -64,6 +64,9 @@ def create(page_name, parent_id, page_content, json_info):
 
     with open("temp.json") as file:
         data = json.load(file)
+
+    # Empties temp.json
+    open("temp.json", 'w').close()
 
     # For use with purge_all_pages.py. Also checks if page was actually created
     try:

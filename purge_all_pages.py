@@ -55,6 +55,9 @@ print (output)
 # Empties allPageIDs.txt
 open("allPageIDs.txt", 'w').close()
 
+# Empties allSkytapIDs.txt
+open("allSkytapIDs.txt", 'w').close()
+
 dir_path = "JSONS"
 file_list = os.listdir(dir_path)
 for file_name in file_list:

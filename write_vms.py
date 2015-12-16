@@ -8,11 +8,11 @@
 # write_page.py is called to request the Confluence API and write the page.
 # -----------------------------------------------------------------------------
 
+import json
+import write_page
 
 def create_one(i, parent_id, parent_name):
     """Just make one vm page; primarily called by create(), seen below."""
-    import json
-    import write_page
 
     # Making a json containing important information. This will be stored in
     # a file in JSONS directory and used to perform various functions
@@ -83,10 +83,6 @@ def create_one(i, parent_id, parent_name):
 
 def create(data, parent_id, parent_name):
     """Create vm wiki page(s)."""
-    import json
-    import write_page
-
-    # -------------------------------------------------------------------------
 
     for i in data["vms"]:
         create_one(i, parent_id, parent_name)
