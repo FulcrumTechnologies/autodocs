@@ -1,0 +1,6 @@
+*.pyc
+config.yml
+/JSONS
+allPageIDs.txt
+allSkytapIDs.txt
+temp.json
