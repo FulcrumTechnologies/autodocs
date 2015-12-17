@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-# -----------------------------------------------------------------------------
-# create_page.py
-#
-# Initiate write_envs.py or write_vms.py depending on argument passed in. For
-# example, "python create_page.py env 5709327" will create a page for the
-# environment with ID 5709327, if such an environment exists.
-#
-# This script is used exclusively by update.py.
-# -----------------------------------------------------------------------------
+"""create_page.py
+
+Initiate write_envs.py or write_vms.py depending on argument passed in. For
+example, "python create_page.py env 5709327" will create a page for the
+environment with ID 5709327, if such an environment exists.
+
+This script is used exclusively by update.py.
+"""
 
 import json
 import os
@@ -18,66 +17,74 @@ import sys
 import write_env
 import write_vms
 
-try:
-    import requests
-except ImportError:
-    sys.stderr.write("You do not have the 'requests' module installed. "
-                     "Please see http://docs.python-requests.org/en/latest/ "
-                     "for more information.")
-    exit(1)
 
-# --------- Import yaml, then try to open config.yml -> store in list ---------
+def start(args):
+    """Start creation of page."""
 
-try:
-    import yaml
-except ImportError:
-    sys.stderr.write("You do not have the 'yaml' module installed. "
-                     "Please see http://pyyaml.org/wiki/PyYAMLDocumentation "
-                     "for more information.")
-    exit(1)
+    try:
+        import requests
+    except ImportError:
+        sys.stderr.write("You do not have the 'requests' module installed. "
+                         "Please see http://docs.python-requests.org/en/latest/"
+                         " for more information.")
+        exit(1)
 
-config_data = {}
+    # ------- Import yaml, then try to open config.yml -> store in list -------
 
-try:
-    f = open("config.yml")
-    config_data = yaml.safe_load(f)
-    f.close()
-except IOError:
-    sys.stderr.write("There is no config.yml in the directory. Create one "
-                     "and then try again.\nFor reference, check config_"
-                     "template.yml and follow the listed guidelines.\n")
-    exit(1)
+    try:
+        import yaml
+    except ImportError:
+        sys.stderr.write("You do not have the 'yaml' module installed. "
+                         "Please see http://pyyaml.org/wiki/PyYAMLDocumentation"
+                         " for more information.")
+        exit(1)
 
-# ----------------- Store data from config in named variables -----------------
+    config_data = {}
 
-wiki_parent = config_data["wiki_parent"]
+    try:
+        f = open("config.yml")
+        config_data = yaml.safe_load(f)
+        f.close()
+    except IOError:
+        sys.stderr.write("There is no config.yml in the directory. Create one "
+                         "and then try again.\nFor reference, check config_"
+                         "template.yml and follow the listed guidelines.\n")
+        exit(1)
 
-skytap_url = config_data["skytap_url"]
-skytap_user = config_data["skytap_user"]
-skytap_token = config_data["skytap_token"]
+    # --------------- Store data from config in named variables ---------------
 
-# --------------- Take argv[1] ("env" or "vm") and argv[2] (ID) ---------------
+    wiki_parent = config_data["wiki_parent"]
 
-try:
-    print ("Creating " + sys.argv[1] + " with ID " + sys.argv[2])
-except IndexError:
-    print ("IndexError: you did not supply two arguments, ya dingus.")
+    skytap_url = config_data["skytap_url"]
+    skytap_user = config_data["skytap_user"]
+    skytap_token = config_data["skytap_token"]
 
-if sys.argv[1] == "vm" or sys.argv[1] == "env":
-    print ("Requesting Skytap services...")
-    requisite_headers = {'Accept': 'application/json',
-                         'Content-Type': 'application/json'}
-    auth = (skytap_user, skytap_token)
+    # ------------- Take argv[1] ("env" or "vm") and argv[2] (ID) -------------
 
-if sys.argv[1] == "env":
-    print ("Preparing to write...")
-    response = requests.get(skytap_url + "/configurations/" + str(sys.argv[2]),
-                            headers=requisite_headers, auth=auth)
+    try:
+        print ("Creating " + args[1] + " with ID " + args[2])
+    except IndexError:
+        print ("IndexError: you did not supply two arguments, ya dingus.")
 
-    env_details = json.loads(response.text)
+    if args[1] == "vm" or args[1] == "env":
+        print ("Requesting Skytap services...")
+        requisite_headers = {'Accept': 'application/json',
+                             'Content-Type': 'application/json'}
+        auth = (skytap_user, skytap_token)
 
-    env_page_id, parent_name = write_env.create(env_details, wiki_parent)
+    if args[1] == "env":
+        print ("Preparing to write...")
+        response = requests.get(skytap_url + "/configurations/" + str(args[2]),
+                                headers=requisite_headers, auth=auth)
 
-    if env_page_id != 999:
-        write_vms.create(env_details, env_page_id, parent_name)
+        env_details = json.loads(response.text)
+
+        env_page_id, parent_name = write_env.create(env_details, wiki_parent)
+
+        if env_page_id != 999:
+            write_vms.create(env_details, env_page_id, parent_name)
+
+
+if __name__ == '__main__':
+    start(sys.argv)
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-# -----------------------------------------------------------------------------
-# write_page.py
-#
-# Request Confluence API to write content to a page for either an environment or
-# vm page. Also stores JSON containing relevant data in /JSONS directory under
-# the name [Skytap ID].json.
-# -----------------------------------------------------------------------------
+"""write_page.py
+
+Request Confluence API to write content to a page for either an environment or
+vm page. Also stores JSON containing relevant data in /JSONS directory under
+the name [Skytap ID].json.
+"""
 
 import json
 import os
+
 
 def get_cfg():
     """Return config.yml as a yaml object."""
@@ -53,12 +53,12 @@ def create(page_name, parent_id, page_content, json_info):
         print ("\nWriting new VM page: " + page_name)
 
     curl_cmd = ("curl -u " + username + ":" + password + " -X POST -H \'Content"
-               "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
-               "\"" + page_name + "\",\"ancestors\": [{\"id\": "
-               "" + parent_id + "}],\"space\": {\"key\": \"" + space_key + "\""
-               "},\"body\": {\"storage\": {\"value\": \"" + page_content + "\""
-               ",\"representation\": \"storage\"}}}\' " + location + " | "
-               "python -mjson.tool > temp.json")
+                "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
+                "\"" + page_name + "\",\"ancestors\": [{\"id\": "
+                "" + parent_id + "}],\"space\": {\"key\": \"" + space_key + "\""
+                "},\"body\": {\"storage\": {\"value\": \"" + page_content + "\""
+                ",\"representation\": \"storage\"}}}\' " + location + " | "
+                "python -mjson.tool > temp.json")
 
     output = os.system(curl_cmd)
 

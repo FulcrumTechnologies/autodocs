@@ -53,10 +53,17 @@ auth = (skytap_user, skytap_token)
 response = requests.get(skytap_url + "/configurations",
                         headers=requisite_headers, auth=auth)
 
-#env_data = json.loads(response.text)
+env_data = json.loads(response.text)
+
+count = []
+
+for i in env_data:
+    count.append(str(i["id"]))
 
 #if len(env_data[0]["error"]) is 0:
 #response = requests.get(skytap_url + "/vms/" + env_data[0],
 #                        headers=requisite_headers, auth=auth)
-print response.text
+#print response.text
+#print "Number of envs: " + str(count)
 
+print sorted(count)
