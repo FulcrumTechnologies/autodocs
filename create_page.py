@@ -9,27 +9,14 @@ environment with ID 5709327, if such an environment exists.
 This script is used exclusively by update.py.
 """
 
+import commands
 import json
-import os
-import os.path
-import socket
-import sys
 import write_env
 import write_vms
 
 
-def start(args):
+def start(id):
     """Start creation of page."""
-
-    try:
-        import requests
-    except ImportError:
-        sys.stderr.write("You do not have the 'requests' module installed. "
-                         "Please see http://docs.python-requests.org/en/latest/"
-                         " for more information.")
-        exit(1)
-
-    # ------- Import yaml, then try to open config.yml -> store in list -------
 
     try:
         import yaml
@@ -55,36 +42,17 @@ def start(args):
 
     wiki_parent = config_data["wiki_parent"]
 
-    skytap_url = config_data["skytap_url"]
-    skytap_user = config_data["skytap_user"]
-    skytap_token = config_data["skytap_token"]
-
     # ------------- Take argv[1] ("env" or "vm") and argv[2] (ID) -------------
 
-    try:
-        print ("Creating " + args[1] + " with ID " + args[2])
-    except IndexError:
-        print ("IndexError: you did not supply two arguments, ya dingus.")
+    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+                                              " -a vms -e " + str(id))
 
-    if args[1] == "vm" or args[1] == "env":
-        print ("Requesting Skytap services...")
-        requisite_headers = {'Accept': 'application/json',
-                             'Content-Type': 'application/json'}
-        auth = (skytap_user, skytap_token)
+    env_details = json.loads(output)
 
-    if args[1] == "env":
-        print ("Preparing to write...")
-        response = requests.get(skytap_url + "/configurations/" + str(args[2]),
-                                headers=requisite_headers, auth=auth)
+    env_page_id, parent_name = write_env.create(env_details, wiki_parent)
 
-        env_details = json.loads(response.text)
+    if env_page_id != 0:
+        write_vms.create(env_details, env_page_id, parent_name)
 
-        env_page_id, parent_name = write_env.create(env_details, wiki_parent)
-
-        if env_page_id != 999:
-            write_vms.create(env_details, env_page_id, parent_name)
-
-
-if __name__ == '__main__':
-    start(sys.argv)
+    return env_page_id
 

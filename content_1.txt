@@ -1,48 +1,48 @@
 <ac:layout>
-  <ac:layout-section ac:type=\"two_equal\">
-    <ac:layout-cell>
-      <p>This environment is being maintained and updated by Wiki Keeper...name is a WIP, suggest something cool, like Trogdor or The Final Boss of Confluence.</p>
-      <p>&nbsp;</p>
-      <p>Wiki Keeper writes pages for environments shortly after said environments are created and dynamically writes the data. Information followed by an asterisk is not written dynamically and may be incorrect.</p>
-      <p>&nbsp;</p>
-      <p>If you edit these pages, beware! Wiki Keeper is not above nuking pages that it does not like.</p>
-    </ac:layout-cell>
-    <ac:layout-cell>
-      <h3>Cloud Application Information</h3>
-      <table>
-        <tbody>
-          <tr>
-            <th>Skytap</th>
-            <th>&nbsp;</th>
-          </tr>
-          <tr>
-            <td>Start Link:</td>
-            <td><a href=\"%s\">%s</a></td>
-          </tr>
-          <tr>
-            <td>Puppet:</td>
-            <td>
-              <ac:task-list>
-                <ac:task>
-                  <ac:task-id>1</ac:task-id>
-                  <ac:task-status>%s</ac:task-status>
-                  <ac:task-body>&nbsp;</ac:task-body>
-                </ac:task>
-              </ac:task-list>
-            </td>
-          </tr>
-          <tr>
-            <td colspan=\"1\">Admins:</td>
-            <td colspan=\"1\">%s</td>
-          </tr>
-          <tr>
-            <td colspan=\"1\">User Access:</td>
-            <td colspan=\"1\">%s</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>&nbsp;</p>
-      <p>&nbsp;</p>
-    </ac:layout-cell>
-  </ac:layout-section>
+<ac:layout-section ac:type=\"two_equal\">
+<ac:layout-cell>
+<p>This environment is being maintained and updated by Wiki Keeper...name is a WIP, suggest something cool, like Trogdor or The Final Boss of Confluence.</p>
+<p>&nbsp;</p>
+<p>Wiki Keeper writes pages for environments shortly after said environments are created and dynamically writes the data. Information followed by an asterisk is not written dynamically and may be incorrect.</p>
+<p>&nbsp;</p>
+<p>If you edit these pages, beware! Wiki Keeper is not above nuking pages that it does not like.</p>
+</ac:layout-cell>
+<ac:layout-cell>
+<h3>Cloud Application Information</h3>
+<table>
+<tbody>
+<tr>
+<th>Skytap</th>
+<th>&nbsp;</th>
+</tr>
+<tr>
+<td>Start Link:</td>
+<td><a href=\"%s\">%s</a></td>
+</tr>
+<tr>
+<td>Puppet:</td>
+<td>
+<ac:task-list>
+<ac:task>
+<ac:task-id>1</ac:task-id>
+<ac:task-status>%s</ac:task-status>
+<ac:task-body>&nbsp;</ac:task-body>
+</ac:task>
+</ac:task-list>
+</td>
+</tr>
+<tr>
+<td colspan=\"1\">Admins:</td>
+<td colspan=\"1\">%s</td>
+</tr>
+<tr>
+<td colspan=\"1\">User Access:</td>
+<td colspan=\"1\">%s</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</ac:layout-cell>
+</ac:layout-section>
 

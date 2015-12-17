@@ -4,3 +4,4 @@ config.yml
 allPageIDs.txt
 allSkytapIDs.txt
 temp.json
+error_log.txt

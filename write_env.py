@@ -39,6 +39,8 @@ def clean_string(str):
 def create(data, parent_id):
     """Create environment wiki page."""
 
+    print ("Writing content..."),
+
     # Making a json containing important information. This will be stored in a
     # file in JSONS directory and used to perform various functions related to
     # Wiki Keeper.
@@ -78,6 +80,7 @@ def create(data, parent_id):
     port_home = 8443
     port_reports = 8444
     port_services = 8445
+    port_api = 8446
 
     db_exists = False
 
@@ -88,7 +91,7 @@ def create(data, parent_id):
         try:
             vm_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
             base_url = "https://" + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
-        except KeyError:
+        except (KeyError, IndexError):
             vm_ip = undef_err
             base_url = undef_err
 
@@ -186,8 +189,8 @@ def create(data, parent_id):
     content += ("<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
 
     qr_url = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=lb."
-              "" + env_id + ".skytap.fulcrum.net:8446:1::" + env_name + ""
-              "&amp;size=150x150\\\" />")
+              "" + str(env_id) + ".skytap.fulcrum.net:" + str(port_api) + ":1::"
+              "" + env_name + "&amp;size=150x150\\\" />")
 
     content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
                 "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
@@ -199,12 +202,9 @@ def create(data, parent_id):
     # -------------------------------------------------------------------------
 
     feedback, json_info = write_page.create(env_name, str(parent_id), content, json_info)
-
+    
     with open("JSONS/" + env_id + ".json", "w") as file:
         json.dump(json_info, file)
-
-    with open("allSkytapIDs.txt", "a") as file:
-        file.write((env_id) + "\n")
 
     return feedback, env_name
 

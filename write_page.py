@@ -47,12 +47,9 @@ def create(page_name, parent_id, page_content, json_info):
 
     # ------------- Create page with gathered initial information -------------
 
-    if parent_id == env_parent:
-        print ("\nWriting new environment page: " + page_name)
-    else:
-        print ("\nWriting new VM page: " + page_name)
+    print ("calling API..."),
 
-    curl_cmd = ("curl -u " + username + ":" + password + " -X POST -H \'Content"
+    curl_cmd = ("curl -s -u " + username + ":" + password + " -X POST -H \'Content"
                 "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
                 "\"" + page_name + "\",\"ancestors\": [{\"id\": "
                 "" + parent_id + "}],\"space\": {\"key\": \"" + space_key + "\""
@@ -70,16 +67,26 @@ def create(page_name, parent_id, page_content, json_info):
 
     # For use with purge_all_pages.py. Also checks if page was actually created
     try:
+        print ("finishing..."),
         with open("allPageIDs.txt", "a") as file:
             file.write(str(data["id"]) + "\n")
 
+        with open("allSkytapIDs.txt", "a") as file:
+            file.write(str(data["id"]) + "\n")
+
         json_info["page_id"] = data["id"]
+        print ("done!\n")
     except KeyError as e:
+        print ("R.I.P.")
         print ("Something went wrong; page was not generated. "
                "Error message returned: " + str(e))
+
+        with open("error_log.txt", "a") as file:
+            file.write(page_name + ", w/ ID " + parent_id + ", made an owie.\n")
+   
         with open("temp.json", "r") as file:
             print (file.read())
-        return 999
+        return 0, json_info
 
     # Empties temp.json
     open("temp.json", 'w').close()

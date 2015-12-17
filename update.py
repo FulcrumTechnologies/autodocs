@@ -6,66 +6,37 @@ Perform a check on current environments and vms and make changes to Confluence
 page(s) if necessary. (As of 12/15, incomplete)
 """
 
+import commands
+import create_page
 import json
-import os
-import os.path
-import socket
 
 
 def start():
     """Start the update function."""
 
-    try:
-        import requests
-    except ImportError:
-        sys.stderr.write("You do not have the 'requests' module installed. "
-                         "Please see http://docs.python-requests.org/en/latest/"
-                         " for more information.")
-        exit(1)
+    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py -a "
+                                              "env_full")
 
-    # ------- Import yaml, then try to open config.yml -> store in list -------
+    envs = json.loads(output)
 
-    try:
-        import yaml
-    except ImportError:
-        sys.stderr.write("You do not have the 'yaml' module installed. "
-                         "Please see http://pyyaml.org/wiki/PyYAMLDocumentation"
-                         " for more information.")
-        exit(1)
-
-    config_data = {}
-
-    try:
-        f = open("config.yml")
-        config_data = yaml.safe_load(f)
-        f.close()
-    except IOError:
-        sys.stderr.write("There is no config.yml in the directory. Create one "
-                         "and then try again.\nFor reference, check config_"
-                         "template.yml and follow the listed guidelines.\n")
-        exit(1)
-
-    # --------------- Store data from config in named variables ---------------
-
-    skytap_url = config_data["skytap_url"]
-    skytap_user = config_data["skytap_user"]
-    skytap_token = config_data["skytap_token"]
-
-    # -------------------------------------------------------------------------
-
-    requisite_headers = {'Accept': 'application/json',
-                         'Content-Type': 'application/json'}
-    auth = (skytap_user, skytap_token)
-
-    response = requests.get(skytap_url + "/configurations",
-                            headers=requisite_headers, auth=auth)
-    envs = json.loads(response.text)
+    env_count = 0
+    env_tried = 0
+    env_written = 0
 
     for i in envs:
-        if len(i["error"]) is 0:
+        env_count += 1
+        if len(i["error"]) is 0 and env_count < 4:
+            env_tried += 1
             if i["id"] not in open('allSkytapIDs.txt').read():
-                print ("New environment detected. Creating page...")
-                os.system("python create_page.py env " + str(i["id"]))
+                print ("Found new environment. Name: " + i["name"] + " ... ID: "
+                       "" + i["id"])
+                feedback = create_page.start(i["id"])
+                if feedback != 0:
+                    env_written += 1
+
+    print ("Total environments: " + str(env_count))
+    print ("Environments tried: " + str(env_tried))
+    print ("Environments written: " + str(env_written))
 
 
 if __name__ == '__main__':

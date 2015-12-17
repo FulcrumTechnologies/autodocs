@@ -46,14 +46,15 @@ def start():
     with open("allPageIDs.txt", 'r') as file:
         for line in file:
 
-            print ("\n\nDeleting page with ID: " + line)
+            print ("\n\nDeleting page with ID: " + line),
 
-            curl_cmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE "
+            curl_cmd = ("curl -v -s -u " + username + ":" + password + " -X DELETE "
                         "" + location + str(line).rstrip('\n') + " | python -m "
                         "json.tool")
             output = os.system(curl_cmd)
 
-    print (output)
+            if output == 0:
+                print ("...done!")
 
     # Empties allPageIDs.txt
     open("allPageIDs.txt", 'w').close()

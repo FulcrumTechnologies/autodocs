@@ -14,6 +14,8 @@ import write_page
 def create_one(i, parent_id, parent_name):
     """Just make one vm page; primarily called by create(), seen below."""
 
+    print (i["interfaces"][0]["hostname"] + ": Writing content..."),
+
     # Making a json containing important information. This will be stored in
     # a file in JSONS directory and used to perform various functions
     # related to Wiki Keeper.
@@ -39,14 +41,14 @@ def create_one(i, parent_id, parent_name):
     try:
         content += ("NAT IP: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"] + "<br/>")
         json_info["nat_ip"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
-    except KeyError:
+    except (KeyError, IndexError):
         # Can't find "nat_addresses"
         pass
 
     try:
         content += ("VPN ID: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"] + "<br/><br/>")
         json_info["vpn_id"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"]
-    except KeyError:
+    except (KeyError, IndexError):
         # Can't find "nat_addresses"
         pass
 
@@ -85,5 +87,6 @@ def create(data, parent_id, parent_name):
     """Create vm wiki page(s)."""
 
     for i in data["vms"]:
+        print ("Writing pages for vms.")
         create_one(i, parent_id, parent_name)
 
