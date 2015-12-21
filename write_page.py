@@ -79,10 +79,11 @@ def create(page_name, parent_id, page_content, json_info):
     except KeyError as e:
         print ("R.I.P.")
         print ("Something went wrong; page was not generated. "
-               "Error message returned: " + str(e))
+               "Error message returned: " + data["message"])
 
         with open("error_log.txt", "a") as file:
-            file.write(page_name + ", w/ ID " + parent_id + ", made an owie.\n")
+            file.write(page_name + ", w/ ID " + parent_id + ", made an owie.\n"
+                       "Error message: " + data["message"] + "\n\n")
    
         with open("temp.json", "r") as file:
             print (file.read())

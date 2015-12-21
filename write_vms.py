@@ -86,7 +86,8 @@ def create_one(i, parent_id, parent_name):
 def create(data, parent_id, parent_name):
     """Create vm wiki page(s)."""
 
+    print ("Writing pages for vms.")
+
     for i in data["vms"]:
-        print ("Writing pages for vms.")
         create_one(i, parent_id, parent_name)
 
