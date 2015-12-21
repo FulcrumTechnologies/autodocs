@@ -25,7 +25,7 @@ def start():
 
     for i in envs:
         env_count += 1
-        if len(i["error"]) is 0 and env_count < 4:
+        if len(i["error"]) is 0 and env_count < 7:
             env_tried += 1
             if i["id"] not in open('allSkytapIDs.txt').read():
                 print ("Found new environment. Name: " + i["name"] + " ... ID: "

@@ -67,26 +67,36 @@ def create(data, parent_id):
 
     content = (to_read % (config_url, config_url, undef, undef, undef))
 
+    json_info["name"] = env_name
     json_info["id"] = env_id
-
     json_info["config_url"] = config_url
+    json_info["puppet_enabled"] = puppet_enabled
+    json_info["admin_access"] = admin_access
+    json_info["user_access"] = user_access
 
     # --- Writing content for row 2, col 1 of the environment page template ---
     # This content lists the URL for the vm, as well as homes/reports/services.
 
     content += ("<ac:layout-section ac:type=\\\"two_equal\\\"><ac:layout-cell><h3><strong>Server Access:</strong></h3>")
     json_info["vms"] = []
+    json_info["db"] = []
 
+    new_db = {}
+    db_exists = False
+
+    # Initially these are hardcoded. Change later.
     port_home = 8443
     port_reports = 8444
     port_services = 8445
     port_api = 8446
 
-    db_exists = False
-
     for i in data["vms"]:
         vm_name = i["interfaces"][0]["hostname"]
         vm_id = i["id"]
+        vm_user = undef
+        vm_pass = undef
+        ssh_enabled = undef
+        ssl_enabled = undef
 
         try:
             vm_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
@@ -95,27 +105,27 @@ def create(data, parent_id):
             vm_ip = undef_err
             base_url = undef_err
 
-        new_vm = {}
-        new_vm["vm_name"] = vm_name
-        new_vm["vm_ip"] = vm_ip
-        new_vm["vm_id"] = vm_id
-        vm_user = undef
-        vm_pass = undef
-
         try:
             internal_port = str(i["interfaces"][0]["services"][0]["internal_port"])
-            new_vm["internal_port"] = str(i["interfaces"][0]["services"][0]["internal_port"])
         except IndexError:
             internal_port = undef_err
 
         try:
             external_port = str(i["interfaces"][0]["services"][0]["external_port"])
-            new_vm["external_port"] = str(i["interfaces"][0]["services"][0]["external_port"])
         except IndexError:
             external_port = undef_err
 
-        ssh_enabled = undef
-        ssl_enabled = undef
+        new_vm = {}
+        new_vm["vm_name"] = vm_name
+        new_vm["vm_ip"] = vm_ip
+        new_vm["vm_id"] = vm_id
+        new_vm["vm_base_url"] = base_url
+        new_vm["vm_user"] = vm_user
+        new_vm["vm_pass"] = vm_pass
+        new_vm["vm_ssh_enabled"] = ssh_enabled
+        new_vm["vm_ssl_enabled"] = ssl_enabled
+        new_vm["vm_internal_port"] = internal_port
+        new_vm["vm_external_port"] = external_port
 
         # "db" is the database, and gets its own table later on. Skip for now.
         if vm_name != "db":
@@ -152,7 +162,22 @@ def create(data, parent_id):
             db_port = 1521
             db_sid = "orcl"
 
+            # If there is a db vm, this information will be added to db dict.
+            new_db["db_id"] = db_id
+            new_db["db_ip"] = db_ip
+            new_db["db_user"] = db_user
+            new_db["db_pass"] = db_pass
+            new_db["db_ssh"] = db_ssh
+            new_db["db_ssl"] = db_ssl
+            new_db["db_port"] = str(db_port)
+            new_db["db_sid"] = db_sid
+
         json_info["vms"].append(new_vm)
+
+    # db_exists will always be in db dict even if there is no db vm. For this
+    # reason, it is added after everything else is done.
+    new_db["db_exists"] = str(db_exists)
+    json_info["db"].append(new_db)
 
     # End of row 2, column 1.
     content += ("<p><strong><br /></strong></p></ac:layout-cell>")
@@ -192,6 +217,10 @@ def create(data, parent_id):
               "" + str(env_id) + ".skytap.fulcrum.net:" + str(port_api) + ":1::"
               "" + env_name + "&amp;size=150x150\\\" />")
 
+    # The qr_url in json_info will have "extra" escape chars (backslashes), but
+    # it is included in json_info just in case.
+    json_info["qr_url"] = qr_url
+
     content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
                 "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
                 "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><"
@@ -202,7 +231,7 @@ def create(data, parent_id):
     # -------------------------------------------------------------------------
 
     feedback, json_info = write_page.create(env_name, str(parent_id), content, json_info)
-    
+
     with open("JSONS/" + env_id + ".json", "w") as file:
         json.dump(json_info, file)
 
