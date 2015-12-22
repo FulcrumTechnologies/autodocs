@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """update.py
-
 Perform a check on current environments and vms and make changes to Confluence
 page(s) if necessary. (As of 12/15, incomplete)
 """
@@ -24,8 +23,6 @@ def write(envs):
 
     with open("allSkytapIDs.txt", "r") as f:
         id_list = [line.strip() for line in f]
-
-    print id_list
 
     # Count up total so we have completetion dialogue (1/95, 2/95, etc.)
     for i in envs:
@@ -57,12 +54,18 @@ def check_and_rewrite(envs):
 
     count = 0
 
+    # listed_envs is used in a special case scenario where env is deleted
+    # from Skytap. The page will be removed along with its vms.
+    listed_envs = []
+
     for i in envs:
+        listed_envs.append(i["id"])
         count += 1
+
         print ("Environment " + str(count) + ": " + i["name"] + " ... " + i["id"])
         # Get JSON matching environment ID
         if os.path.isfile(json_dir + i["id"] + ".json"):
-            print ("Found JSON.") 
+            print ("Found JSON.")
             data = []
 
             # Make a JSON out of file info
@@ -76,9 +79,6 @@ def check_and_rewrite(envs):
 
             cur_data = json.loads(output)
 
-            #print data[0]
-            #print cur_data[0]
-
             print ("About to compare elements...")
             # NOTE: this list of things to compare is incomplete. Refer to JSON
             # of environments in /JSONS to get full list of elements to compare.
@@ -89,14 +89,14 @@ def check_and_rewrite(envs):
                     print ("Update: environment data has been altered.")
                     print ("Changes found in: " + data[0]["name"] + "... ID: "
                            "" + data[0]["id"])
-                    #remove_page.start(data[0]["id"])
-                    #create_page.start(data[0]["id"])
-                    return
+                    remove_page.start(data[0]["id"])
+                    create_page.start(data[0]["id"])
+                    continue
 
             # listed_vms is used in a special case scenario where vm is deleted
             # from an environment. The page will be removed if vm is removed.
             listed_vms = []
-            
+
             for i in data[0]["vms"]:
                 listed_vms.append(i["vm_id"])
 
@@ -127,15 +127,17 @@ def check_and_rewrite(envs):
                                        "... ID: " + data[0]["id"] + "... VM: "
                                        "" + vm_data[0]["vm_name"] + "... ID: "
                                        "" + vm_data[0]["id"] + "\n\n")
-                                #remove_page.start(data[0]["id"])
-                                #create_page.start(data[0]["id"])
+                                remove_page.start(data[0]["id"])
+                                create_page.start(data[0]["id"])
+                                continue
                     except FileNotFoundError:
                         # Another vm has been added to the environment; update.
                         print ("Update: VM has been added to environment.")
                         print ("Changes found in: " + data[0]["name"] + "... ID: "
                                "" + data[0]["id"])
-                        #remove_page.start(data[0]["id"])
-                        #create_page.start(data[0]["id"])
+                        remove_page.start(data[0]["id"])
+                        create_page.start(data[0]["id"])
+                        continue
 
                 # Remove from listed_vms if this vm still exists.
                 if i["id"] in listed_vms:
@@ -147,8 +149,29 @@ def check_and_rewrite(envs):
                 print ("Update: VM(s) removed from environment.")
                 print ("Changes found in: " + data[0]["name"] + "... ID: "
                        "" + data[0]["id"])
-                #remove_page.start(data[0]["id"])
-                #create_page.start(data[0]["id"])
+                remove_page.start(data[0]["id"])
+                create_page.start(data[0]["id"])
+                continue
+
+    # Check every file representing an environment from the JSONS directory
+    # against each ID in listed_envs. If not found, call remove_page for that
+    # ID. This ensures envs that were removed will have their pages purged too.
+    for f in os.listdir(json_dir):
+        env_data = []
+        with open(json_dir + f) as f:
+            for line in f:
+                env_data.append(json.loads(line))
+
+        try:
+            # If this JSON belongs to environment and id is not in listed_envs
+            if env_data[0]["vms"] and env_data[0]["id"] not in listed_envs:
+                print ("Update: Environment has been deleted.")
+                print ("Changes found in: " + env_data[0]["name"] + "... ID: "
+                       "" + env_data[0]["id"])
+                remove_page.start(env_data[0]["id"])
+                continue
+        except (IndexError, KeyError):
+            pass
 
 
 def start(args):

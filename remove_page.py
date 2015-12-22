@@ -16,10 +16,10 @@ import sys
 def remove(username, password, location, data, path):
     """Delete page, along with references in JSONS/ and allPageIDs.txt."""
 
-    print "\n\nDeleting page with Skytap ID: " + str(data["id"])
+    print "\n\nDeleting page with Skytap ID: " + str(data[0]["id"])
 
     curl_cmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE"
-                " " + location + str(data["page_id"]) + " | python -m "
+                " " + location + str(data[0]["page_id"]) + " | python -m "
                 "json.tool")
     output = os.system(curl_cmd)
     print (output)
@@ -31,7 +31,7 @@ def remove(username, password, location, data, path):
 
     f = open("allPageIDs.txt", "w")
     for line in lines:
-        if str(data["page_id"]) not in line:
+        if str(data[0]["page_id"]) not in line:
             f.write(line)
 
     # Delete instance from allSkytapIDs.txt
@@ -41,7 +41,7 @@ def remove(username, password, location, data, path):
 
     f = open("allSkytapIDs.txt", "w")
     for line in lines:
-        if str(data["id"]) not in line:
+        if str(data[0]["id"]) not in line:
             f.write(line)
 
     f.close()
@@ -53,7 +53,7 @@ def remove(username, password, location, data, path):
 def remove_env(username, password, location, data, path):
     """Removes all vms associated with environment, then removes environment."""
 
-    for i in data["vms"]:
+    for i in data[0]["vms"]:
         try:
             vm_data = []
 
@@ -114,15 +114,9 @@ def start(id):
             for line in f:
                 data.append(json.loads(line))
 
-        # Different actions depending on if the id belongs to an env or vm
-        try:
-            if (data["vm_name"]):
-                # Must be a vm
-                remove(username, password, location, data, path)
-        except KeyError:
-            # Must be an env
-            remove_env(username, password, location, data, path)
+        remove_env(username, password, location, data, path)
 
 
 if __name__ == '__main__':
     start(0)
+
