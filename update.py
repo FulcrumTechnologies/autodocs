@@ -62,37 +62,40 @@ def check_and_rewrite(envs):
         listed_envs.append(i["id"])
         count += 1
 
-        print ("Environment " + str(count) + ": " + i["name"] + " ... " + i["id"])
+        print ("\n----------------------------------------\n")
+        print ("Environment " + str(count) + ": " + i["name"] + " ... ID: " + i["id"])
+
         # Get JSON matching environment ID
         if os.path.isfile(json_dir + i["id"] + ".json"):
-            print ("Found JSON.")
+            print ("Collecting environment data..."),
             data = []
 
             # Make a JSON out of file info
             with open(json_dir + i["id"] + ".json") as f:
                 for line in f:
                     data.append(json.loads(line))
-                    print ("Data JSON made")
 
             status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
                                                       " -a vms -e " + i["id"])
 
             cur_data = json.loads(output)
 
-            print ("About to compare elements...")
+            print ("checking for changes..."),
             # NOTE: this list of things to compare is incomplete. Refer to JSON
             # of environments in /JSONS to get full list of elements to compare.
             if (data[0]["config_url"] != cur_data["url"] or
                     data[0]["id"] != cur_data["id"] or
                     data[0]["name"] != cur_data["name"]):
                     # Environment data has been changed; update.
+                    print ("changes found.")
                     print ("Update: environment data has been altered.")
                     print ("Changes found in: " + data[0]["name"] + "... ID: "
                            "" + data[0]["id"])
                     remove_page.start(data[0]["id"])
                     create_page.start(data[0]["id"])
                     continue
-
+            else:
+                print ("no changes found.")
             # listed_vms is used in a special case scenario where vm is deleted
             # from an environment. The page will be removed if vm is removed.
             listed_vms = []
@@ -100,14 +103,13 @@ def check_and_rewrite(envs):
             for i in data[0]["vms"]:
                 listed_vms.append(i["vm_id"])
 
-            print ("About to check vm changes.")
             vm_count = 0
             # Check all of the environment's vms.
             for i in cur_data["vms"]:
                 vm_count += 1
-                print ("VM " + str(vm_count) + ": " + i["name"] + " ... " + i["id"])
+                print ("\nVM " + str(vm_count) + ": " + i["name"] + " ... ID: " + i["id"])
                 if os.path.isfile(json_dir + i["id"] + ".json"):
-                    print ("Found JSON.")
+                    print ("Collecting VM data..."),
                     vm_data = []
 
                     try:
@@ -115,13 +117,15 @@ def check_and_rewrite(envs):
                         with open(json_dir + i["id"] + ".json") as f:
                             for line in f:
                                 vm_data.append(json.loads(line))
-                                print ("Data JSON made.")
 
-                        print ("About to compare elements of VM...")
+                        print ("checking for changes..."),
                         if (vm_data[0]["id"] != i["id"] or
                                 vm_data[0]["local_ip"] != i["interfaces"][0]["ip"] or
-                                vm_data[0]["vm_name"] != i["name"]):
+                                vm_data[0]["vm_name"] != i["name"] or
+                                vm_data[0]["config_url"] != i["configuration_url"] or
+                                vm_data[0]["vm_hostname"] != i["interfaces"][0]["hostname"]):
                                 # Vm data has been changed; update.
+                                print ("changes found.")
                                 print ("Update: VM data has been altered.")
                                 print ("Changes found in: " + data[0]["name"] + ""
                                        "... ID: " + data[0]["id"] + "... VM: "
@@ -132,6 +136,7 @@ def check_and_rewrite(envs):
                                 continue
                     except FileNotFoundError:
                         # Another vm has been added to the environment; update.
+                        print ("no data found.")
                         print ("Update: VM has been added to environment.")
                         print ("Changes found in: " + data[0]["name"] + "... ID: "
                                "" + data[0]["id"])
@@ -143,19 +148,24 @@ def check_and_rewrite(envs):
                 if i["id"] in listed_vms:
                     listed_vms.remove(i["id"])
 
+            print ("\nChecking for recently deleted VMs..."),
             # If there are still elements in listed_vm...
             if len(listed_vms) != 0:
                 # One or more vms have been removed from environment; update.
-                print ("Update: VM(s) removed from environment.")
+                print ("orphaned vm data found. We\'ll code-name it \"Bruce Wayne\".")
+                print ("Update: environment has been shot dead in front of Bruce Wayne.")
                 print ("Changes found in: " + data[0]["name"] + "... ID: "
-                       "" + data[0]["id"])
+                       "" + data[0]["id"] + " ... Cave: of the Bat variety.")
                 remove_page.start(data[0]["id"])
                 create_page.start(data[0]["id"])
                 continue
+            else:
+                print ("no orphaned VMs found.")
 
     # Check every file representing an environment from the JSONS directory
     # against each ID in listed_envs. If not found, call remove_page for that
     # ID. This ensures envs that were removed will have their pages purged too.
+    print ("\nChecking for recently deleted environments...")
     for f in os.listdir(json_dir):
         env_data = []
         with open(json_dir + f) as f:
@@ -165,6 +175,7 @@ def check_and_rewrite(envs):
         try:
             # If this JSON belongs to environment and id is not in listed_envs
             if env_data[0]["vms"] and env_data[0]["id"] not in listed_envs:
+                print ("deleted environment found...or, rather, it hasn\'t?")
                 print ("Update: Environment has been deleted.")
                 print ("Changes found in: " + env_data[0]["name"] + "... ID: "
                        "" + env_data[0]["id"])
@@ -172,6 +183,8 @@ def check_and_rewrite(envs):
                 continue
         except (IndexError, KeyError):
             pass
+
+    print ("\n\nJob\'s done.\n")
 
 
 def start(args):
