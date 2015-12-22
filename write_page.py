@@ -72,7 +72,7 @@ def create(page_name, parent_id, page_content, json_info):
             file.write(str(data["id"]) + "\n")
 
         with open("allSkytapIDs.txt", "a") as file:
-            file.write(str(data["id"]) + "\n")
+            file.write(str(json_info["id"]) + "\n")
 
         json_info["page_id"] = data["id"]
         print ("done!\n")

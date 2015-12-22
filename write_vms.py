@@ -14,20 +14,20 @@ import write_page
 def create_one(i, parent_id, parent_name):
     """Just make one vm page; primarily called by create(), seen below."""
 
-    print (i["interfaces"][0]["hostname"] + ": Writing content..."),
+    print (i["name"] + ": Writing content..."),
 
     # Making a json containing important information. This will be stored in
     # a file in JSONS directory and used to perform various functions
     # related to Wiki Keeper.
     json_info = {}
 
-    vm_name = i["interfaces"][0]["hostname"]
+    vm_name = i["name"]
+    vm_hostname = i["interfaces"][0]["hostname"]
     vm_id = i["id"]
 
     json_info["vm_name"] = vm_name
-
+    json_info["vm_hostname"] = vm_hostname
     json_info["parent_page_id"] = parent_id
-
     json_info["parent_page_name"] = parent_name
 
     content = "<p>"
@@ -76,7 +76,7 @@ def create_one(i, parent_id, parent_name):
     content += ("<br/>------------------------<br/>Note: Wiki Keeper is a WIP; ")
     content += ("other super fun and magical features are under development.</p>")
 
-    feedback, json_info = write_page.create("" + vm_name + " - [" + parent_name + "]",
+    feedback, json_info = write_page.create("" + vm_hostname + " - " + vm_name + " - [" + parent_name + "]",
                                             str(parent_id), content, json_info)
 
     with open("JSONS/" + vm_id + ".json", "w") as file:

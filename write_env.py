@@ -83,6 +83,7 @@ def create(data, parent_id):
 
     new_db = {}
     db_exists = False
+    db_id = undef
 
     # Initially these are hardcoded. Change later.
     port_home = 8443
@@ -91,7 +92,8 @@ def create(data, parent_id):
     port_api = 8446
 
     for i in data["vms"]:
-        vm_name = i["interfaces"][0]["hostname"]
+        vm_name = i["name"]
+        vm_hostname = i["interfaces"][0]["hostname"]
         vm_id = i["id"]
         vm_user = undef
         vm_pass = undef
@@ -117,6 +119,7 @@ def create(data, parent_id):
 
         new_vm = {}
         new_vm["vm_name"] = vm_name
+        new_vm["vm_hostname"] = vm_hostname
         new_vm["vm_ip"] = vm_ip
         new_vm["vm_id"] = vm_id
         new_vm["vm_base_url"] = base_url
@@ -128,7 +131,7 @@ def create(data, parent_id):
         new_vm["vm_external_port"] = external_port
 
         # "db" is the database, and gets its own table later on. Skip for now.
-        if vm_name != "db":
+        if vm_hostname != "db":
             content += ("<table><tbody>")
             content += ("<tr><th>" + vm_name + "</th><th>&nbsp;</th></tr>")
             content += ("<tr><td>ID:</td><td>" + vm_id + "</td></tr>")
@@ -173,6 +176,8 @@ def create(data, parent_id):
             new_db["db_sid"] = db_sid
 
         json_info["vms"].append(new_vm)
+
+    json_info["db_id"] = db_id
 
     # db_exists will always be in db dict even if there is no db vm. For this
     # reason, it is added after everything else is done.
