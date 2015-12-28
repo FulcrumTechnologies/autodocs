@@ -78,10 +78,26 @@ def create(data, parent_id):
     port_services = 8445
     port_mob = 8446
 
-    comment = ("This page is being monitored and updated automatically by tech "
-               "wizardry. Consult your local tech wizards or their IT intern "
-               "minion if there is information you would like to edit. (This "
-               "paragraph is OK to change)")
+    storage_dir = "storage/"
+
+    if os.path.isfile(storage_dir + env_id + ".json"):
+        stored = []
+
+        # Make a JSON out of file info
+        with open(storage_dir + env_id + ".json") as f:
+            for line in f:
+                stored.append(json.loads(line))
+
+        comment = stored[0]["comment"]
+        user = stored[0]["user"]
+        password = stored[0]["password"]
+    else:
+        comment = ("This page is being monitored and updated automatically by "
+                   "tech wizardry. Consult your local tech wizards or their IT "
+                   "intern/minion if there is information you would like to "
+                   "edit.")
+        user = "?"
+        password = "?"
 
     # Initial block.
     content = ("<ac:layout><ac:layout-section ac:type=\\\"two_equal\\\"><ac:lay"
@@ -193,8 +209,8 @@ def create(data, parent_id):
     content += ("<ac:layout-cell>")
     content += ("<p><strong>Additional Details</strong></p>")
     content += ("<p>Config ID: " + str(env_id) + "</p>")
-    content += ("<p>Admin User: ?</p>")
-    content += ("<p>Admin PW: ?</p>")
+    content += ("<p>Admin User: " + user + "</p>")
+    content += ("<p>Admin PW: " + password + "</p>")
     content += ("<p>Skytap environment link:&nbsp;<a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
     content += ("<p>&nbsp;</p>")
 
@@ -230,8 +246,9 @@ def create(data, parent_id):
 
     feedback, json_info = write_page.create(env_name, str(parent_id), content, json_info)
 
-    with open("JSONS/" + env_id + ".json", "w") as file:
-        json.dump(json_info, file)
+    if feedback != 0:
+        with open("JSONS/" + env_id + ".json", "w") as file:
+            json.dump(json_info, file)
 
     return feedback, env_name
 

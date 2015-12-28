@@ -18,7 +18,7 @@ def remove(username, password, location, data, path):
 
     print "\n\nDeleting page with Skytap ID: " + str(data[0]["id"])
 
-    curl_cmd = ("curl -v -S -u " + username + ":" + password + " -X DELETE"
+    curl_cmd = ("curl -v -s -u " + username + ":" + password + " -X DELETE"
                 " " + location + str(data[0]["page_id"]) + " | python -m "
                 "json.tool")
     output = os.system(curl_cmd)

@@ -1,6 +1,7 @@
 *.pyc
 config.yml
 /JSONS
+/storage
 allPageIDs.txt
 allSkytapIDs.txt
 temp.json

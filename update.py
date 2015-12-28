@@ -24,7 +24,7 @@ def write(envs):
     with open("allSkytapIDs.txt", "r") as f:
         id_list = [line.strip() for line in f]
 
-    # Count up total so we have completion dialogue (1/95, 2/95, etc.)
+    # Count up total so we have completetion dialogue (1/95, 2/95, etc.)
     for i in envs:
         if len(i["error"]) is 0:
             if str(i["id"]) not in id_list:
@@ -33,7 +33,7 @@ def write(envs):
     # Writing environments that are currently not in allSkytapIDs.txt
     for i in envs:
         env_all += 1
-        if len(i["error"]) is 0 and env_tried < 30:
+        if len(i["error"]) is 0:
             if str(i["id"]) not in id_list:
                 env_tried += 1
                 print ("(" + str(env_tried) + "/" + str(env_count) + ") Found new"
@@ -47,7 +47,7 @@ def write(envs):
     print ("Environments written: " + str(env_written))
 
 
-def check_and_rewrite(envs):
+def check(envs):
     """Check for differences between page and current env JSON, and update."""
 
     json_dir = "JSONS/"
@@ -161,6 +161,9 @@ def check_and_rewrite(envs):
                 continue
             else:
                 print ("no orphaned VMs found.")
+        else:
+            print ("There\'s an environment missing here. Run \"python update"
+                   ".py write\" to write it.")
 
     # Check every file representing an environment from the JSONS directory
     # against each ID in listed_envs. If not found, call remove_page for that
@@ -184,7 +187,72 @@ def check_and_rewrite(envs):
         except (IndexError, KeyError):
             pass
 
-    print ("\n\nJob\'s done.\n")
+
+def store(envs):
+    """Store specific data from pages to preserve through future updates."""
+
+    try:
+        import yaml
+    except ImportError:
+        sys.stderr.write("You do not have the 'yaml' module installed. "
+                         "Please see http://pyyaml.org/wiki/PyYAMLDocumentation"
+                         " for more information.")
+        exit(1)
+
+    try:
+        f = open("config.yml")
+        config_data = yaml.safe_load(f)
+        f.close()
+    except IOError:
+        sys.stderr.write("There is no config.yml in the directory. Create one "
+                         "and then try again.\nFor reference, check config_"
+                         "template.yml and follow the listed guidelines.\n")
+        exit(1)
+
+    location = config_data["wiki_url"]
+    username = config_data["wiki_user"]
+    password = config_data["wiki_pass"]
+
+    json_dir = "JSONS/"
+    storage_dir = "storage/"
+
+    for i in envs:
+        # Get JSON matching environment ID
+        if os.path.isfile(json_dir + i["id"] + ".json"):
+            print ("Storing data of " + i["name"] + " ... ID: " + i["id"])
+            print ("Collecting environment data..."),
+            data = []
+
+            # Make a JSON out of file info
+            with open(json_dir + i["id"] + ".json") as f:
+                for line in f:
+                    data.append(json.loads(line))
+
+            print ("fetching page source..."),
+            curl_cmd = ("curl -s -u " + username + ":" + password + " "
+                        "" + location + data[0]["page_id"] + "?expand=body.storage"
+                        " | python -mjson.tool > temp.json")
+
+            output = os.system(curl_cmd)
+
+            with open("temp.json") as file:
+                result = json.load(file)
+
+            # Empties temp.json
+            open("temp.json", 'w').close()
+
+            storage_info = {}
+            content = result["body"]["storage"]["value"]
+
+            print ("storing relevant information in JSON..."),
+            storage_info["comment"] = content[content.find("<ac:layout-cell><p>")+19:content.find("</p></ac:layout-cell>")]
+            storage_info["user"] = content[content.find("Admin User:")+12:content.find("</p><p>Admin PW:")]
+            storage_info["password"] = content[content.find("Admin PW:")+10:content.find("</p><p>Skytap environment")]
+
+            with open(storage_dir + i["id"] + ".json", "w") as file:
+                json.dump(storage_info, file)
+
+            print ("done.\n")
 
 
 def start(args):
@@ -197,14 +265,21 @@ def start(args):
 
     if (args[1] == "write"):
         os.system("clear")
-        print ("Writing environments.")
+        print ("Writing wiki pages.")
         write(envs)
     elif (args[1] == "check"):
         os.system("clear")
-        print ("Updating existing environments.")
-        check_and_rewrite(envs)
+        print ("Updating existing wiki pages.")
+        check(envs)
+    elif (args[1] == "store"):
+        os.system("clear")
+        print ("Storing updated information from wiki pages.")
+        store(envs)
     else:
         print ("Command not recognized. Use \"write\" or \"check\".")
+
+    print ("\n\nJob\'s done.\n")
+
 
 if __name__ == '__main__':
     start(sys.argv)
