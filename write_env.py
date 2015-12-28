@@ -50,22 +50,13 @@ def create(data, parent_id):
     undef = "Unavailable"
     undef_err = "Unavailable: data missing"
 
-    # --- Writing content for all of row 1 of the environment page template ---
-    # This content includes everything up until the "Server Access" tables.
-
-    with open("content_1.txt", "r") as file:
-        to_read = file.read().replace('\n', '')
-
     env_id = data["id"]
-    env_name = data["name"]
-    env_name = clean_string(env_name)
+    env_name = clean_string(data["name"])
 
     config_url = data["url"]
     puppet_enabled = undef
     admin_access = undef
     user_access = undef
-
-    content = (to_read % (config_url, config_url, undef, undef, undef))
 
     json_info["name"] = env_name
     json_info["id"] = env_id
@@ -74,10 +65,6 @@ def create(data, parent_id):
     json_info["admin_access"] = admin_access
     json_info["user_access"] = user_access
 
-    # --- Writing content for row 2, col 1 of the environment page template ---
-    # This content lists the URL for the vm, as well as homes/reports/services.
-
-    content += ("<ac:layout-section ac:type=\\\"two_equal\\\"><ac:layout-cell><h3><strong>Server Access:</strong></h3>")
     json_info["vms"] = []
     json_info["db"] = []
 
@@ -89,7 +76,23 @@ def create(data, parent_id):
     port_home = 8443
     port_reports = 8444
     port_services = 8445
-    port_api = 8446
+    port_mob = 8446
+
+    comment = ("This page is being monitored and updated automatically by tech "
+               "wizardry. Consult your local tech wizards or their IT intern "
+               "minion if there is information you would like to edit. (This "
+               "paragraph is OK to change)")
+
+    # Initial block.
+    content = ("<ac:layout><ac:layout-section ac:type=\\\"two_equal\\\"><ac:lay"
+               "out-cell><p>" + comment + "</p></ac:layout-cell><ac:layout"
+               "-cell><p>&nbsp;</p></ac:layout-cell></ac:layout-section>")
+
+    content += ("<ac:layout-section ac:type=\\\"two_equal\\\">")
+    content += ("<ac:layout-cell>")
+
+    vm_content = ""
+    lb_content = ""
 
     for i in data["vms"]:
         vm_name = i["name"]
@@ -102,20 +105,20 @@ def create(data, parent_id):
 
         try:
             vm_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
-            base_url = "https://" + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
         except (KeyError, IndexError):
-            vm_ip = undef_err
-            base_url = undef_err
+            vm_ip = i["interfaces"][0]["ip"]
 
-        try:
-            internal_port = str(i["interfaces"][0]["services"][0]["internal_port"])
-        except IndexError:
-            internal_port = undef_err
+        base_url = "https://" + vm_ip
 
-        try:
-            external_port = str(i["interfaces"][0]["services"][0]["external_port"])
-        except IndexError:
-            external_port = undef_err
+        services = []
+
+        for i in i["interfaces"][0]["services"]:
+            new_service = {}
+            new_service["internal_ip"] = vm_ip
+            new_service["internal_port"] = str(i["internal_port"])
+            new_service["external_ip"] = i["external_ip"]
+            new_service["external_port"] = str(i["external_port"])
+            services.append(new_service)
 
         new_vm = {}
         new_vm["vm_name"] = vm_name
@@ -127,33 +130,33 @@ def create(data, parent_id):
         new_vm["vm_pass"] = vm_pass
         new_vm["vm_ssh_enabled"] = ssh_enabled
         new_vm["vm_ssl_enabled"] = ssl_enabled
-        new_vm["vm_internal_port"] = internal_port
-        new_vm["vm_external_port"] = external_port
+        new_vm["services"] = services
 
-        # "db" is the database, and gets its own table later on. Skip for now.
-        if vm_hostname != "db":
-            content += ("<table><tbody>")
-            content += ("<tr><th>" + vm_name + "</th><th>&nbsp;</th></tr>")
-            content += ("<tr><td>ID:</td><td>" + vm_id + "</td></tr>")
-            content += ("<tr><td>Host IP Address:</td><td>" + vm_ip + "</td></tr>")
-            content += ("<tr><td><p>User:</p></td><td>" + vm_user + "</td></tr>")
-            content += ("<tr><td>Password:</td><td>" + vm_pass + "</td></tr>")
+        # This will hold content for each vm "block"
+        vm_info = []
 
-            if internal_port != undef_err:
-                content += ("<tr><td>Internal Port:</td><td>" + internal_port + "</td></tr>")
-            if external_port != undef_err:
-                content += ("<tr><td>External Port:</td><td>" + external_port + "</td></tr>")
+        if vm_hostname != "lb":
+            vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_name + "</strong></h2>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP: " + vm_ip + "</p>")
 
-            content += ("<tr><td>SSH:</td><td><ac:task-list><ac:task><ac:task-id>"
-                        "9</ac:task-id><ac:task-status>" + ssh_enabled + "</ac:task-status>"
-                        "<ac:task-body><span>&nbsp;</span></ac:task-body></ac:task>"
-                        "</ac:task-list></td></tr>")
-            content += ("<tr><td>SSL:</td><td><ac:task-list><ac:task><ac:task-id>"
-                        "10</ac:task-id><ac:task-status>" + ssl_enabled + "</ac:task-status>"
-                        "<ac:task-body><span>&nbsp;</span></ac:task-body></ac:task>"
-                        "</ac:task-list></td></tr>")
-            content += ("</tbody></table>")
+            serv_count = 0
+            for j in services:
+                serv_count += 1
+                vm_content += ("<p><strong> - Service " + str(serv_count) + ":</strong></p>")
+                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port: " + j["internal_port"] + "</p>")
+                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External IP: <a href=\\\"" + j["external_ip"] + "\\\">" + j["external_ip"] + "</a></p>")
+                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External Port: " + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
         else:
+            lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_name + "</strong></h2>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: (URL/home/reports/services/mobility): </p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_home) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_reports) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_services) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_mob) + "/cats/</a></p>")
+
+        if vm_hostname == "db":
             # This data will be used shortly, for creating the database table.
             db_exists = True
             db_id = vm_id
@@ -184,42 +187,31 @@ def create(data, parent_id):
     new_db["db_exists"] = str(db_exists)
     json_info["db"].append(new_db)
 
-    # End of row 2, column 1.
-    content += ("<p><strong><br /></strong></p></ac:layout-cell>")
+    content += ("" + lb_content + vm_content)
 
-    # ---------------- Writing content for database (db) table ----------------
-
-    content += ("<ac:layout-cell><table><tbody><tr><th>Database (db)</th>")
+    content += ("</ac:layout-cell>")
+    content += ("<ac:layout-cell>")
+    content += ("<p><strong>Additional Details</strong></p>")
+    content += ("<p>Config ID: " + str(env_id) + "</p>")
+    content += ("<p>Admin User: ?</p>")
+    content += ("<p>Admin PW: ?</p>")
+    content += ("<p>Skytap environment link:&nbsp;<a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
+    content += ("<p>&nbsp;</p>")
 
     if db_exists:
-        content += ("<th>&nbsp;</th></tr>")
-        content += ("<tr><td>Host IP Address:</td><td>" + db_ip + "</td></tr>")
-        content += ("<tr><td>User:</td><td>" + db_user + "</td></tr>")
-        content += ("<tr><td>Password:</td><td>" + db_pass + "</td></tr>")
-        content += ("<tr><td>SSH:</td><td><ac:task-list><ac:task><ac:task-id>"
-                    "9</ac:task-id><ac:task-status>" + db_ssh + "</ac:task-status>"
-                    "<ac:task-body><span>&nbsp;</span></ac:task-body></ac:task>"
-                    "</ac:task-list></td></tr>")
-        content += ("<tr><td>SSL:</td><td><ac:task-list><ac:task><ac:task-id>"
-                    "7</ac:task-id><ac:task-status>" + db_ssl + "</ac:task-status>"
-                    "<ac:task-body><span>&nbsp;</span></ac:task-body></ac:task>"
-                    "</ac:task-list></td></tr>")
-        content += ("<tr><td>Oracle Schema CATS:</td><td><p>User: CATS</p><p>Password: CATS</p></td></tr>")
-        content += ("<tr><td>Oracle Schema CATSCUST:</td><td><p>User: CATS</p><p>Password: CATS</p></td></tr>")
-        content += ("<tr><td>Oracle Schema CATCON:</td><td><p>User: CATS</p><p>Password: CATS</p></td></tr>")
-        content += ("<tr><td>Port:</td><td>" + str(db_port) + "</td></tr>")
-        content += ("<tr><td>SID:</td><td>" + db_sid + "</td></tr>")
-        content += ("<tr><td>Tablespace Name:</td><td>" + undef + "</td></tr>")
-        content += ("<tr><td>TEMP Tablespace Name:</td><td>" + undef + "</td></tr>")
-        content += ("<tr><td>Version:</td><td>" + undef + "</td></tr>")
-    else:
-        content += ("<th>" + undef_err + "</th></tr>")
+        content += ("<p><strong>Oracle DB Info</strong></p>")
+        content += ("<ul><li>Oracle OS User: &nbsp;oracle</li>")
+        content += ("<li>Host: " + db_ip + "</li>")
+        content += ("<li>DB Schema:&nbsp;CATS</li>")
+        content += ("<li>DB Password:&nbsp;CATS</li>")
+        content += ("<li>SID:&nbsp;" + db_sid + "</li>")
+        content += ("<li>Port: " + str(db_port) + "</li>")
+        content += ("</ul>")
 
-    content += ("</tbody></table>")
     content += ("<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
 
     qr_url = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=lb."
-              "" + str(env_id) + ".skytap.fulcrum.net:" + str(port_api) + ":1::"
+              "" + str(env_id) + ".skytap.fulcrum.net:" + str(port_mob) + ":1::"
               "" + env_name + "&amp;size=150x150\\\" />")
 
     # The qr_url in json_info will have "extra" escape chars (backslashes), but
@@ -228,8 +220,9 @@ def create(data, parent_id):
 
     content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
                 "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
-                "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><"
-                "/ac:layout-cell></ac:layout-section></ac:layout>")
+                "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
+
+    content += ("</ac:layout-cell></ac:layout-section></ac:layout>")
 
     content = clean_string(content)
 

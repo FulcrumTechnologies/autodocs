@@ -24,7 +24,7 @@ def write(envs):
     with open("allSkytapIDs.txt", "r") as f:
         id_list = [line.strip() for line in f]
 
-    # Count up total so we have completetion dialogue (1/95, 2/95, etc.)
+    # Count up total so we have completion dialogue (1/95, 2/95, etc.)
     for i in envs:
         if len(i["error"]) is 0:
             if str(i["id"]) not in id_list:
@@ -33,7 +33,7 @@ def write(envs):
     # Writing environments that are currently not in allSkytapIDs.txt
     for i in envs:
         env_all += 1
-        if len(i["error"]) is 0:
+        if len(i["error"]) is 0 and env_tried < 30:
             if str(i["id"]) not in id_list:
                 env_tried += 1
                 print ("(" + str(env_tried) + "/" + str(env_count) + ") Found new"
@@ -196,13 +196,15 @@ def start(args):
     envs = json.loads(output)
 
     if (args[1] == "write"):
-        print "Writing environments."
+        os.system("clear")
+        print ("Writing environments.")
         write(envs)
-
-    if (args[1] == "check"):
-        print "Updating existing environments."
+    elif (args[1] == "check"):
+        os.system("clear")
+        print ("Updating existing environments.")
         check_and_rewrite(envs)
-
+    else:
+        print ("Command not recognized. Use \"write\" or \"check\".")
 
 if __name__ == '__main__':
     start(sys.argv)

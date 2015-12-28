@@ -84,6 +84,7 @@ def create(page_name, parent_id, page_content, json_info):
         with open("error_log.txt", "a") as file:
             file.write(page_name + ", w/ ID " + parent_id + ", made an owie.\n"
                        "Error message: " + data["message"] + "\n\n")
+            print page_content
    
         with open("temp.json", "r") as file:
             print (file.read())

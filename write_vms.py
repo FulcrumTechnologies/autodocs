@@ -73,8 +73,7 @@ def create_one(i, parent_id, parent_name):
     content += ("Local IP: " + i["interfaces"][0]["ip"] + "<br/>")
     json_info["local_ip"] = i["interfaces"][0]["ip"]
 
-    content += ("<br/>------------------------<br/>Note: Wiki Keeper is a WIP; ")
-    content += ("other super fun and magical features are under development.</p>")
+    content += ("</p>")
 
     feedback, json_info = write_page.create("" + vm_hostname + " - " + vm_name + " - [" + parent_name + "]",
                                             str(parent_id), content, json_info)
