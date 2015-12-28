@@ -134,6 +134,8 @@ def check(envs):
                                 remove_page.start(data[0]["id"])
                                 create_page.start(data[0]["id"])
                                 continue
+                        else:
+                            print ("no changes found.")
                     except FileNotFoundError:
                         # Another vm has been added to the environment; update.
                         print ("no data found.")
