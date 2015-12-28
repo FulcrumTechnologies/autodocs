@@ -150,11 +150,11 @@ def create(data, parent_id):
         else:
             lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_name + "</strong></h2>")
             lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: (URL/home/reports/services/mobility): </p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_home) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_reports) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_services) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"><a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_mob) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_home) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_reports) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_services) + "/cats/</a></p>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_mob) + "/cats/</a></p>")
 
         if vm_hostname == "db":
             # This data will be used shortly, for creating the database table.
