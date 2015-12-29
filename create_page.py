@@ -49,6 +49,8 @@ def start(id):
 
     env_details = json.loads(output)
 
+    print ("Creating page for " + env_details["name"] + " ... ID: " + ""
+           "" + env_details["id"])
     env_page_id, parent_name = write_env.create(env_details, wiki_parent)
 
     if env_page_id != 0:

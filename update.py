@@ -256,15 +256,31 @@ def store(envs):
             storage_info = {}
             content = result["body"]["storage"]["value"]
 
+            # NOTE: this is where the magic happens. Add elements here.
             print ("storing relevant information in JSON..."),
             storage_info["comment"] = content[content.find("<ac:layout-cell><p>")+19:content.find("</p></ac:layout-cell>")]
             storage_info["user"] = content[content.find("Admin User*:")+12:content.find("</p><p>Admin PW*:")]
             storage_info["password"] = content[content.find("Admin PW*:")+10:content.find("</p><p>Skytap environment")]
+            storage_info["mob_ver"] = content[content.find("Version*:")+9:content.find("</p><p>APK Build")]
+            storage_info["apk_build"] = content[content.find("APK Build*:")+11:content.find("</p><p>WAR Build")]
+            storage_info["war_build"] = content[content.find("WAR Build*:")+11:content.find("</p><p>&nbsp;</p>")]
 
             with open(storage_dir + i["id"] + ".json", "w") as file:
                 json.dump(storage_info, file)
 
             print ("done.\n")
+
+
+def reset(envs):
+    """Reset every page in the wiki; utilized to update template."""
+
+    json_dir = "JSONS/"
+
+    for i in envs:
+        if os.path.isfile(json_dir + i["id"] + ".json"):
+            print ("Resetting environment " + i["name"] + " ... ID: " + i["id"])
+            remove_page.start(i["id"])
+            create_page.start(i["id"])
 
 
 def start(args):
@@ -287,6 +303,10 @@ def start(args):
         os.system("clear")
         print ("Storing updated information from wiki pages.")
         store(envs)
+    elif (args[1] == "reset"):
+        os.system("clear")
+        print ("Resetting all wiki pages.")
+        reset(envs)
     else:
         print ("Command not recognized. Use \"write\" or \"check\".")
 

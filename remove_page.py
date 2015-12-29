@@ -20,7 +20,7 @@ def remove(username, password, location, data, path):
 
     curl_cmd = ("curl -v -s -u " + username + ":" + password + " -X DELETE"
                 " " + location + str(data[0]["page_id"]) + " | python -m "
-                "json.tool")
+                "json.tool > /dev/null")
     output = os.system(curl_cmd)
     print (output)
 

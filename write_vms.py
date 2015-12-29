@@ -42,8 +42,8 @@ def create_one(i, parent_id, parent_name):
         content += ("NAT IP: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"] + "<br/>")
         json_info["nat_ip"] = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
     except (KeyError, IndexError):
-        # Can't find "nat_addresses"
-        pass
+        content += ("NAT IP: " + i["interfaces"][0]["ip"] + "<br/>")
+        json_info["nat_ip"] = i["interfaces"][0]["ip"]
 
     try:
         content += ("VPN ID: " + i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["vpn_id"] + "<br/><br/>")

@@ -91,13 +91,18 @@ def create(data, parent_id):
         comment = stored[0]["comment"]
         user = stored[0]["user"]
         password = stored[0]["password"]
+        mob_ver = stored[0]["mob_ver"]
+        apk_build = stored[0]["apk_build"]
+        war_build = stored[0]["war_build"]
     else:
-        comment = ("This page is being monitored and updated automatically by "
-                   "the Confluence Writer bot. Only changes made to fields den"
-                   "oted by an asterisk (*) will be preserved in future update"
-                   "s. Add notes here: ")
+        comment = ("[Add any miscellaneous notes here. This box, along with "
+                   "information entered into fields denoted by an asterisk *, "
+                   "will be preserved through future updates.]")
         user = "?"
         password = "?"
+        mob_ver = "?"
+        apk_build = "?"
+        war_build = "?"
 
     # Initial block.
     content = ("<ac:layout><ac:layout-section ac:type=\\\"two_equal\\\"><ac:lay"
@@ -152,9 +157,13 @@ def create(data, parent_id):
         vm_info = []
 
         if vm_hostname != "lb":
-            vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_name + "</strong></h2>")
+            vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
             vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP: " + vm_ip + "</p>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_home) + "/cats/</a></p>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_reports) + "/cats/</a></p>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_services) + "/cats/</a></p>")
+            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url + "/catsmob/\\\">" + base_url + ":" + str(port_mob) + "/catsmob/</a></p>")
 
             serv_count = 0
             for j in services:
@@ -164,13 +173,8 @@ def create(data, parent_id):
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External IP: <a href=\\\"" + j["external_ip"] + "\\\">" + j["external_ip"] + "</a></p>")
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External Port: " + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
         else:
-            lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_name + "</strong></h2>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: (URL/home/reports/services/mobility): </p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_home) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_reports) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_services) + "/cats/</a></p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\"> - <a href=\\\"" + base_url + "/cats/\\\">" + base_url + ":" + str(port_mob) + "/cats/</a></p>")
+            lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
+            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer: <a href=\\\"" + base_url + "/cats/\\\">" + base_url + "/cats/</a></p>")
 
         if vm_hostname == "db":
             # This data will be used shortly, for creating the database table.
@@ -214,13 +218,20 @@ def create(data, parent_id):
     content += ("<p>Skytap environment link:&nbsp;<a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
     content += ("<p>&nbsp;</p>")
 
+    content += ("<p><strong>Mobility Details:</strong></p>")
+    content += ("<p>Version*: " + mob_ver + "</p>")
+    content += ("<p>APK Build*: " + apk_build + "</p>")
+    content += ("<p>WAR Build*: " + war_build + "</p>")
+    content += ("<p>&nbsp;</p>")
+
+
     if db_exists:
         content += ("<p><strong>Oracle DB Info</strong></p>")
-        content += ("<ul><li>Oracle OS User: &nbsp;oracle</li>")
+        content += ("<ul><li>Oracle OS User: oracle</li>")
         content += ("<li>Host: " + db_ip + "</li>")
-        content += ("<li>DB Schema:&nbsp;CATS</li>")
-        content += ("<li>DB Password:&nbsp;CATS</li>")
-        content += ("<li>SID:&nbsp;" + db_sid + "</li>")
+        content += ("<li>DB Schema: CATS</li>")
+        content += ("<li>DB Password: CATS</li>")
+        content += ("<li>SID: " + db_sid + "</li>")
         content += ("<li>Port: " + str(db_port) + "</li>")
         content += ("</ul>")
 
