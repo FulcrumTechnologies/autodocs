@@ -232,8 +232,8 @@ def store(envs):
 
             print ("fetching page source..."),
             curl_cmd = ("curl -s -u " + username + ":" + password + " "
-                        "" + location + data[0]["page_id"] + "?expand=body.storage"
-                        " | python -mjson.tool > temp.json")
+                        "" + location + data[0]["page_id"] + "?expand=body.stor"
+                        "age | python -mjson.tool > temp.json")
 
             output = os.system(curl_cmd)
 
@@ -247,9 +247,9 @@ def store(envs):
             content = result["body"]["storage"]["value"]
 
             print ("storing relevant information in JSON..."),
-            storage_info["comment"] = content[content.find("<ac:layout-cell><p>")+19:content.find("</p></ac:layout-cell>")]
-            storage_info["user"] = content[content.find("Admin User:")+12:content.find("</p><p>Admin PW:")]
-            storage_info["password"] = content[content.find("Admin PW:")+10:content.find("</p><p>Skytap environment")]
+            storage_info["comment"] = content[content.find("<ac:layout-cell><p>")+20:content.find("</p></ac:layout-cell>")]
+            storage_info["user"] = content[content.find("Admin User*:")+13:content.find("</p><p>Admin PW*:")]
+            storage_info["password"] = content[content.find("Admin PW*:")+11:content.find("</p><p>Skytap environment")]
 
             with open(storage_dir + i["id"] + ".json", "w") as file:
                 json.dump(storage_info, file)

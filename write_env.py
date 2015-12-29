@@ -93,9 +93,9 @@ def create(data, parent_id):
         password = stored[0]["password"]
     else:
         comment = ("This page is being monitored and updated automatically by "
-                   "tech wizardry. Consult your local tech wizards or their IT "
-                   "intern/minion if there is information you would like to "
-                   "edit.")
+                   "the Confluence Writer bot. Only changes made to fields den"
+                   "oted by an asterisk (*) will be preserved in future update"
+                   "s. Add notes here: ")
         user = "?"
         password = "?"
 
@@ -209,8 +209,8 @@ def create(data, parent_id):
     content += ("<ac:layout-cell>")
     content += ("<p><strong>Additional Details</strong></p>")
     content += ("<p>Config ID: " + str(env_id) + "</p>")
-    content += ("<p>Admin User: " + user + "</p>")
-    content += ("<p>Admin PW: " + password + "</p>")
+    content += ("<p>Admin User*: " + user + "</p>")
+    content += ("<p>Admin PW*: " + password + "</p>")
     content += ("<p>Skytap environment link:&nbsp;<a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
     content += ("<p>&nbsp;</p>")
 
