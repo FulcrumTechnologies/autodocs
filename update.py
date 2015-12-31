@@ -96,42 +96,53 @@ def check(envs):
                     continue
             else:
                 print ("no changes found.")
+
             # listed_vms is used in a special case scenario where vm is deleted
             # from an environment. The page will be removed if vm is removed.
             listed_vms = []
 
-            for i in data[0]["vms"]:
-                listed_vms.append(i["vm_id"])
+            for j in data[0]["vms"]:
+                listed_vms.append(j["vm_id"])
 
             vm_count = 0
             # Check all of the environment's vms.
-            for i in cur_data["vms"]:
+            for j in cur_data["vms"]:
                 vm_count += 1
-                print ("\nVM " + str(vm_count) + ": " + i["name"] + " ... ID: " + i["id"])
-                if os.path.isfile(json_dir + i["id"] + ".json"):
+
+                # JSON of current VM data is assigned to vm_data.
+                print ("\nVM " + str(vm_count) + ": " + j["name"] + " ... ID: " + j["id"])
+                if os.path.isfile(json_dir + j["id"] + ".json"):
                     print ("Collecting VM data..."),
                     vm_data = []
 
                     try:
-                        # Make a JSON of vm file info
-                        with open(json_dir + i["id"] + ".json") as f:
+                        # Make a JSON of VM file info
+                        with open(json_dir + j["id"] + ".json") as f:
                             for line in f:
                                 vm_data.append(json.loads(line))
 
                         # The field where the correct IP can be found varies.
+                        tmp_ip_india = ""
                         try:
                             # The usual place.
-                            tmp_ip = i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+                            for k in j["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
+                                if k["vpn_name"].startswith("US"):
+                                    tmp_ip_us = k["ip_address"]
+                                elif k["vpn_name"].startswith("SG"):
+                                    tmp_ip_india = k["ip_address"]
                         except (KeyError, IndexError):
                             # Otherwise, get it here.
-                            tmp_ip = i["interfaces"][0]["ip"]
+                            tmp_ip_us = j["interfaces"][0]["ip"]
 
+                        # NOTE: these statements will decide if the VM is
+                        # up-to-date, or if it is old.
                         print ("checking for changes..."),
-                        if (vm_data[0]["id"] != i["id"] or
-                                vm_data[0]["local_ip"] != tmp_ip or
-                                vm_data[0]["vm_name"] != i["name"] or
-                                vm_data[0]["config_url"] != i["configuration_url"] or
-                                vm_data[0]["vm_hostname"] != i["interfaces"][0]["hostname"]):
+                        if (vm_data[0]["id"] != j["id"] or
+                                vm_data[0]["nat_ip_us"] != tmp_ip_us or
+                                vm_data[0]["nat_ip_india"] != tmp_ip_india or
+                                vm_data[0]["vm_name"] != j["name"] or
+                                vm_data[0]["config_url"] != j["configuration_url"] or
+                                vm_data[0]["vm_hostname"] != j["interfaces"][0]["hostname"]):
                                 # Vm data has been changed; update.
                                 print ("changes found.")
                                 print ("Update: VM data has been altered.")
@@ -141,10 +152,11 @@ def check(envs):
                                        "" + vm_data[0]["id"] + "\n\n")
                                 remove_page.start(data[0]["id"])
                                 create_page.start(data[0]["id"])
-                                continue
                         else:
                             print ("no changes found.")
-                    except FileNotFoundError:
+                    # NOTE: update this exception handler if running Python 3 to 
+                    # FileNotFoundError.
+                    except IOError:
                         # Another vm has been added to the environment; update.
                         print ("no data found.")
                         print ("Update: VM has been added to environment.")
@@ -152,11 +164,10 @@ def check(envs):
                                "" + data[0]["id"])
                         remove_page.start(data[0]["id"])
                         create_page.start(data[0]["id"])
-                        continue
 
                 # Remove from listed_vms if this vm still exists.
-                if i["id"] in listed_vms:
-                    listed_vms.remove(i["id"])
+                if j["id"] in listed_vms:
+                    listed_vms.remove(j["id"])
 
             print ("\nChecking for recently deleted VMs..."),
             # If there are still elements in listed_vm...
@@ -259,11 +270,11 @@ def store(envs):
             # NOTE: this is where the magic happens. Add elements here.
             print ("storing relevant information in JSON..."),
             storage_info["comment"] = content[content.find("<ac:layout-cell><p>")+19:content.find("</p></ac:layout-cell>")]
-            storage_info["user"] = content[content.find("Admin User*:")+12:content.find("</p><p>Admin PW*:")]
-            storage_info["password"] = content[content.find("Admin PW*:")+10:content.find("</p><p>Skytap environment")]
-            storage_info["mob_ver"] = content[content.find("Version*:")+9:content.find("</p><p>APK Build")]
-            storage_info["apk_build"] = content[content.find("APK Build*:")+11:content.find("</p><p>WAR Build")]
-            storage_info["war_build"] = content[content.find("WAR Build*:")+11:content.find("</p><p>&nbsp;</p>")]
+            storage_info["user"] = content[content.find("Admin User*:")+12:content.find("</p><p>Admin PW*:")].strip()
+            storage_info["password"] = content[content.find("Admin PW*:")+10:content.find("</p><p>Skytap environment")].strip()
+            storage_info["mob_ver"] = content[content.find("Version*:")+9:content.find("</p><p>APK Build")].strip()
+            storage_info["apk_build"] = content[content.find("APK Build*:")+11:content.find("</p><p>WAR Build")].strip()
+            storage_info["war_build"] = "?" #content[content.find("WAR Build*:")+11:content.find("</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><table>")]
 
             with open(storage_dir + i["id"] + ".json", "w") as file:
                 json.dump(storage_info, file)
@@ -275,7 +286,6 @@ def reset(envs):
     """Reset every page in the wiki; utilized to update template."""
 
     json_dir = "JSONS/"
-
     for i in envs:
         if os.path.isfile(json_dir + i["id"] + ".json"):
             print ("Resetting environment " + i["name"] + " ... ID: " + i["id"])

@@ -118,5 +118,5 @@ def start(id):
 
 
 if __name__ == '__main__':
-    start(0)
+    start(sys.argv[1])
 

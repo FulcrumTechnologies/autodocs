@@ -13,7 +13,7 @@ import commands
 import json
 import write_env
 import write_vms
-
+import sys
 
 def start(id):
     """Start creation of page."""
@@ -57,4 +57,8 @@ def start(id):
         write_vms.create(env_details, env_page_id, parent_name)
 
     return env_page_id
+
+
+if __name__ == '__main__':
+    start(sys.argv[1])
 
