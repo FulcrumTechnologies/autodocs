@@ -104,9 +104,15 @@ def check(envs):
             for j in data[0]["vms"]:
                 listed_vms.append(j["vm_id"])
 
+            changes_made = False
             vm_count = 0
+
             # Check all of the environment's vms.
             for j in cur_data["vms"]:
+                # Has this environment already been rewritten? Skip rest of VMs.
+                if changes_made:
+                    continue
+
                 vm_count += 1
 
                 # JSON of current VM data is assigned to vm_data.
@@ -152,9 +158,10 @@ def check(envs):
                                        "" + vm_data[0]["id"] + "\n\n")
                                 remove_page.start(data[0]["id"])
                                 create_page.start(data[0]["id"])
+                                changes_made = True
                         else:
                             print ("no changes found.")
-                    # NOTE: update this exception handler if running Python 3 to 
+                    # NOTE: update this exception handler if running Python 3 to
                     # FileNotFoundError.
                     except IOError:
                         # Another vm has been added to the environment; update.
@@ -164,6 +171,7 @@ def check(envs):
                                "" + data[0]["id"])
                         remove_page.start(data[0]["id"])
                         create_page.start(data[0]["id"])
+                        changes_made = True
 
                 # Remove from listed_vms if this vm still exists.
                 if j["id"] in listed_vms:
@@ -179,7 +187,7 @@ def check(envs):
                        "" + data[0]["id"] + " ... Cave: of the Bat variety.")
                 remove_page.start(data[0]["id"])
                 create_page.start(data[0]["id"])
-                continue
+                changes_made = True
             else:
                 print ("no orphaned VMs found.")
         else:
@@ -204,9 +212,6 @@ def check(envs):
                 print ("Changes found in: " + env_data[0]["name"] + "... ID: "
                        "" + env_data[0]["id"])
                 remove_page.start(env_data[0]["id"])
-                continue
-            else:
-                print ("no environments have been deleted.")
         except (IndexError, KeyError):
             pass
 
