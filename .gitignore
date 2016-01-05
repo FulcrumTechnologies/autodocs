@@ -2,6 +2,7 @@
 config.yml
 /JSONS
 /storage
+/other
 allPageIDs.txt
 allSkytapIDs.txt
 temp.json
