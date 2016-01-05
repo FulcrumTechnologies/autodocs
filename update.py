@@ -140,6 +140,15 @@ def check(envs):
                             # Otherwise, get it here.
                             tmp_ip_us = j["interfaces"][0]["ip"]
 
+                        # How many services in current VM
+                        serv_count_1 = len(j["interfaces"][0]["services"])
+
+                        # How many services recorded in JSON for same VM
+                        for x in data[0]["vms"]:
+                            if x["vm_id"] == j["id"]:
+                                serv_count_2 = len(x["services"])
+                                break
+
                         # NOTE: these statements will decide if the VM is
                         # up-to-date, or if it is old.
                         print ("checking for changes..."),
@@ -148,7 +157,8 @@ def check(envs):
                                 vm_data[0]["nat_ip_india"] != tmp_ip_india or
                                 vm_data[0]["vm_name"] != j["name"] or
                                 vm_data[0]["config_url"] != j["configuration_url"] or
-                                vm_data[0]["vm_hostname"] != j["interfaces"][0]["hostname"]):
+                                vm_data[0]["vm_hostname"] != j["interfaces"][0]["hostname"] or
+                                serv_count_1 != serv_count_2):
                                 # Vm data has been changed; update.
                                 print ("changes found.")
                                 print ("Update: VM data has been altered.")

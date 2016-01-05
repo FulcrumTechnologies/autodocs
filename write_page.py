@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """write_page.py
-
 Request Confluence API to write content to a page for either an environment or
 vm page. Also stores JSON containing relevant data in /JSONS directory under
 the name [Skytap ID].json.

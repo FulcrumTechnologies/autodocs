@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """write_env.py
-
 Creates content in xhtml that will be posted to new page. Also creates json
 that will be used to hold information, stored in /JSONS directory. Lastly,
 write_page.py is called to request the Confluence API and write the page.
@@ -53,6 +52,7 @@ def create(data, parent_id):
     env_name = clean_string(data["name"])
 
     config_url = data["url"]
+    dash_url = "http://dashboard.fulcrum.net/" + env_id
     puppet_enabled = undef
     admin_access = undef
     user_access = undef
@@ -215,12 +215,11 @@ def create(data, parent_id):
 
             # Writing service information
             serv_count = 0
-            for j in services:
-                serv_count += 1
-                vm_content += ("<p><strong> - Service " + str(serv_count) + ":</strong></p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port: " + j["internal_port"] + "</p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External IP: <a href=\\\"" + j["external_ip"] + "\\\">" + j["external_ip"] + "</a></p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">External Port: " + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+            if len(services) != 0:
+                vm_content += ("<p><strong> - Published Services:</strong></p>")
+                for j in services:
+                    serv_count += 1
+                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
 
         # Print this stuff if this VM is load balancer
         else:
@@ -277,7 +276,8 @@ def create(data, parent_id):
     content += ("<p>Config ID: " + str(env_id) + "</p>")
     content += ("<p>Admin User*: " + user + "</p>")
     content += ("<p>Admin PW*: " + password + "</p>")
-    content += ("<p>Skytap environment link:&nbsp;<a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
+    content += ("<p>Skytap Environment: <a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
+    content += ("<p>Environment Dashboard: <a href=\\\"" + dash_url + "\\\">" + dash_url + "</a></p>")
     content += ("<p>&nbsp;</p>")
 
     content += ("<p><strong>Mobility Details:</strong></p>")
