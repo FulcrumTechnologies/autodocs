@@ -8,6 +8,7 @@ page(s) if necessary. (As of 12/15, incomplete)
 import commands
 import create_page
 import json
+import list_india
 import os
 import remove_page
 import sys
@@ -332,6 +333,10 @@ def start(args):
         os.system("clear")
         print ("Resetting all wiki pages.")
         reset(envs)
+    elif (args[1] == "india"):
+        os.system("clear")
+        print ("Writing list of environments with VPN connections to India.")
+        list_india.start(envs)
     else:
         print ("Command not recognized. Use \"write\" or \"check\".")
 
