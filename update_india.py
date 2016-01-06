@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-"""list_india.py
+"""update_india.py
 Writes a page with listing of all environments with VPN connections to India.
 """
 
 import commands
 import json
 import os
+
 
 def write(names, ids, page_ids):
     """Write the page containing list of appropriate environments."""
@@ -97,7 +98,7 @@ def write(names, ids, page_ids):
 
 
 def start(envs):
-    """Starting point for list_india.py."""
+    """Starting point for update_india.py."""
 
     names = []
     ids = []
