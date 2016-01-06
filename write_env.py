@@ -185,14 +185,17 @@ def create(data, parent_id):
         if vm_hostname != "lb":
             vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
-            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
 
             # Write down India IP if there is one
+            if vm_ip_us != "":
+                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (India): " + vm_ip_india + "</p>")
 
             # Write down URLs if not a database
             if vm_hostname != "db":
+                if vm_ip_us == "":
+                    vm_ip_us = vm_ip_india
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_us + ":" + str(port_home) + "/cats/\\\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_us + ":" + str(port_reports) + "/cats/\\\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_us + ":" + str(port_services) + "/cats/\\\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
