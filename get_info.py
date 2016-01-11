@@ -61,7 +61,7 @@ auth = (skytap_user, skytap_token)
 #    count.append(str(i["id"]))
 
 #if len(env_data[0]["error"]) is 0:
-response = requests.get(skytap_url + "/configurations/1698764",
+response = requests.get(skytap_url + "/configurations/6089584",
                         headers=requisite_headers, auth=auth)
 print response.text
 #print "Number of envs: " + str(count)

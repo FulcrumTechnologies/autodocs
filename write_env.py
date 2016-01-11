@@ -143,9 +143,9 @@ def create(data, parent_id):
         try:
             # US = US, SG = India
             for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                if k["vpn_name"].startswith("US"):
+                if k["vpn_name"].startswith("ASAOPS"):
                     vm_ip_us = k["ip_address"]
-                elif k["vpn_name"].startswith("SG"):
+                elif k["vpn_name"].startswith("ASASG"):
                     vm_ip_india = k["ip_address"]
         except (KeyError, IndexError):
             vm_ip_us = i["interfaces"][0]["ip"]
