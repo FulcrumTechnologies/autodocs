@@ -43,10 +43,10 @@ def create_one(i, parent_id, parent_name):
     try:
         content += ("<br/>")
         for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-            if k["vpn_name"].startswith("US"):
+            if k["vpn_name"].startswith("ASAOPS"):
                 content += ("NAT IP (US): " + k["ip_address"] + "<br/>")
                 json_info["nat_ip_us"] = k["ip_address"]
-            elif k["vpn_name"].startswith("SG"):
+            elif k["vpn_name"].startswith("ASASG"):
                 content += ("NAT IP (India): " + k["ip_address"] + "<br/>")
                 json_info["nat_ip_india"] = k["ip_address"]
     except (KeyError, IndexError):
@@ -59,10 +59,10 @@ def create_one(i, parent_id, parent_name):
 
     try:
         for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-            if k["vpn_name"].startswith("US"):
+            if k["vpn_name"].startswith("ASAOPS"):
                 content += ("VPN ID (US): " + k["vpn_id"] + "<br/>")
                 json_info["vpn_id_us"] = k["vpn_id"]
-            elif k["vpn_name"].startswith("SG"):
+            elif k["vpn_name"].startswith("ASASG"):
                 content += ("VPN ID (India): " + k["vpn_id"] + "<br/>")
                 json_info["vpn_id_india"] = k["vpn_id"]
     except (KeyError, IndexError):

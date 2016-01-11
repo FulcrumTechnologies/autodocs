@@ -28,6 +28,35 @@ def reset(envs):
             create_page.start(i["id"])
 
 
+def purge():
+    """Purge pages from wiki that no longer have a correlating environment."""
+    json_dir = "JSONS/"
+
+    print ("\nChecking for recently deleted environments...")
+    for f in os.listdir(json_dir):
+        env_data = []
+        with open(json_dir + f) as file:
+            for line in file:
+                env_data.append(json.loads(line))
+
+        try:
+            if env_data[0]["parent_page_id"]:
+                continue
+        except (IndexError, KeyError):
+            pass
+
+        print ("Trying " + env_data[0]["name"] + " with ID " + env_data[0]["id"])
+
+        try:
+            # [:-5] removes ".json" giving us the Skytap ID
+            status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+                                                      " -a vms -e " + f[:-5])
+            data = json.loads(output)
+        except ValueError:
+            print ("Removing page.")
+            remove_page(env_data[0]["id"])
+
+
 def start(args):
     """Start the update function."""
 
@@ -56,6 +85,10 @@ def start(args):
         os.system("clear")
         print ("Writing list of environments with VPN connections to India.")
         update_india.start(envs)
+    elif (args[1] == "purge"):
+        os.system("clear")
+        print ("Purging wiki pages that no longer have an environment.")
+        purge()
     else:
         print ("Command not recognized.")
 

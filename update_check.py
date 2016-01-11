@@ -37,6 +37,7 @@ def start(envs):
 
         # Get JSON matching environment ID
         if os.path.isfile(json_dir + i["id"] + ".json"):
+            changes_made = False
             print ("Collecting environment data..."),
             data = []
 
@@ -66,6 +67,7 @@ def start(envs):
                            "" + data[0]["id"])
                     remove_page.start(data[0]["id"])
                     create_page.start(data[0]["id"])
+                    changes_made = True
                     continue
             else:
                 print ("no changes found.")
@@ -77,7 +79,6 @@ def start(envs):
             for j in data[0]["vms"]:
                 listed_vms.append(j["vm_id"])
 
-            changes_made = False
             vm_count = 0
 
             # Check all of the environment's vms.
@@ -109,9 +110,9 @@ def start(envs):
                         try:
                             # The usual place.
                             for k in j["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                                if k["vpn_name"].startswith("US"):
+                                if k["vpn_name"].startswith("ASAOPS"):
                                     tmp_ip_us = k["ip_address"]
-                                elif k["vpn_name"].startswith("SG"):
+                                elif k["vpn_name"].startswith("ASASG"):
                                     tmp_ip_india = k["ip_address"]
                         except (KeyError, IndexError):
                             # Otherwise, get it here.
@@ -158,7 +159,7 @@ def start(envs):
 
             print ("\nChecking for recently deleted VMs..."),
             # If there are still elements in listed_vm...
-            if len(listed_vms) != 0:
+            if len(listed_vms) != 0 and changes_made is False:
                 # One or more vms have been removed from environment; update.
                 print ("orphaned vm data found. We\'ll code-name it \"Bruce Wayne\".")
                 print ("Update: environment has been shot dead in front of Bruce Wayne.")

@@ -7,6 +7,7 @@ Writes a page with listing of all environments with VPN connections to India.
 import commands
 import json
 import os
+import remove_page
 
 
 def write(names, ids, page_ids):
@@ -114,14 +115,18 @@ def start(envs):
 
         status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
                                                   " -a vms -e " + i["id"])
-        data = json.loads(output)
+        try:
+            data = json.loads(output)
+        except ValueError:
+            print ("This doesn't exist anymore!")
+            remove_page(i["id"])
 
         done = False
 
         for j in data["vms"]:
             try:
                 for k in j["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                    if k["vpn_name"].startswith("SG"):
+                    if k["vpn_name"].startswith("ASASG"):
 
                         # Get page id
                         data = []
