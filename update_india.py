@@ -10,9 +10,26 @@ import os
 import remove_page
 
 
-def write(names, ids, page_ids):
+def write(names, ids, page_ids, content):
     """Write the page containing list of appropriate environments."""
 
+    new_content = ""
+
+    for i in range(len(names)):
+        new_content += "<p>"
+        new_content += "<ac:link><ri:page ri:content-title=\\\"" + names[i] + "\\\" /><ac:plain-text-link-body><![CDATA[" + names[i] + " - " + ids[i] + "]]></ac:plain-text-link-body></ac:link>"
+        new_content += "</p>"
+
+    if len(names) == 0:
+        new_content += ("<p>No environments found. If you\'re seeing this, the "
+                        "gobbledeegook has likely bunksmoogered, if you catch "
+                        "my drift. Check update_india.py.</p>")
+
+    return new_content
+
+
+def make_page(content):
+    """Call the Confluence Wiki API to delete the old page and create new."""
     print ("Writing page.")
 
     try:
@@ -56,17 +73,11 @@ def write(names, ids, page_ids):
     # parent_id here is the home page id for AutoDocs space.
     parent_id = "54362439"
 
-    page_content = "<p>All environments that have a VPN connection to India will be listed below.</p>"
-    for i in range(len(names)):
-        page_content += "<p>"
-        page_content += "<ac:link><ri:page ri:content-title=\\\"" + names[i] + "\\\" /><ac:plain-text-link-body><![CDATA[" + names[i] + " - {" + ids[i] + "}]]></ac:plain-text-link-body></ac:link>"
-        page_content += "</p>"
-
     curl_cmd = ("curl -s -u " + username + ":" + password + " -X POST -H \'Content"
                 "-Type: application/json\' -d\'{\"type\": \"page\",\"title\": "
                 "\"" + page_name + "\",\"ancestors\": [{\"id\": "
                 "" + parent_id + "}],\"space\": {\"key\": \"" + space_key + "\""
-                "},\"body\": {\"storage\": {\"value\": \"" + page_content + "\""
+                "},\"body\": {\"storage\": {\"value\": \"" + content + "\""
                 ",\"representation\": \"storage\"}}}\' " + location + " | "
                 "python -mjson.tool > temp.json")
 
@@ -84,21 +95,11 @@ def write(names, ids, page_ids):
     except KeyError:
         print ("Something bad happened and the page apparently wasn't written.")
 
-    env_details = []
-    for i in range(len(names)):
-        new_env = {}
-        new_env["name"] = names[i]
-        new_env["id"] = ids[i]
-        new_env["page_id"] = page_ids[i]
-        env_details.append(new_env)
-
-    json_info["envs"] = env_details
-
     with open("other/india.json", "w") as file:
         json.dump(json_info, file)
 
 
-def start(envs):
+def start():
     """Starting point for update_india.py."""
 
     names = []
@@ -109,49 +110,63 @@ def start(envs):
 
     count = 0
 
-    for i in envs:
-        count += 1
-        print ("" + str(count) + ": checking " + i["name"] + "...")
+    apac_names, apac_ids, apac_page_ids = [], [], []
+    usw_names, usw_ids, usw_page_ids = [], [], []
 
-        status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
-                                                  " -a vms -e " + i["id"])
+    # Collecting data for APAC environments
+    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+                                              " -a vpn -e vpn-3288770")
+    vpn = json.loads(output)
+
+    for i in vpn["network_attachments"]:
         try:
-            data = json.loads(output)
-        except ValueError:
-            print ("This doesn't exist anymore!")
-            remove_page(i["id"])
+            with open("" + json_dir + i["network"]["configuration_id"] + ".json") as file:
+                data = json.load(file)
+        except IOError:
+            print "There\'s an environment missing. Run \"update.py write\"."
+            continue
 
-        done = False
+        print ("Adding (APAC): " + data["name"] + " with ID " + data["id"])
 
-        for j in data["vms"]:
-            try:
-                for k in j["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                    if k["vpn_name"].startswith("ASASG"):
+        apac_names.append(data["name"])
+        apac_ids.append(data["id"])
+        apac_page_ids.append(data["page_id"])
 
-                        # Get page id
-                        data = []
-                        try:
-                            with open(json_dir + i["id"] + ".json") as f:
-                                for line in f:
-                                    data.append(json.loads(line))
-                        except IOError:
-                            done = True
-                            break
+    # Collecting data for USW environments
+    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+                                              " -a vpn -e vpn-3631944")
+    vpn = json.loads(output)
 
-                        names.append(i["name"])
-                        ids.append(i["id"])
-                        page_ids.append(data[0]["page_id"])
+    for i in vpn["network_attachments"]:
+        try:
+            with open("" + json_dir + i["network"]["configuration_id"] + ".json") as file:
+                data = json.load(file)
+        except IOError:
+            print "There\'s an environment missing (ID = " + i["network"]["configuration_id"] + ")."
+            print "Run \"update.py write\"."
+            continue
 
-                        done = True
-                        break
-            except KeyError:
-                pass
-            # If environment has been added to list, skip to next environment
-            if done:
-                break
+        print ("Adding (USW): " + data["name"] + " with ID " + data["id"])
 
-    for x in range(len(names)):
-        print ("ID: " + ids[x] + " - Page ID: " + page_ids[x] + " - Name: " + names[x])
+        usw_names.append(data["name"])
+        usw_ids.append(data["id"])
+        usw_page_ids.append(data["page_id"])
 
-    write(names, ids, page_ids)
+    for x in range(len(apac_names)):
+        print ("ID: " + apac_ids[x] + " - Page ID: " + apac_page_ids[x] + " - Name: " + apac_names[x])
+
+    for x in range(len(usw_names)):
+        print ("ID: " + usw_ids[x] + " - Page ID: " + usw_page_ids[x] + " - Name: " + usw_names[x])
+
+    content = ""
+
+    if len(apac_names) != 0:
+        content += "<p>All APAC environments that have a VPN connection to India are listed below:</p>"
+        content += write(apac_names, apac_ids, apac_page_ids, content)
+
+    if len(usw_names) != 0:
+        content += "<p>&nbsp;</p><p>All USW environments that have a VPN connection to India are listed below:</p>"
+        content += write(usw_names, usw_ids, usw_page_ids, content)
+
+    make_page(content)
 

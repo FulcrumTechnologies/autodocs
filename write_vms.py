@@ -43,10 +43,11 @@ def create_one(i, parent_id, parent_name):
     try:
         content += ("<br/>")
         for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-            if k["vpn_name"].startswith("ASAOPS"):
+            if (k["vpn_id"] == "vpn-3631944" or
+                    k["vpn_id"] == "vpn-661182"):
                 content += ("NAT IP (US): " + k["ip_address"] + "<br/>")
                 json_info["nat_ip_us"] = k["ip_address"]
-            elif k["vpn_name"].startswith("ASASG"):
+            elif k["vpn_id"] == "vpn-3288770":
                 content += ("NAT IP (India): " + k["ip_address"] + "<br/>")
                 json_info["nat_ip_india"] = k["ip_address"]
     except (KeyError, IndexError):

@@ -31,13 +31,19 @@ def reset(envs):
 def purge():
     """Purge pages from wiki that no longer have a correlating environment."""
     json_dir = "JSONS/"
+    count = 0
 
     print ("\nChecking for recently deleted environments...")
     for f in os.listdir(json_dir):
         env_data = []
-        with open(json_dir + f) as file:
-            for line in file:
-                env_data.append(json.loads(line))
+        try:
+            with open(json_dir + f) as file:
+                for line in file:
+                    env_data.append(json.loads(line))
+        except IOError:
+            print "This error should be impossible to achieve. Congratulations!"
+            print "(Error found when trying to read JSON found in JSONS/ dir.)"
+            continue
 
         try:
             if env_data[0]["parent_page_id"]:
@@ -45,46 +51,57 @@ def purge():
         except (IndexError, KeyError):
             pass
 
-        print ("Trying " + env_data[0]["name"] + " with ID " + env_data[0]["id"])
+        count += 1
+        print ("" + str(count) + ": Trying " + env_data[0]["name"] + " with ID " + env_data[0]["id"])
 
         try:
             # [:-5] removes ".json" giving us the Skytap ID
-            status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
-                                                      " -a vms -e " + f[:-5])
+            status, output = commands.getstatusoutput("python /opt/skynet/skyne"
+                                                      "t.py -a vms -e " + f[:-5])
             data = json.loads(output)
         except ValueError:
             print ("Removing page.")
-            remove_page(env_data[0]["id"])
+            remove_page.start(env_data[0]["id"])
+
+
+def get_json(skynet_arg):
+    """Return json of output from a Skynet call."""
+
+    if skynet_arg == "env_full":
+        status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+                                                  " -a env_full")
+
+        envs = json.loads(output)
+        return envs
 
 
 def start(args):
     """Start the update function."""
 
-    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py -a "
-                                              "env_full")
-
-    envs = json.loads(output)
-
     if (args[1] == "write"):
         os.system("clear")
         print ("Writing wiki pages.")
+        envs = get_json("env_full")
         update_write.start(envs)
     elif (args[1] == "check"):
         os.system("clear")
         print ("Updating existing wiki pages.")
+        envs = get_json("env_full")
         update_check.start(envs)
     elif (args[1] == "store"):
         os.system("clear")
         print ("Storing updated information from wiki pages.")
+        envs = get_json("env_full")
         update_store.start(envs)
     elif (args[1] == "reset"):
         os.system("clear")
         print ("Resetting all wiki pages.")
+        envs = get_json("env_full")
         reset(envs)
     elif (args[1] == "india"):
         os.system("clear")
         print ("Writing list of environments with VPN connections to India.")
-        update_india.start(envs)
+        update_india.start()
     elif (args[1] == "purge"):
         os.system("clear")
         print ("Purging wiki pages that no longer have an environment.")

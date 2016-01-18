@@ -6,6 +6,7 @@ vm page. Also stores JSON containing relevant data in /JSONS directory under
 the name [Skytap ID].json.
 """
 
+import commands
 import json
 import os
 
@@ -56,10 +57,14 @@ def create(page_name, parent_id, page_content, json_info):
                 ",\"representation\": \"storage\"}}}\' " + location + " | "
                 "python -mjson.tool > temp.json")
 
-    output = os.system(curl_cmd)
+    status, output = commands.getstatusoutput(curl_cmd)
 
-    with open("temp.json") as file:
-        data = json.load(file)
+    try:
+        with open("temp.json") as file:
+            data = json.load(file)
+    except ValueError:
+        print ("temp.json was not created; the page was (probably) not written.")
+        print page_content
 
     # Empties temp.json
     open("temp.json", 'w').close()
@@ -84,7 +89,7 @@ def create(page_name, parent_id, page_content, json_info):
             file.write(page_name + ", w/ ID " + parent_id + ", made an owie.\n"
                        "Error message: " + data["message"] + "\n\n")
             print page_content
-   
+
         with open("temp.json", "r") as file:
             print (file.read())
         return 0, json_info

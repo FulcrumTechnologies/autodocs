@@ -9,6 +9,7 @@ import json
 import os
 import sys
 
+
 def start(envs):
     """Store specific data from pages to preserve through future updates."""
 

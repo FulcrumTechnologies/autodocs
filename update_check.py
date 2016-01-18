@@ -11,11 +11,13 @@ import json
 import os
 import remove_page
 
+
 def clean_string(str):
     """Clean up lone apostrophes and quotations in string."""
     str = str.replace("\'", "")
 
     return str
+
 
 def start(envs):
     """Check for differences between page and current env JSON, and update."""
@@ -24,12 +26,7 @@ def start(envs):
 
     count = 0
 
-    # listed_envs is used in a special case scenario where env is deleted
-    # from Skytap. The page will be removed along with its vms.
-    listed_envs = []
-
     for i in envs:
-        listed_envs.append(i["id"])
         count += 1
 
         print ("\n----------------------------------------\n")
@@ -106,13 +103,15 @@ def start(envs):
                                 vm_data.append(json.loads(line))
 
                         # The field where the correct IP can be found varies.
+                        tmp_ip_us = ""
                         tmp_ip_india = ""
                         try:
                             # The usual place.
                             for k in j["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                                if k["vpn_name"].startswith("ASAOPS"):
+                                if (k["vpn_id"] == "vpn-3631944" or
+                                        k["vpn_id"] == "vpn-661182"):
                                     tmp_ip_us = k["ip_address"]
-                                elif k["vpn_name"].startswith("ASASG"):
+                                elif k["vpn_id"] == "vpn-3288770":
                                     tmp_ip_india = k["ip_address"]
                         except (KeyError, IndexError):
                             # Otherwise, get it here.
@@ -173,25 +172,4 @@ def start(envs):
         else:
             print ("There\'s an environment missing here. Run \"python update"
                    ".py write\" to write it.")
-
-    # Check every file representing an environment from the JSONS directory
-    # against each ID in listed_envs. If not found, call remove_page for that
-    # ID. This ensures envs that were removed will have their pages purged too.
-    print ("\nChecking for recently deleted environments...")
-    for f in os.listdir(json_dir):
-        env_data = []
-        with open(json_dir + f) as f:
-            for line in f:
-                env_data.append(json.loads(line))
-
-        try:
-            # If this JSON belongs to environment and id is not in listed_envs
-            if env_data[0]["vms"] and env_data[0]["id"] not in listed_envs:
-                print ("deleted environment found...or, rather, it hasn\'t?")
-                print ("Update: Environment has been deleted.")
-                print ("Changes found in: " + env_data[0]["name"] + "... ID: "
-                       "" + env_data[0]["id"])
-                remove_page.start(env_data[0]["id"])
-        except (IndexError, KeyError):
-            pass
 

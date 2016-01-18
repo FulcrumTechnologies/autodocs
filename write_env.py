@@ -31,6 +31,8 @@ def check_url(url):
 def clean_string(str):
     """Clean up lone apostrophes and quotations in string."""
     str = str.replace("\'", "")
+    str = str.replace("\"", "\\\"")
+    str = str.replace("\\\\\"", "\\\"")
 
     return str
 
@@ -61,9 +63,9 @@ def create(data, parent_id):
     if env_name.startswith("VZW"):
         url = "http://"
         port_home = 8001
-        port_reports = 8002
-        port_services = 8003
-        port_mob = 8004
+        port_reports = 8003
+        port_services = 8004
+        port_mob = 8002
         mob_end = "cats"
     else:
         url = "https://"
@@ -125,6 +127,7 @@ def create(data, parent_id):
 
     vm_content = ""
     lb_content = ""
+    has_app1 = ""
 
     # Loop through every VM and affix xhtml to vm_content.
     for i in data["vms"]:
@@ -143,9 +146,10 @@ def create(data, parent_id):
         try:
             # US = US, SG = India
             for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                if k["vpn_name"].startswith("ASAOPS"):
+                if (k["vpn_id"] == "vpn-3631944" or
+                        k["vpn_id"] == "vpn-661182"):
                     vm_ip_us = k["ip_address"]
-                elif k["vpn_name"].startswith("ASASG"):
+                elif k["vpn_id"] == "vpn-3288770":
                     vm_ip_india = k["ip_address"]
         except (KeyError, IndexError):
             vm_ip_us = i["interfaces"][0]["ip"]
@@ -196,10 +200,11 @@ def create(data, parent_id):
             if vm_hostname != "db":
                 if vm_ip_us == "":
                     vm_ip_us = vm_ip_india
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_us + ":" + str(port_home) + "/cats/\\\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_us + ":" + str(port_reports) + "/cats/\\\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_us + ":" + str(port_services) + "/cats/\\\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
+                else:
+                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_us + ":" + str(port_home) + "/cats/\\\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
+                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_us + ":" + str(port_reports) + "/cats/\\\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
+                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_us + ":" + str(port_services) + "/cats/\\\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
+                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
                 # Writing URLs for India VPN if not a database and India VPN exists
                 if vm_ip_india != "":
@@ -223,6 +228,11 @@ def create(data, parent_id):
                 for j in services:
                     serv_count += 1
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+
+            if vm_hostname == "app1" or vm_hostname == "app":
+                has_app1 = vm_ip_us
+                if vm_ip_us == "":
+                    has_app1 = vm_ip_india
 
         # Print this stuff if this VM is load balancer
         else:
@@ -292,29 +302,44 @@ def create(data, parent_id):
     if db_exists:
         content += ("<p><strong>Oracle DB Info</strong></p>")
         content += ("<ul><li>Oracle OS User: oracle</li>")
-        content += ("<li>IP (US): " + db_ip_us + "</li>")
-        content += ("<li>IP (India): " + db_ip_india + "</li>")
+        if db_ip_us != "":
+            content += ("<li>IP (US): " + db_ip_us + "</li>")
+        if db_ip_india != "":
+            content += ("<li>IP (India): " + db_ip_india + "</li>")
         content += ("<li>DB Schema: CATS</li>")
         content += ("<li>DB Password: CATS</li>")
         content += ("<li>SID: " + db_sid + "</li>")
         content += ("<li>Port: " + str(db_port) + "</li>")
         content += ("</ul>")
 
-    content += ("<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
+    content += ("<p>&nbsp;</p><p>&nbsp;</p>")
 
-    qr_url = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=lb."
-              "" + str(env_id) + ".skytap.fulcrum.net:" + str(port_mob) + ":1::"
-              "" + env_name + "&amp;size=150x150\\\" />")
+    if has_app1 != "":
+        qr_url = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data="
+                  "" + has_app1 + ":" + str(port_mob) + ":1::"
+                  "" + env_name + "&amp;size=150x150\\\" />")
 
-    # The qr_url in json_info will have "extra" escape chars (backslashes), but
-    # it is included in json_info just in case.
-    json_info["qr_url"] = qr_url
+        # The qr_url in json_info will have "extra" escape chars (backslashes), but
+        # it is included in json_info just in case.
+        json_info["qr_url"] = qr_url
 
-    content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
-                "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
-                "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
+        content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
+                    "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
+                    "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
 
-    content += ("</ac:layout-cell></ac:layout-section></ac:layout>")
+    content += ("</ac:layout-cell></ac:layout-section>")
+
+    # This block prints out the environment's JSON in an expandable block.
+    # Removed because some environments had too long of a JSON.
+    # content += ("<ac:layout-section ac:type=\\\"single\\\">")
+    # content += ("<ac:layout-cell><ac:structured-macro ac:macro-id=\\\"8312e2c6-31a0-4312-8d34-e13a415bd31a\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
+    # content += ("<ac:parameter ac:name=\\\"title\\\">Raw data (JSON format)</ac:parameter><ac:rich-text-body><p>")
+    #
+    # content += json.dumps(data)
+    #
+    # content += ("</p></ac:rich-text-body></ac:structured-macro></ac:layout-cell></ac:layout-section>")
+
+    content += ("</ac:layout>")
 
     content = clean_string(content)
 
