@@ -99,13 +99,13 @@ def create(data, parent_id):
         with open(storage_dir + env_id + ".json") as f:
             for line in f:
                 stored.append(json.loads(line))
-
         comment = stored[0]["comment"]
         user = stored[0]["user"]
         password = stored[0]["password"]
         mob_ver = stored[0]["mob_ver"]
         apk_build = stored[0]["apk_build"]
         war_build = stored[0]["war_build"]
+
     else:
         comment = ("[Add any miscellaneous notes here. This box, along with "
                    "information entered into fields denoted by an asterisk *, "
@@ -160,12 +160,12 @@ def create(data, parent_id):
         services = []
 
         # Create data in JSON for individual service information.
-        for i in i["interfaces"][0]["services"]:
+        for j in i["interfaces"][0]["services"]:
             new_service = {}
             new_service["internal_ip"] = vm_ip_us
-            new_service["internal_port"] = str(i["internal_port"])
-            new_service["external_ip"] = i["external_ip"]
-            new_service["external_port"] = str(i["external_port"])
+            new_service["internal_port"] = str(j["internal_port"])
+            new_service["external_ip"] = j["external_ip"]
+            new_service["external_port"] = str(j["external_port"])
             services.append(new_service)
 
         new_vm = {}
@@ -182,7 +182,38 @@ def create(data, parent_id):
         new_vm["vm_ssl_enabled"] = ssl_enabled
         new_vm["services"] = services
 
-        # This will hold content for each vm "block"
+        # pub_content holds information displayed at the end of the individual
+        # VM blocks.
+        pub_content = ""
+
+        # Writing service information
+        serv_count = 0
+        if len(services) != 0:
+            pub_content += ("<p><strong> - Published Services:</strong></p>")
+            for j in services:
+                serv_count += 1
+                pub_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+
+        # Writing public IP information
+        if i["interfaces"][0]["public_ips_count"] > 0:
+            pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
+            for k in i["interfaces"][0]["public_ips"]:
+                addr = k["address"]
+                pub_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
+                pub_content += ("<ac:parameter ac:name=\\\"title\\\">")
+                pub_content += ("https://" + addr + "/cats/")
+                pub_content += ("</ac:parameter>")
+                pub_content += ("<ac:rich-text-body>")
+
+                pub_content += ("<p>Direct link: <a href=\\\"https://" + addr + "/cats/\\\">https://" + addr + "/cats/</a></p>")
+
+                qrc = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\\\" />")
+
+                pub_content += ("<p>" + qrc + "</p>")
+
+                pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
+
+        # This will hold main content for each VM block
         vm_info = []
 
         # If this VM isn't the load balancer...
@@ -190,44 +221,42 @@ def create(data, parent_id):
             vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
 
-            # Write down India IP if there is one
+            # IPs should be displayed when...
             if vm_ip_us != "":
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
                 vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (India): " + vm_ip_india + "</p>")
 
-            # Write down URLs if not a database
+            # Never write down URLs when a database
             if vm_hostname != "db":
-                if vm_ip_us == "":
-                    vm_ip_us = vm_ip_india
-                else:
+                if vm_ip_us != "":
+
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_us + ":" + str(port_home) + "/cats/\\\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_us + ":" + str(port_reports) + "/cats/\\\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_us + ":" + str(port_services) + "/cats/\\\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
-                # Writing URLs for India VPN if not a database and India VPN exists
-                if vm_ip_india != "":
-                    vm_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
-                    vm_content += ("<ac:parameter ac:name=\\\"title\\\">")
-                    vm_content += ("India VPN details:")
-                    vm_content += ("</ac:parameter>")
-                    vm_content += ("<ac:rich-text-body>")
+                    if vm_ip_india != "":
+                        vm_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
+                        vm_content += ("<ac:parameter ac:name=\\\"title\\\">")
+                        vm_content += ("India VPN details:")
+                        vm_content += ("</ac:parameter>")
+                        vm_content += ("<ac:rich-text-body>")
 
+                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_india + ":" + str(port_home) + "/cats/\\\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
+                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_india + ":" + str(port_reports) + "/cats/\\\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
+                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_india + ":" + str(port_services) + "/cats/\\\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
+                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
+
+                        vm_content += ("</ac:rich-text-body></ac:structured-macro></p>")
+                elif vm_ip_india != "":
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_india + ":" + str(port_home) + "/cats/\\\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_india + ":" + str(port_reports) + "/cats/\\\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_india + ":" + str(port_services) + "/cats/\\\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
                     vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
-                    vm_content += ("</ac:rich-text-body></ac:structured-macro></p>")
-
-            # Writing service information
-            serv_count = 0
-            if len(services) != 0:
-                vm_content += ("<p><strong> - Published Services:</strong></p>")
-                for j in services:
-                    serv_count += 1
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+                # Add pub_content at the end.
+                vm_content += pub_content
 
             if vm_hostname == "app1" or vm_hostname == "app":
                 has_app1 = vm_ip_us
@@ -238,18 +267,22 @@ def create(data, parent_id):
         else:
             lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
 
+            if vm_ip_us != "":
+                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
                 lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (India): " + vm_ip_india + "</p>")
 
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer URL (US): <a href=\\\"" + base_url_us + "/cats/\\\">" + base_url_us + "/cats/</a></p>")
-
+            if vm_ip_us != "":
+                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer URL (US): <a href=\\\"" + base_url_us + "/cats/\\\">" + base_url_us + "/cats/</a></p>")
             if vm_ip_india != "":
                 lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer URL (India): <a href=\\\"" + base_url_india + "/cats/\\\">" + base_url_india + "/cats/</a></p>")
 
+            # Add pub_content at the end.
+            lb_content += pub_content
+
         if vm_hostname == "db":
-            # This data will be used shortly, for creating the database table.
+            # This data will be used shortly for creating the database table.
             db_exists = True
             db_id = vm_id
             db_ip_us = vm_ip_us
@@ -258,8 +291,11 @@ def create(data, parent_id):
             db_pass = vm_pass
             db_ssh = ssh_enabled
             db_ssl = ssl_enabled
-            db_port = 1521
+            oracle_user = "oracle"
+            db_schema = "CATS"
+            db_password = "CATS"
             db_sid = "orcl"
+            oracle_port = "1521"
 
             # If there is a db vm, this information will be added to db dict.
             new_db["db_id"] = db_id
@@ -269,8 +305,10 @@ def create(data, parent_id):
             new_db["db_pass"] = db_pass
             new_db["db_ssh"] = db_ssh
             new_db["db_ssl"] = db_ssl
-            new_db["db_port"] = str(db_port)
+            new_db["db_schema"] = db_schema
+            new_db["db_password"] = db_password
             new_db["db_sid"] = db_sid
+            new_db["db_port"] = oracle_port
 
         json_info["vms"].append(new_vm)
 
@@ -301,15 +339,15 @@ def create(data, parent_id):
 
     if db_exists:
         content += ("<p><strong>Oracle DB Info</strong></p>")
-        content += ("<ul><li>Oracle OS User: oracle</li>")
+        content += ("<ul><li>Oracle OS User: " + oracle_user + "</li>")
         if db_ip_us != "":
             content += ("<li>IP (US): " + db_ip_us + "</li>")
         if db_ip_india != "":
             content += ("<li>IP (India): " + db_ip_india + "</li>")
-        content += ("<li>DB Schema: CATS</li>")
-        content += ("<li>DB Password: CATS</li>")
+        content += ("<li>DB Schema: " + db_schema + "</li>")
+        content += ("<li>DB Password: " + db_password + "</li>")
         content += ("<li>SID: " + db_sid + "</li>")
-        content += ("<li>Port: " + str(db_port) + "</li>")
+        content += ("<li>Port: " + oracle_port + "</li>")
         content += ("</ul>")
 
     content += ("<p>&nbsp;</p><p>&nbsp;</p>")
@@ -319,25 +357,15 @@ def create(data, parent_id):
                   "" + has_app1 + ":" + str(port_mob) + ":1::"
                   "" + env_name + "&amp;size=150x150\\\" />")
 
-        # The qr_url in json_info will have "extra" escape chars (backslashes), but
-        # it is included in json_info just in case.
+        # The qr_url in json_info will have "extra" escape chars (backslashes),
+        # but it is included in json_info just in case.
         json_info["qr_url"] = qr_url
 
-        content += ("<table><tbody><tr><th><p>QR Code for Configuration:</p><p>"
+        content += ("<table><tbody><tr><th><p>QR Code for app1:</p><p>"
                     "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
                     "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
 
     content += ("</ac:layout-cell></ac:layout-section>")
-
-    # This block prints out the environment's JSON in an expandable block.
-    # Removed because some environments had too long of a JSON.
-    # content += ("<ac:layout-section ac:type=\\\"single\\\">")
-    # content += ("<ac:layout-cell><ac:structured-macro ac:macro-id=\\\"8312e2c6-31a0-4312-8d34-e13a415bd31a\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
-    # content += ("<ac:parameter ac:name=\\\"title\\\">Raw data (JSON format)</ac:parameter><ac:rich-text-body><p>")
-    #
-    # content += json.dumps(data)
-    #
-    # content += ("</p></ac:rich-text-body></ac:structured-macro></ac:layout-cell></ac:layout-section>")
 
     content += ("</ac:layout>")
 

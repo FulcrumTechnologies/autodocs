@@ -73,7 +73,14 @@ def start(envs):
             storage_info["password"] = content[content.find("Admin PW*:")+10:content.find("</p><p>Skytap Environment")].strip()
             storage_info["mob_ver"] = content[content.find("Version*:")+9:content.find("</p><p>APK Build")].strip()
             storage_info["apk_build"] = content[content.find("APK Build*:")+11:content.find("</p><p>WAR Build")].strip()
-            storage_info["war_build"] = "?" #content[content.find("WAR Build*:")+11:content.find("</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><table>")]
+            storage_info["war_build"] = "?" # content[content.find("WAR Build*:")+11:content.find("</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><table>")]
+            """
+            storage_info["oracle_user"] = "oracle" # content[content.find("Oracle OS User*:")+16:content.find("")].strip()
+            storage_info["db_schema"] = content[content.find("DB Schema*:")+11:content.find("</li><li>DB Password")].strip()
+            storage_info["db_password"] = content[content.find("DB Password*:")+13:content.find("</li><li>SID")].strip()
+            storage_info["db_sid"] = content[content.find("SID*:")+5:content.find("</li><li>Port")].strip()
+            storage_info["oracle_port"] = content[content.find("Port*:")+6:content.find("</li></ul>")].strip()
+            """
 
             with open(storage_dir + i["id"] + ".json", "w") as file:
                 json.dump(storage_info, file)
