@@ -10,6 +10,27 @@ import os
 import remove_page
 
 
+def content_unchanged(content):
+    """Returns true if the content is no different than the last page's."""
+
+    json_data = []
+
+    with open("other/india.json") as f:
+        for line in f:
+            json_data.append(json.loads(line))
+
+    cmd = ("curl -u chawkins:rufus77 https://fulcrumtech.atlassian.net/wiki/rest/api/content/" + json_data[0]["page_id"] + "?expand=body.storage > /tmp/temp.json")
+
+    status, output = commands.getstatusoutput(cmd)
+
+    with open("/tmp/temp.json") as file:
+        page_data = json.load(file)
+
+    content = content.replace("\\", "")
+
+    return (content == page_data["body"]["storage"]["value"])
+
+
 def write(names, ids, page_ids, content):
     """Write the page containing list of appropriate environments."""
 
@@ -167,6 +188,11 @@ def start():
     if len(usw_names) != 0:
         content += "<p>&nbsp;</p><p>All USW environments that have a VPN connection to India are listed below:</p>"
         content += write(usw_names, usw_ids, usw_page_ids, content)
+
+    # Did anything change? If not, don't update page.
+    if content_unchanged(content):
+        print ("Nothing has changed; aborting update.")
+        return
 
     make_page(content)
 
