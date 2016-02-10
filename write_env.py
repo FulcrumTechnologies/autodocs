@@ -324,7 +324,7 @@ def create(data, parent_id):
     content += ("</ac:layout-cell>")
     content += ("<ac:layout-cell>")
     content += ("<p><strong>Additional Details</strong></p>")
-    content += ("<p>Config ID: " + str(env_id) + "</p>")
+    content += ("<p>Environment ID: " + str(env_id) + "</p>")
     content += ("<p>Admin User*: " + user + "</p>")
     content += ("<p>Admin PW*: " + password + "</p>")
     content += ("<p>Skytap Environment: <a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")

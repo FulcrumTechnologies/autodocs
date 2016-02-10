@@ -93,6 +93,10 @@ def create_one(i, parent_id, parent_name):
     content += ("Local IP: " + i["interfaces"][0]["ip"] + "<br/>")
     json_info["local_ip"] = i["interfaces"][0]["ip"]
 
+    content += ("<br/><br/>")
+
+    content += ("<ac:structured-macro ac:name=\\\"iframe\\\" ac:schema-version=\\\"1\\\" ac:macro-id=\\\"1c30019c-dd2a-4c4c-bfa9-387ce00e1d4d\\\"><ac:parameter ac:name=\\\"src\\\"><ri:url ri:value=\\\"http://dashboard.fulcrum.net/" + vm_id + "\\\" /></ac:parameter><ac:parameter ac:name=\\\"width\\\">850</ac:parameter><ac:parameter ac:name=\\\"height\\\">535</ac:parameter><ac:rich-text-body><p>&nbsp;</p></ac:rich-text-body></ac:structured-macro>")
+
     content += ("</p>")
 
     feedback, json_info = write_page.create("" + vm_hostname + " - " + vm_name + " - [" + parent_name + "]",
