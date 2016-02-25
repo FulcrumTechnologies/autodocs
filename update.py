@@ -12,8 +12,10 @@ import os
 import remove_page
 import update_check
 import update_india
+import update_init
 import update_store
 import update_write
+import skytap
 import sys
 
 
@@ -22,13 +24,13 @@ def reset(envs):
 
     json_dir = "JSONS/"
     for i in envs:
-        if os.path.isfile(json_dir + i["id"] + ".json"):
-            print ("Resetting environment " + i["name"] + " ... ID: " + i["id"])
-            remove_page.start(i["id"])
-            create_page.start(i["id"])
+        if os.path.isfile(json_dir + str(i.id) + ".json"):
+            print ("Resetting environment " + i.name + " ... ID: " + str(i.id))
+            remove_page.start(str(i.id))
+            create_page.start(str(i.id))
 
 
-def purge():
+def purge(envs):
     """Purge pages from wiki that no longer have a correlating environment."""
     json_dir = "JSONS/"
     count = 0
@@ -54,49 +56,31 @@ def purge():
         count += 1
         print ("" + str(count) + ": Trying " + env_data[0]["name"] + " with ID " + env_data[0]["id"])
 
-        try:
-            # [:-5] removes ".json" giving us the Skytap ID
-            status, output = commands.getstatusoutput("python /opt/skynet/skyne"
-                                                      "t.py -a vms -e " + f[:-5])
-            data = json.loads(output)
-        except ValueError:
+        if f[:-5] not in envs:
             print ("Removing page.")
             remove_page.start(env_data[0]["id"])
-
-
-def get_json(skynet_arg):
-    """Return json of output from a Skynet call."""
-
-    if skynet_arg == "env_full":
-        status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
-                                                  " -a env_full")
-
-        envs = json.loads(output)
-        return envs
 
 
 def start(args):
     """Start the update function."""
 
+    envs = skytap.Environments()
+
     if (args[1] == "write"):
         os.system("clear")
         print ("Writing wiki pages.")
-        envs = get_json("env_full")
         update_write.start(envs)
     elif (args[1] == "check"):
         os.system("clear")
         print ("Updating existing wiki pages.")
-        envs = get_json("env_full")
         update_check.start(envs)
     elif (args[1] == "store"):
         os.system("clear")
         print ("Storing updated information from wiki pages.")
-        envs = get_json("env_full")
         update_store.start(envs)
     elif (args[1] == "reset"):
         os.system("clear")
         print ("Resetting all wiki pages.")
-        envs = get_json("env_full")
         reset(envs)
     elif (args[1] == "india"):
         os.system("clear")
@@ -105,7 +89,11 @@ def start(args):
     elif (args[1] == "purge"):
         os.system("clear")
         print ("Purging wiki pages that no longer have an environment.")
-        purge()
+        purge(envs)
+    elif (args[1] == "init"):
+        os.system("clear")
+        print ("Initializing AutoDocs pages.")
+        update_init.start()
     else:
         print ("Command not recognized.")
 

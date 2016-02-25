@@ -22,19 +22,19 @@ def start(envs):
 
     # Count up total so we have completetion dialogue (1/95, 2/95, etc.)
     for i in envs:
-        if len(i["error"]) is 0:
-            if str(i["id"]) not in id_list:
+        if len(i.error) is 0:
+            if str(i.id) not in id_list:
                 env_count += 1
 
     # Writing environments that are currently not in allSkytapIDs.txt
     for i in envs:
         env_all += 1
-        if len(i["error"]) is 0:
-            if str(i["id"]) not in id_list:
+        if len(i.error) is 0:
+            if str(i.id) not in id_list:
                 env_tried += 1
                 print ("(" + str(env_tried) + "/" + str(env_count) + ") Found new"
-                       " environment. Name: " + i["name"] + " ... ID: " + i["id"])
-                feedback = create_page.start(i["id"])
+                       " environment. Name: " + i.name + " ... ID: " + str(i.id))
+                feedback = create_page.start(i.id, envs)
                 if feedback != 0:
                     env_written += 1
 

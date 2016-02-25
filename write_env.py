@@ -50,10 +50,10 @@ def create(data, parent_id):
     undef = "Unavailable"
     undef_err = "Unavailable: data missing"
 
-    env_id = data["id"]
-    env_name = clean_string(data["name"])
+    env_id = str(data.id)
+    env_name = clean_string(data.name)
 
-    config_url = data["url"]
+    config_url = data.url
     dash_url = "http://dashboard.fulcrum.net/" + env_id
     puppet_enabled = undef
     admin_access = undef
@@ -130,10 +130,10 @@ def create(data, parent_id):
     has_app1 = ""
 
     # Loop through every VM and affix xhtml to vm_content.
-    for i in data["vms"]:
-        vm_name = i["name"]
-        vm_hostname = i["interfaces"][0]["hostname"]
-        vm_id = i["id"]
+    for i in data.vms:
+        vm_name = i.name
+        vm_hostname = i.interfaces[0].hostname
+        vm_id = str(i.id)
         vm_user = undef
         vm_pass = undef
         ssh_enabled = undef
@@ -145,14 +145,14 @@ def create(data, parent_id):
         # Allocate correct IP addresses for US and India.
         try:
             # US = US, SG = India
-            for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-                if (k["vpn_id"] == "vpn-3631944" or
-                        k["vpn_id"] == "vpn-661182"):
-                    vm_ip_us = k["ip_address"]
-                elif k["vpn_id"] == "vpn-3288770":
-                    vm_ip_india = k["ip_address"]
+            for k in i.interfaces[0].nat_addresses.vpn_nat_addresses:
+                if (k.vpn_id == "vpn-3631944" or
+                        k.vpn_id == "vpn-661182"):
+                    vm_ip_us = k.ip_address
+                elif k.vpn_id == "vpn-3288770":
+                    vm_ip_india = k.ip_address
         except (KeyError, IndexError):
-            vm_ip_us = i["interfaces"][0]["ip"]
+            vm_ip_us = i.interfaces[0].ip
 
         base_url_us = url + vm_ip_us
         base_url_india = url + vm_ip_india
@@ -160,12 +160,12 @@ def create(data, parent_id):
         services = []
 
         # Create data in JSON for individual service information.
-        for j in i["interfaces"][0]["services"]:
+        for j in i.interfaces[0].services:
             new_service = {}
             new_service["internal_ip"] = vm_ip_us
-            new_service["internal_port"] = str(j["internal_port"])
-            new_service["external_ip"] = j["external_ip"]
-            new_service["external_port"] = str(j["external_port"])
+            new_service["internal_port"] = str(j.internal_port)
+            new_service["external_ip"] = j.external_ip
+            new_service["external_port"] = str(j.external_port)
             services.append(new_service)
 
         new_vm = {}
@@ -195,10 +195,10 @@ def create(data, parent_id):
                 pub_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
 
         # Writing public IP information
-        if i["interfaces"][0]["public_ips_count"] > 0:
+        if i.interfaces[0].public_ips_count > 0:
             pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
-            for k in i["interfaces"][0]["public_ips"]:
-                addr = k["address"]
+            for k in i.interfaces[0].public_ips:
+                addr = k.address
                 pub_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
                 pub_content += ("<ac:parameter ac:name=\\\"title\\\">")
                 pub_content += ("https://" + addr + "/cats/")

@@ -13,9 +13,11 @@ import commands
 import json
 import write_env
 import write_vms
+import skytap
 import sys
 
-def start(id):
+
+def start(id, envs):
     """Start creation of page."""
 
     try:
@@ -44,13 +46,10 @@ def start(id):
 
     # ------------- Take argv[1] ("env" or "vm") and argv[2] (ID) -------------
 
-    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
-                                              " -a vms -e " + str(id))
+    env_details = envs[id]
 
-    env_details = json.loads(output)
-
-    print ("Creating page for " + env_details["name"] + " ... ID: " + ""
-           "" + env_details["id"])
+    print ("Creating page for " + env_details.name + " ... ID: " + ""
+           "" + str(env_details.id))
     env_page_id, parent_name = write_env.create(env_details, wiki_parent)
 
     if env_page_id != 0:

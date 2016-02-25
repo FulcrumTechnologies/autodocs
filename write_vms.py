@@ -10,19 +10,19 @@ import json
 import write_page
 
 
-def create_one(i, parent_id, parent_name):
+def create_one(env_details, parent_id, parent_name):
     """Just make one vm page; primarily called by create(), seen below."""
 
-    print (i["name"] + ": Writing content..."),
+    print (env_details.name + ": Writing content..."),
 
     # Making a json containing important information. This will be stored in
     # a file in JSONS directory and used to perform various functions
     # related to Wiki Keeper.
     json_info = {}
 
-    vm_name = i["name"]
-    vm_hostname = i["interfaces"][0]["hostname"]
-    vm_id = i["id"]
+    vm_name = env_details.name
+    vm_hostname = env_details.interfaces[0].hostname
+    vm_id = env_details.id
 
     json_info["vm_name"] = vm_name
     json_info["vm_hostname"] = vm_hostname
@@ -34,38 +34,38 @@ def create_one(i, parent_id, parent_name):
     content += ("ID: " + vm_id + "<br/><br/>")
     json_info["id"] = vm_id
 
-    content += ("Configuration URL: " + i["configuration_url"] + "<br/>")
-    json_info["config_url"] = i["configuration_url"]
+    content += ("Configuration URL: " + env_details.configuration_url + "<br/>")
+    json_info["config_url"] = env_details.configuration_url
 
     json_info["nat_ip_us"] = ""
     json_info["nat_ip_india"] = ""
 
     try:
         content += ("<br/>")
-        for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-            if (k["vpn_id"] == "vpn-3631944" or
-                    k["vpn_id"] == "vpn-661182"):
-                content += ("NAT IP (US): " + k["ip_address"] + "<br/>")
-                json_info["nat_ip_us"] = k["ip_address"]
-            elif k["vpn_id"] == "vpn-3288770":
-                content += ("NAT IP (India): " + k["ip_address"] + "<br/>")
-                json_info["nat_ip_india"] = k["ip_address"]
+        for k in env_details.interfaces[0].nat_addresses.vpn_nat_addresses:
+            if (k.vpn_id == "vpn-3631944" or
+                    k.vpn_id == "vpn-661182"):
+                content += ("NAT IP (US): " + k.ip_address + "<br/>")
+                json_info["nat_ip_us"] = k.ip_address
+            elif k.vpn_id == "vpn-3288770":
+                content += ("NAT IP (India): " + k.ip_address + "<br/>")
+                json_info["nat_ip_india"] = k.ip_address
     except (KeyError, IndexError):
-        content += ("NAT IP (US): " + i["interfaces"][0]["ip"] + "<br/>")
-        json_info["nat_ip_us"] = i["interfaces"][0]["ip"]
+        content += ("NAT IP (US): " + env_details.interfaces[0].ip + "<br/>")
+        json_info["nat_ip_us"] = env_details.interfaces[0].ip
         json_info["nat_ip_india"] = ""
 
     json_info["vpn_id_us"] = ""
     json_info["vpn_id_india"] = ""
 
     try:
-        for k in i["interfaces"][0]["nat_addresses"]["vpn_nat_addresses"]:
-            if k["vpn_name"].startswith("ASAOPS"):
-                content += ("VPN ID (US): " + k["vpn_id"] + "<br/>")
-                json_info["vpn_id_us"] = k["vpn_id"]
+        for k in env_details.interfaces[0]nat_addresses.vpn_nat_addresses:
+            if k.vpn_name.startswith("ASAOPS"):
+                content += ("VPN ID (US): " + k.vpn_id + "<br/>")
+                json_info["vpn_id_us"] = k.vpn_id
             elif k["vpn_name"].startswith("ASASG"):
-                content += ("VPN ID (India): " + k["vpn_id"] + "<br/>")
-                json_info["vpn_id_india"] = k["vpn_id"]
+                content += ("VPN ID (India): " + k.vpn_id + "<br/>")
+                json_info["vpn_id_india"] = k.vpn_id
     except (KeyError, IndexError):
         # Can't find "nat_addresses"
         pass
@@ -73,25 +73,25 @@ def create_one(i, parent_id, parent_name):
         content += ("<br/>")
 
     try:
-        content += ("External IP: " + i["interfaces"][0]["services"][0]["external_ip"] + "<br/>")
-        json_info["external_ip"] = i["interfaces"][0]["services"][0]["external_ip"]
+        content += ("External IP: " + env_details.interfaces[0].services[0].external_ip + "<br/>")
+        json_info["external_ip"] = env_details.interfaces[0].services[0].external_ip
     except IndexError:
         pass
 
     try:
-        content += ("External port: " + str(i["interfaces"][0]["services"][0]["external_port"]) + "<br/>")
-        json_info["external_port"] = str(i["interfaces"][0]["services"][0]["external_port"])
+        content += ("External port: " + str(env_details.interfaces[0].services[0].external_port) + "<br/>")
+        json_info["external_port"] = str(env_details.interfaces[0].services[0].external_port)
     except IndexError:
         pass
 
     try:
-        content += ("Internal port: " + str(i["interfaces"][0]["services"][0]["internal_port"]) + "<br/><br/>")
-        json_info["internal_port"] = str(i["interfaces"][0]["services"][0]["internal_port"])
+        content += ("Internal port: " + str(env_details.interfaces[0].services[0].internal_port) + "<br/><br/>")
+        json_info["internal_port"] = str(env_details.interfaces[0].services[0].internal_port)
     except IndexError:
         pass
 
-    content += ("Local IP: " + i["interfaces"][0]["ip"] + "<br/>")
-    json_info["local_ip"] = i["interfaces"][0]["ip"]
+    content += ("Local IP: " + env_details.interfaces[0].ip + "<br/>")
+    json_info["local_ip"] = env_details.interfaces[0].ip
 
     content += ("<br/><br/>")
 
