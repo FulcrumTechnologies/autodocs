@@ -10,7 +10,7 @@ import os
 import remove_page
 
 
-def content_unchanged(content):
+def content_unchanged(content, config_data):
     """Returns true if the content is no different than the last page's."""
 
     username = config_data["wiki_user"]
