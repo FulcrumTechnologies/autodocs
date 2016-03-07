@@ -67,6 +67,9 @@ def create(data, parent_id):
         port_services = 8004
         port_mob = 8002
         mob_end = "cats"
+
+        # TEMPORARY: VZW ENVIRONMENTS ARE CURRENTLY NOT BEING WRITTEN
+        return 0, env_name
     else:
         url = "https://"
         port_home = 8443
@@ -380,4 +383,3 @@ def create(data, parent_id):
             json.dump(json_info, file)
 
     return feedback, env_name
-
