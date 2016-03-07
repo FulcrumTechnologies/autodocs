@@ -13,13 +13,16 @@ import remove_page
 def content_unchanged(content):
     """Returns true if the content is no different than the last page's."""
 
+    username = config_data["wiki_user"]
+    password = config_data["wiki_pass"]
+
     json_data = []
 
     with open("other/india.json") as f:
         for line in f:
             json_data.append(json.loads(line))
 
-    cmd = ("curl -u chawkins:rufus77 https://fulcrumtech.atlassian.net/wiki/rest/api/content/" + json_data[0]["page_id"] + "?expand=body.storage > /tmp/temp.json")
+    cmd = ("curl -u " + username + ":" + password + " https://fulcrumtech.atlassian.net/wiki/rest/api/content/" + json_data[0]["page_id"] + "?expand=body.storage > /tmp/temp.json")
 
     status, output = commands.getstatusoutput(cmd)
 
@@ -49,27 +52,9 @@ def write(names, ids, page_ids, content):
     return new_content
 
 
-def make_page(content):
+def make_page(content, config_data):
     """Call the Confluence Wiki API to delete the old page and create new."""
     print ("Writing page.")
-
-    try:
-        import yaml
-    except ImportError:
-        sys.stderr.write("You do not have the 'yaml' module installed. "
-                         "Please see http://pyyaml.org/wiki/PyYAMLDocumentation"
-                         " for more information.")
-        exit(1)
-
-    try:
-        f = open("config.yml")
-        config_data = yaml.safe_load(f)
-        f.close()
-    except IOError:
-        sys.stderr.write("There is no config.yml in the directory. Create one "
-                         "and then try again.\nFor reference, check config_"
-                         "template.yml and follow the listed guidelines.\n")
-        exit(1)
 
     location = config_data["wiki_url"]
     username = config_data["wiki_user"]
@@ -122,6 +107,24 @@ def make_page(content):
 
 def start():
     """Starting point for update_india.py."""
+
+    try:
+        import yaml
+    except ImportError:
+        sys.stderr.write("You do not have the 'yaml' module installed. "
+                         "Please see http://pyyaml.org/wiki/PyYAMLDocumentation"
+                         " for more information.")
+        exit(1)
+
+    try:
+        f = open("config.yml")
+        config_data = yaml.safe_load(f)
+        f.close()
+    except IOError:
+        sys.stderr.write("There is no config.yml in the directory. Create one "
+                         "and then try again.\nFor reference, check config_"
+                         "template.yml and follow the listed guidelines.\n")
+        exit(1)
 
     names = []
     ids = []
@@ -190,9 +193,8 @@ def start():
         content += write(usw_names, usw_ids, usw_page_ids, content)
 
     # Did anything change? If not, don't update page.
-    if content_unchanged(content):
+    if content_unchanged(content, config_data):
         print ("Nothing has changed; aborting update.")
         return
 
-    make_page(content)
-
+    make_page(content, config_data)
