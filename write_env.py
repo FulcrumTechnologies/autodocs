@@ -67,9 +67,6 @@ def create(data, parent_id):
         port_services = 8004
         port_mob = 8002
         mob_end = "cats"
-
-        # TEMPORARY: VZW ENVIRONMENTS ARE CURRENTLY NOT BEING WRITTEN
-        return 0, env_name
     else:
         url = "https://"
         port_home = 8443
@@ -108,7 +105,6 @@ def create(data, parent_id):
         mob_ver = stored[0]["mob_ver"]
         apk_build = stored[0]["apk_build"]
         war_build = stored[0]["war_build"]
-
     else:
         comment = ("[Add any miscellaneous notes here. This box, along with "
                    "information entered into fields denoted by an asterisk *, "
@@ -373,6 +369,12 @@ def create(data, parent_id):
     content += ("</ac:layout>")
 
     content = clean_string(content)
+
+    if env_name.startswith("VZW"):
+        content = ("Auto documentation for this, and all Verizon environments, "
+                   "has been suspended due to security concerns until further "
+                   "notice.<br/><br/>Please go to this environment on Skytap to"
+                   " access information on this environment.")
 
     # -------------------------------------------------------------------------
 
