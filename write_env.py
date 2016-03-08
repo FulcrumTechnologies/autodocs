@@ -69,7 +69,7 @@ def create(data, parent_id):
         mob_end = "cats"
 
         # TEMPORARY: VZW ENVIRONMENTS ARE CURRENTLY NOT BEING WRITTEN
-        # return 0, env_name
+        return 0, env_name
     else:
         url = "https://"
         port_home = 8443
