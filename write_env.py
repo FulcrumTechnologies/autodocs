@@ -370,6 +370,7 @@ def create(data, parent_id):
 
     content = clean_string(content)
 
+    # Temporary!
     if env_name.startswith("VZW"):
         content = ("Auto documentation for this, and all Verizon environments, "
                    "has been suspended due to security concerns until further "
@@ -383,5 +384,9 @@ def create(data, parent_id):
     if feedback != 0:
         with open("JSONS/" + env_id + ".json", "w") as file:
             json.dump(json_info, file)
+
+    # Temporary!
+    if env_name.startswith("VZW"):
+        feedback = 0
 
     return feedback, env_name
