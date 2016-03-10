@@ -1,14 +1,13 @@
 # Save this as config.yml when you're done.
 
-gateway:
+gateway:        192.168.1.254
 
-wiki_url:       # https://[confluence org name].atlassian.net/wiki/rest/api/content/
-wiki_user:      # Your username
-wiki_pass:      # Your password
-wiki_space:     # Space key, found in URL when in space
-wiki_parent:    # This is the "parent" page ID where all pages will be written
+wiki_url:       https://fulcrumtech.atlassian.net/wiki/rest/api/content/
+wiki_user:      confluencebot
+wiki_pass:      wBrsHddX\;gWJit7p%PM3n9Mm
+wiki_space:     AutoDocs
+wiki_parent:    67469619
 
-skytap_url:     # https://cloud.skytap.com
-skytap_user:    # Email address associated with your Skytap account
-skytap_token:   # Generate this in your Skytap account
-
+skytap_url:     https://cloud.skytap.com
+skytap_user:    chawkins@fulcrum.net
+skytap_token:   25ae66d4ef9e5af05f402f1412a530f7fb7587b6

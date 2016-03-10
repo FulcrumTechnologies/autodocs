@@ -23,11 +23,11 @@ def reset(envs):
     """Reset every page in the wiki; utilized to update template."""
 
     json_dir = "JSONS/"
-    for i in envs:
-        if os.path.isfile(json_dir + str(i.id) + ".json"):
-            print ("Resetting environment " + i.name + " ... ID: " + str(i.id))
-            remove_page.start(str(i.id))
-            create_page.start(str(i.id))
+    for e in envs:
+        if os.path.isfile(json_dir + str(e.id) + ".json"):
+            print ("Resetting environment " + e.name + " ... ID: " + str(e.id))
+            remove_page.start(str(e.id))
+            create_page.start(str(e.id))
 
 
 def purge(envs):
@@ -77,7 +77,9 @@ def start(args):
     elif (args[1] == "store"):
         os.system("clear")
         print ("Storing updated information from wiki pages.")
-        update_store.start(envs)
+        print ("Access denied. Which is just a fancy way of saying \"this is "
+               "broken right now.\"")
+        #update_store.start(envs)
     elif (args[1] == "reset"):
         os.system("clear")
         print ("Resetting all wiki pages.")
@@ -90,10 +92,6 @@ def start(args):
         os.system("clear")
         print ("Purging wiki pages that no longer have an environment.")
         purge(envs)
-    elif (args[1] == "init"):
-        os.system("clear")
-        print ("Initializing AutoDocs pages.")
-        update_init.start()
     else:
         print ("Command not recognized.")
 
@@ -102,4 +100,3 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
-

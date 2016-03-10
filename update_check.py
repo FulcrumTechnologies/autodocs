@@ -26,35 +26,34 @@ def start(envs):
 
     count = 0
 
-    for i in envs:
+    for e in envs:
         count += 1
 
         print ("\n----------------------------------------\n")
-        print ("Environment " + str(count) + ": " + i.name + " ... ID: " + str(i.id))
+        print ("Environment " + str(count) + ": " + e.name + " ... ID: " + str(e.id))
 
         # Get JSON matching environment ID
-        if os.path.isfile(json_dir + str(i.id) + ".json"):
+        if os.path.isfile(json_dir + str(e.id) + ".json"):
             changes_made = False
             print ("Collecting environment data..."),
             data = []
 
             # Make a JSON out of file info
-            with open(json_dir + str(i.id) + ".json") as f:
+            with open(json_dir + str(e.id) + ".json") as f:
                 for line in f:
                     data.append(json.loads(line))
 
             # cur_data is the up-to-date list of vms in environment
-            cur_data = envs[i.id]
 
             print ("checking for changes..."),
             # NOTE: this list of things to compare is incomplete. Refer to JSON
             # of environments in /JSONS to get full list of elements to compare.
-            if (data[0]["config_url"] != cur_data.url or
-                    data[0]["id"] != str(cur_data.id) or
-                    data[0]["name"] != clean_string(cur_data.name)):
-                    print ("" + data[0]["config_url"] + " - " + cur_data.url)
-                    print ("" + data[0]["id"] + " - " + str(cur_data.id))
-                    print ("" + data[0]["name"] + " - " + cur_data.name)
+            if (data[0]["config_url"] != e.url or
+                    data[0]["id"] != str(e.id) or
+                    data[0]["name"] != clean_string(e.name)):
+                    print ("" + data[0]["config_url"] + " - " + e.url)
+                    print ("" + data[0]["id"] + " - " + str(e.id))
+                    print ("" + data[0]["name"] + " - " + e.name)
                     # Environment data has been changed; update.
                     print ("changes found.")
                     print ("Update: environment data has been altered.")
@@ -77,59 +76,63 @@ def start(envs):
             vm_count = 0
 
             # Check all of the environment's vms.
-            for j in cur_data.vms:
+            for v in e.vms:
                 # Has this environment already been rewritten? Skip rest of VMs.
                 if changes_made:
                     continue
 
                 # Remove from listed_vms if this vm still exists.
-                if str(j.id) in listed_vms:
-                    listed_vms.remove(str(j.id))
+                if str(v.id) in listed_vms:
+                    listed_vms.remove(str(v.id))
 
                 vm_count += 1
 
                 # JSON of current VM data is assigned to vm_data.
-                print ("\nVM " + str(vm_count) + ": " + j.name + " ... ID: " + str(j.id))
-                if os.path.isfile(json_dir + str(j.id) + ".json"):
+                print ("\nVM " + str(vm_count) + ": " + v.name + " ... ID: " + str(v.id))
+                if os.path.isfile(json_dir + str(v.id) + ".json"):
                     print ("Collecting VM data..."),
                     vm_data = []
 
                     try:
                         # Make a JSON of VM file info
-                        with open(json_dir + str(j.id) + ".json") as f:
+                        with open(json_dir + str(v.id) + ".json") as f:
                             for line in f:
                                 vm_data.append(json.loads(line))
 
                         # The field where the correct IP can be found varies.
                         tmp_ip_us = ""
                         tmp_ip_india = ""
-                        try:
-                            # The usual place.
-                            for k in j.interfaces[0].nat_addresses.vpn_nat_addresses:
-                                if (k.vpn_id == "vpn-3631944" or
-                                        k.vpn_id == "vpn-661182"):
-                                    tmp_ip_us = k.ip_address
-                                elif k.vpn_id == "vpn-3288770":
-                                    tmp_ip_india = k.ip_address
-                        except (KeyError, IndexError):
-                            # Otherwise, get it here.
-                            tmp_ip_us = j.interfaces[0].ip
+                        # try:
+                        #     # The usual place.
+                        #     for k in j.interfaces[0].nat_addresses.vpn_nat_addresses:
+                        #         if (k.vpn_id == "vpn-3631944" or
+                        #                 k.vpn_id == "vpn-661182"):
+                        #             tmp_ip_us = k.ip_address
+                        #         elif k.vpn_id == "vpn-3288770":
+                        #             tmp_ip_india = k.ip_address
+                        # except (KeyError, IndexError):
+                        #     # Otherwise, get it here.
+                        #     tmp_ip_us = j.interfaces[0].ip
+
+                        for i in v.interfaces:
+                            tmp_ip_us = i.ip
+                            tmp_hostname = i.hostname
 
                         # NOTE: these statements will decide if the VM is
                         # up-to-date, or if it is old.
                         print ("checking for changes..."),
-                        if (vm_data[0]["id"] != str(j.id) or
+                        if (vm_data[0]["id"] != str(v.id) or
                                 vm_data[0]["nat_ip_us"] != tmp_ip_us or
                                 vm_data[0]["nat_ip_india"] != tmp_ip_india or
-                                vm_data[0]["vm_name"] != j.name or
-                                vm_data[0]["config_url"] != j.configuration_url or
-                                vm_data[0]["vm_hostname"] != j.interfaces[0].hostname):
-                                print ("" + vm_data[0]["id"] + " - " + str(j.id))
+                                vm_data[0]["vm_name"] != v.name or
+                                vm_data[0]["config_url"] != v.configuration_url or
+                                vm_data[0]["vm_hostname"] != tmp_hostname):
+                                print ("" + vm_data[0]["id"] + " - " + str(v.id))
                                 print ("" + vm_data[0]["nat_ip_us"] + " - " + tmp_ip_us)
                                 print ("" + vm_data[0]["nat_ip_india"] + " - " + tmp_ip_india)
-                                print ("" + vm_data[0]["vm_name"] + " - " + j.name)
-                                print ("" + vm_data[0]["config_url"] + " - " + j.configuration_url)
-                                print ("" + vm_data[0]["vm_hostname"] + " - " + j.interfaces[0].hostname)
+                                print ("" + vm_data[0]["vm_name"] + " - " + v.name)
+                                print ("" + vm_data[0]["config_url"] + " - " + v.configuration_url)
+                                print ("" + vm_data[0]["vm_hostname"] + " - " + tmp_hostname)
                                 # Vm data has been changed; update.
                                 print ("changes found.")
                                 print ("Update: VM data has been altered.")
@@ -170,4 +173,3 @@ def start(envs):
         else:
             print ("There\'s an environment missing here. Run \"python update"
                    ".py write\" to write it.")
-

@@ -114,4 +114,3 @@ def create(data, parent_id, parent_name):
 
     for i in data["vms"]:
         create_one(i, parent_id, parent_name)
-

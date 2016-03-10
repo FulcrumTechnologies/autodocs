@@ -14,20 +14,6 @@ import urlparse
 import write_page
 
 
-def check_url(url):
-    """Check if given URL directs to existing page. Return true if so."""
-    # Return true for now, until a better method can be concocted.
-    # Current method works but takes up to 60 seconds before timing out and
-    # returning False.
-    return True
-
-    p = urlparse(url)
-    conn = httplib.HTTPConnection(p.netloc)
-    conn.request('HEAD', p.path)
-    resp = conn.getresponse()
-    return resp.status < 400
-
-
 def clean_string(str):
     """Clean up lone apostrophes and quotations in string."""
     str = str.replace("\'", "")
@@ -37,7 +23,7 @@ def clean_string(str):
     return str
 
 
-def create(data, parent_id):
+def create(e, parent_id):
     """Create environment wiki page."""
 
     print ("Writing content..."),
@@ -46,14 +32,16 @@ def create(data, parent_id):
     # file in JSONS directory and used to perform various functions.
     json_info = {}
 
+    storage_dir = "storage/"
+
     # Placeholder variables.
     undef = "Unavailable"
     undef_err = "Unavailable: data missing"
 
-    env_id = str(data.id)
-    env_name = clean_string(data.name)
+    env_id = str(e.id)
+    env_name = clean_string(e.name)
 
-    config_url = data.url
+    config_url = e.url
     dash_url = "http://dashboard.fulcrum.net/" + env_id
     puppet_enabled = undef
     admin_access = undef
@@ -88,8 +76,6 @@ def create(data, parent_id):
     new_db = {}
     db_exists = False
     db_id = undef
-
-    storage_dir = "storage/"
 
     # If there is data in storage, use that instead of default info.
     if os.path.isfile(storage_dir + env_id + ".json"):
@@ -130,9 +116,12 @@ def create(data, parent_id):
     has_app1 = ""
 
     # Loop through every VM and affix xhtml to vm_content.
-    for i in data.vms:
-        vm_name = i.name
-        vm_hostname = i.interfaces[0].hostname
+    for v in e.vms:
+        vm_name = v.name
+
+        for i in v.interfaces:
+            vm_hostname = i.hostname
+
         vm_id = str(i.id)
         vm_user = undef
         vm_pass = undef
@@ -143,16 +132,17 @@ def create(data, parent_id):
         vm_ip_india = ""
 
         # Allocate correct IP addresses for US and India.
-        try:
-            # US = US, SG = India
-            for k in i.interfaces[0].nat_addresses.vpn_nat_addresses:
-                if (k.vpn_id == "vpn-3631944" or
-                        k.vpn_id == "vpn-661182"):
-                    vm_ip_us = k.ip_address
-                elif k.vpn_id == "vpn-3288770":
-                    vm_ip_india = k.ip_address
-        except (KeyError, IndexError):
-            vm_ip_us = i.interfaces[0].ip
+        # try:
+        #     # US = US, SG = India
+        #     for k in i.interfaces[0].nat_addresses.vpn_nat_addresses:
+        #         if (k.vpn_id == "vpn-3631944" or
+        #                 k.vpn_id == "vpn-661182"):
+        #             vm_ip_us = k.ip_address
+        #         elif k.vpn_id == "vpn-3288770":
+        #             vm_ip_india = k.ip_address
+        # except (KeyError, IndexError):
+        for i in v.interfaces:
+            vm_ip_us = i.ip
 
         base_url_us = url + vm_ip_us
         base_url_india = url + vm_ip_india
@@ -160,13 +150,14 @@ def create(data, parent_id):
         services = []
 
         # Create data in JSON for individual service information.
-        for j in i.interfaces[0].services:
-            new_service = {}
-            new_service["internal_ip"] = vm_ip_us
-            new_service["internal_port"] = str(j.internal_port)
-            new_service["external_ip"] = j.external_ip
-            new_service["external_port"] = str(j.external_port)
-            services.append(new_service)
+        for i in v.interfaces:
+            for s in i.services:
+                new_service = {}
+                new_service["internal_ip"] = vm_ip_us
+                new_service["internal_port"] = str(j.internal_port)
+                new_service["external_ip"] = j.external_ip
+                new_service["external_port"] = str(j.external_port)
+                services.append(new_service)
 
         new_vm = {}
         new_vm["vm_name"] = vm_name
@@ -186,32 +177,32 @@ def create(data, parent_id):
         # VM blocks.
         pub_content = ""
 
-        # Writing service information
-        serv_count = 0
-        if len(services) != 0:
-            pub_content += ("<p><strong> - Published Services:</strong></p>")
-            for j in services:
-                serv_count += 1
-                pub_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
-
-        # Writing public IP information
-        if i.interfaces[0].public_ips_count > 0:
-            pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
-            for k in i.interfaces[0].public_ips:
-                addr = k.address
-                pub_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
-                pub_content += ("<ac:parameter ac:name=\\\"title\\\">")
-                pub_content += ("https://" + addr + "/cats/")
-                pub_content += ("</ac:parameter>")
-                pub_content += ("<ac:rich-text-body>")
-
-                pub_content += ("<p>Direct link: <a href=\\\"https://" + addr + "/cats/\\\">https://" + addr + "/cats/</a></p>")
-
-                qrc = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\\\" />")
-
-                pub_content += ("<p>" + qrc + "</p>")
-
-                pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
+        # # Writing service information
+        # serv_count = 0
+        # if len(services) != 0:
+        #     pub_content += ("<p><strong> - Published Services:</strong></p>")
+        #     for j in services:
+        #         serv_count += 1
+        #         pub_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + j["internal_port"] + " mapped to " + j["external_ip"] + ":" + j["external_port"] + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+        #
+        # # Writing public IP information
+        # if i.interfaces[0].public_ips_count > 0:
+        #     pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
+        #     for k in i.interfaces[0].public_ips:
+        #         addr = k.address
+        #         pub_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
+        #         pub_content += ("<ac:parameter ac:name=\\\"title\\\">")
+        #         pub_content += ("https://" + addr + "/cats/")
+        #         pub_content += ("</ac:parameter>")
+        #         pub_content += ("<ac:rich-text-body>")
+        #
+        #         pub_content += ("<p>Direct link: <a href=\\\"https://" + addr + "/cats/\\\">https://" + addr + "/cats/</a></p>")
+        #
+        #         qrc = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\\\" />")
+        #
+        #         pub_content += ("<p>" + qrc + "</p>")
+        #
+        #         pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
 
         # This will hold main content for each VM block
         vm_info = []
@@ -380,4 +371,3 @@ def create(data, parent_id):
             json.dump(json_info, file)
 
     return feedback, env_name
-

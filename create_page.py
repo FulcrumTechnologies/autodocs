@@ -17,7 +17,7 @@ import skytap
 import sys
 
 
-def start(id, envs):
+def start(e):
     """Start creation of page."""
 
     try:
@@ -46,18 +46,11 @@ def start(id, envs):
 
     # ------------- Take argv[1] ("env" or "vm") and argv[2] (ID) -------------
 
-    env_details = envs[id]
-
-    print ("Creating page for " + env_details.name + " ... ID: " + ""
-           "" + str(env_details.id))
-    env_page_id, parent_name = write_env.create(env_details, wiki_parent)
+    print ("Creating page for " + e.name + " ... ID: " + ""
+           "" + str(e.id))
+    env_page_id, parent_name = write_env.create(e, wiki_parent)
 
     if env_page_id != 0:
-        write_vms.create(env_details, env_page_id, parent_name)
+        write_vms.create(e, env_page_id, parent_name)
 
     return env_page_id
-
-
-if __name__ == '__main__':
-    start(sys.argv[1])
-

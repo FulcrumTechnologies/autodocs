@@ -98,4 +98,3 @@ def create(page_name, parent_id, page_content, json_info):
     open("temp.json", 'w').close()
 
     return data["id"], json_info
-
