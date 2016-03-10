@@ -12,7 +12,6 @@ import os
 import remove_page
 import update_check
 import update_india
-import update_init
 import update_store
 import update_write
 import skytap

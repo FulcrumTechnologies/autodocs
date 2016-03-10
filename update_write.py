@@ -17,12 +17,15 @@ def start(envs):
     env_tried = 0
     env_written = 0
 
-    with open("allSkytapIDs.txt", "r") as f:
-        id_list = [line.strip() for line in f]
+    try:
+    	with open("allSkytapIDs.txt", "r") as f:
+            id_list = [line.strip() for line in f]
+    except IOError:
+        id_list = []
 
     # Count up total so we have completetion dialogue (1/95, 2/95, etc.)
     for e in envs:
-        if len(e.error) is 0:
+        if len(e.errors) is 0:
             if str(e.id) not in id_list:
                 env_count += 1
 
