@@ -13,7 +13,6 @@ import commands
 import json
 import write_env
 import write_vms
-import skytap
 import sys
 
 
