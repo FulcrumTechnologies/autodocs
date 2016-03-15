@@ -30,7 +30,7 @@ def start(envs):
     for i in envs:
         env_all += 1
         if len(i["error"]) is 0:
-            if str(i["id"]) not in id_list:
+            if i["id"] not in id_list:
                 env_tried += 1
                 print ("(" + str(env_tried) + "/" + str(env_count) + ") Found new"
                        " environment. Name: " + i["name"] + " ... ID: " + i["id"])

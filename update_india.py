@@ -138,7 +138,8 @@ def start():
     usw_names, usw_ids, usw_page_ids = [], [], []
 
     # Collecting data for APAC environments
-    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+    status, output = commands.getstatusoutput("python -W ignore::DeprecationWarning"
+                                              " /opt/skynet/skynet.py"
                                               " -a vpn -e vpn-3288770")
     vpn = json.loads(output)
 
@@ -157,7 +158,8 @@ def start():
         apac_page_ids.append(data["page_id"])
 
     # Collecting data for USW environments
-    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+    status, output = commands.getstatusoutput("python -W ignore::DeprecationWarning"
+                                              " /opt/skynet/skynet.py"
                                               " -a vpn -e vpn-3631944")
     vpn = json.loads(output)
 

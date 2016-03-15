@@ -44,7 +44,8 @@ def start(id):
 
     # ------------- Take argv[1] ("env" or "vm") and argv[2] (ID) -------------
 
-    status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+    status, output = commands.getstatusoutput("python -W ignore::DeprecationWarning"
+                                              " /opt/skynet/skynet.py"
                                               " -a vms -e " + str(id))
 
     env_details = json.loads(output)

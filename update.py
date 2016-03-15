@@ -56,7 +56,8 @@ def purge():
 
         try:
             # [:-5] removes ".json" giving us the Skytap ID
-            status, output = commands.getstatusoutput("python /opt/skynet/skyne"
+            status, output = commands.getstatusoutput("python -W ignore::DeprecationWarning"
+                                                      " /opt/skynet/skyne"
                                                       "t.py -a vms -e " + f[:-5])
             data = json.loads(output)
         except ValueError:
@@ -68,7 +69,8 @@ def get_json(skynet_arg):
     """Return json of output from a Skynet call."""
 
     if skynet_arg == "env_full":
-        status, output = commands.getstatusoutput("python /opt/skynet/skynet.py"
+        status, output = commands.getstatusoutput("python -W ignore::DeprecationWarning"
+                                                  " /opt/skynet/skynet.py"
                                                   " -a env_full")
 
         envs = json.loads(output)
