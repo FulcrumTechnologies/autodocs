@@ -2,7 +2,6 @@
 
 """
 
-import create_page
 import json
 
 
