@@ -29,7 +29,7 @@ def build_env(e):
     undef = "Unavailable"
     undef_err = "Unavailable: data missing"
 
-    env_id = e.id
+    env_id = str(e.id)
     env_name = clean_string(e.name)
 
     config_url = e.url

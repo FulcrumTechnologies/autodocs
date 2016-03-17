@@ -8,6 +8,8 @@ import json
 def start(envs):
     """Write all remaining pages of environments not currently listed."""
 
+    space = "AutoDocs"
+
     # Just counting up the total number, for stats
     env_all = 0
     env_tried = 0
@@ -16,7 +18,7 @@ def start(envs):
         env_all += 1
 
     for e in envs:
-        if not confy.page_exists(e.id):
+        if not confy.page_exists(e.name, space):
             env_tried += 1
 
             print build_page.build_env(e)
