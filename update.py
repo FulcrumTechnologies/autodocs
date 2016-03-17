@@ -3,6 +3,7 @@ import skytap
 import sys
 import update_write
 
+
 def start(args):
     """Redirect to update function based on args."""
 
@@ -11,7 +12,7 @@ def start(args):
     if (args[1] == "write"):
         os.system("clear")
         print ("Writing wiki pages.")
-        #update_write.start(envs)
+        update_write.start(envs)
     else:
         print ("Command not recognized.")
 
@@ -20,4 +21,3 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
-
