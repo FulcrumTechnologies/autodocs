@@ -1,4 +1,5 @@
 """Builds the XHTML source that will become a Confluence page."""
+import json
 
 
 def clean_string(text):
@@ -80,9 +81,6 @@ def build_env(e):
     for v in e.vms:
         vm_name = v.name
 
-        for i in v.interfaces:
-            vm_hostname = i.hostname
-
         vm_id = str(v.id)
         vm_user = undef
         vm_pass = undef
@@ -92,23 +90,36 @@ def build_env(e):
         vm_ip_us = ""
         vm_ip_india = ""
 
-        for i in v.interfaces:
-            vm_ip_us = i.ip
-
-        base_url_us = url + vm_ip_us
-        base_url_india = url + vm_ip_india
+        count = 0
 
         services = []
 
         # Create data in JSON for individual service information.
         for i in v.interfaces:
+            vm_hostname = i.hostname
+            int_data = i.json()
+            print int_data
+            if "ip_address" in int_data["nat_addresses"]["vpn_nat_addresses"][0]:
+                vm_ip_us = int_data["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
+            else:
+                vm_ip_us = i.ip
+
+            count = int(i.public_ips_count)
+            public_ips = i.public_ips
             for s in i.services:
+                print ("checking out services...")
                 new_service = {}
-                new_service["internal_ip"] = vm_ip_us
-                new_service["internal_port"] = str(j["internal_port"])
-                new_service["external_ip"] = j["external_ip"]
-                new_service["external_port"] = str(j["external_port"])
-                services.append(new_service)
+                try:
+                    new_service["internal_ip"] = str(s.id)
+                    new_service["internal_port"] = str(s.internal_port)
+                    new_service["external_ip"] = str(s.external_ip)
+                    new_service["external_port"] = str(s.external_port)
+                    services.append(new_service)
+                except AttributeError:
+                    pass
+
+        base_url_us = url + vm_ip_us
+        base_url_india = url + vm_ip_india
 
         # pub_content holds information displayed at the end of the individual
         # VM blocks.
@@ -120,12 +131,9 @@ def build_env(e):
             pub_content += ("<p><strong> - Published Services:</strong></p>")
             for s in services:
                 serv_count += 1
-                pub_content += ("<p style=\"margin-left: 30.0px;\">Internal Port " + str(s.internal_port) + " mapped to " + str(s.external_ip) + ":" + str(s.external_port) + "<span style=\"line-height: 1.4285715;\">&nbsp;</span></p>")
+                pub_content += ("<p style=\"margin-left: 30.0px;\">Internal Port " + str(s["internal_port"]) + " mapped to " + str(s["external_ip"]) + ":" + str(s["external_port"]) + "<span style=\"line-height: 1.4285715;\">&nbsp;</span></p>")
 
         # Writing public IP information
-        for i in v.interfaces:
-            count = int(i.public_ips_count)
-            public_ips = i.public_ips
         if count > 0:
             pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
             for k in public_ips:
@@ -147,8 +155,12 @@ def build_env(e):
         # This will hold main content for each VM block
         vm_info = []
 
+        print ("us ip is " + vm_ip_us)
+        print ("india ip is " + vm_ip_india)
+
         # If this VM isn't the load balancer...
         if vm_hostname != "lb":
+            print ("Writing content for something that isn't lb")
             vm_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             vm_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
@@ -160,6 +172,7 @@ def build_env(e):
 
             # Never write down URLs when a database
             if vm_hostname != "db":
+                print ("Writing content for something that isn't db")
                 if vm_ip_us != "":
 
                     vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_us + ":" + str(port_home) + "/cats/\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
@@ -196,6 +209,7 @@ def build_env(e):
 
         # Print this stuff if this VM is load balancer
         else:
+            print ("Writing content for something that IS lb")
             lb_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             lb_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
@@ -284,3 +298,4 @@ def build_env(e):
     # -------------------------------------------------------------------------
 
     return content
+
