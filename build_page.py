@@ -1,13 +1,11 @@
 """Builds the XHTML source that will become a Confluence page."""
 
 
-def clean_string(str):
-    """Clean up lone apostrophes and quotations in string."""
-    str = str.replace("\'", "")
-    str = str.replace("\"", "\\\"")
-    str = str.replace("\\\\\"", "\\\"")
+def clean_string(text):
+    """Clean a string up so it doesn't screw things."""
+    text = text.replace("\'", "")
 
-    return str
+    return text
 
 
 def build_env(e):
@@ -67,11 +65,11 @@ def build_env(e):
 
     # First block of xhtml.
     # "content" will be affixed with vm_content and lb_content later on.
-    content = ("<ac:layout><ac:layout-section ac:type=\\\"two_equal\\\"><ac:lay"
+    content = ("<ac:layout><ac:layout-section ac:type=\"two_equal\"><ac:lay"
                "out-cell><p>" + comment + "</p></ac:layout-cell><ac:layout"
                "-cell><p>&nbsp;</p></ac:layout-cell></ac:layout-section>")
 
-    content += ("<ac:layout-section ac:type=\\\"two_equal\\\">")
+    content += ("<ac:layout-section ac:type=\"two_equal\">")
     content += ("<ac:layout-cell>")
 
     vm_content = ""
@@ -122,68 +120,71 @@ def build_env(e):
             pub_content += ("<p><strong> - Published Services:</strong></p>")
             for s in services:
                 serv_count += 1
-                pub_content += ("<p style=\\\"margin-left: 30.0px;\\\">Internal Port " + str(s.internal_port) + " mapped to " + str(s.external_ip) + ":" + str(s.external_port) + "<span style=\\\"line-height: 1.4285715;\\\">&nbsp;</span></p>")
+                pub_content += ("<p style=\"margin-left: 30.0px;\">Internal Port " + str(s.internal_port) + " mapped to " + str(s.external_ip) + ":" + str(s.external_port) + "<span style=\"line-height: 1.4285715;\">&nbsp;</span></p>")
 
-        # # Writing public IP information
-        # if i["interfaces"][0]["public_ips_count"] > 0:
-        #     pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
-        #     for k in i["interfaces"][0]["public_ips"]:
-        #         addr = k["address"]
-        #         pub_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
-        #         pub_content += ("<ac:parameter ac:name=\\\"title\\\">")
-        #         pub_content += ("https://" + addr + "/cats/")
-        #         pub_content += ("</ac:parameter>")
-        #         pub_content += ("<ac:rich-text-body>")
-        #
-        #         pub_content += ("<p>Direct link: <a href=\\\"https://" + addr + "/cats/\\\">https://" + addr + "/cats/</a></p>")
-        #
-        #         qrc = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\\\" />")
-        #
-        #         pub_content += ("<p>" + qrc + "</p>")
-        #
-        #         pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
+        # Writing public IP information
+        for i in v.interfaces:
+            count = int(i.public_ips_count)
+            public_ips = i.public_ips
+        if count > 0:
+            pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
+            for k in public_ips:
+                addr = k["address"]
+                pub_content += ("<p><ac:structured-macro ac:macro-id=\"d245b98a-9f3e-46d0-9684-e07e3830153f\" ac:name=\"expand\" ac:schema-version=\"1\">")
+                pub_content += ("<ac:parameter ac:name=\"title\">")
+                pub_content += ("https://" + addr + "/cats/")
+                pub_content += ("</ac:parameter>")
+                pub_content += ("<ac:rich-text-body>")
+
+                pub_content += ("<p>Direct link: <a href=\"https://" + addr + "/cats/\">https://" + addr + "/cats/</a></p>")
+
+                qrc = ("<img src=\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\" />")
+
+                pub_content += ("<p>" + qrc + "</p>")
+
+                pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
 
         # This will hold main content for each VM block
         vm_info = []
 
         # If this VM isn't the load balancer...
         if vm_hostname != "lb":
-            vm_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
-            vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
+            vm_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
+            vm_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
             # IPs should be displayed when...
             if vm_ip_us != "":
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
+                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
-                vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (India): " + vm_ip_india + "</p>")
+                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
 
             # Never write down URLs when a database
             if vm_hostname != "db":
                 if vm_ip_us != "":
 
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_us + ":" + str(port_home) + "/cats/\\\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_us + ":" + str(port_reports) + "/cats/\\\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_us + ":" + str(port_services) + "/cats/\\\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_us + ":" + str(port_home) + "/cats/\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_us + ":" + str(port_reports) + "/cats/\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_us + ":" + str(port_services) + "/cats/\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
                     if vm_ip_india != "":
-                        vm_content += ("<p><ac:structured-macro ac:macro-id=\\\"d245b98a-9f3e-46d0-9684-e07e3830153f\\\" ac:name=\\\"expand\\\" ac:schema-version=\\\"1\\\">")
-                        vm_content += ("<ac:parameter ac:name=\\\"title\\\">")
+                        vm_content += ("<p><ac:structured-macro ac:macro-id=\"d245b98a-9f3e-46d0-9684-e07e3830153f\" ac:name=\"expand\" ac:schema-version=\"1\">")
+                        vm_content += ("<ac:parameter ac:name=\"title\">")
                         vm_content += ("India VPN details:")
                         vm_content += ("</ac:parameter>")
                         vm_content += ("<ac:rich-text-body>")
 
-                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_india + ":" + str(port_home) + "/cats/\\\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
-                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_india + ":" + str(port_reports) + "/cats/\\\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
-                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_india + ":" + str(port_services) + "/cats/\\\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
-                        vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
+                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_india + ":" + str(port_home) + "/cats/\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
+                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_india + ":" + str(port_reports) + "/cats/\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
+                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_india + ":" + str(port_services) + "/cats/\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
+                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
                         vm_content += ("</ac:rich-text-body></ac:structured-macro></p>")
                 elif vm_ip_india != "":
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Web: <a href=\\\"" + base_url_india + ":" + str(port_home) + "/cats/\\\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Reports: <a href=\\\"" + base_url_india + ":" + str(port_reports) + "/cats/\\\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Services: <a href=\\\"" + base_url_india + ":" + str(port_services) + "/cats/\\\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
-                    vm_content += ("<p style=\\\"margin-left: 30.0px;\\\">CATS Mobility: <a href=\\\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\\\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_india + ":" + str(port_home) + "/cats/\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_india + ":" + str(port_reports) + "/cats/\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_india + ":" + str(port_services) + "/cats/\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
+                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
 
                 # Add pub_content at the end.
                 vm_content += pub_content
@@ -195,18 +196,18 @@ def build_env(e):
 
         # Print this stuff if this VM is load balancer
         else:
-            lb_content += ("<h2><strong style=\\\"line-height: 1.4285715;\\\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
-            lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">VM ID: " + vm_id + "</p>")
+            lb_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
+            lb_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
             if vm_ip_us != "":
-                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (US): " + vm_ip_us + "</p>")
+                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
-                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">IP (India): " + vm_ip_india + "</p>")
+                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
 
             if vm_ip_us != "":
-                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer URL (US): <a href=\\\"" + base_url_us + "/cats/\\\">" + base_url_us + "/cats/</a></p>")
+                lb_content += ("<p style=\"margin-left: 30.0px;\">Load Balancer URL (US): <a href=\"" + base_url_us + "/cats/\">" + base_url_us + "/cats/</a></p>")
             if vm_ip_india != "":
-                lb_content += ("<p style=\\\"margin-left: 30.0px;\\\">Load Balancer URL (India): <a href=\\\"" + base_url_india + "/cats/\\\">" + base_url_india + "/cats/</a></p>")
+                lb_content += ("<p style=\"margin-left: 30.0px;\">Load Balancer URL (India): <a href=\"" + base_url_india + "/cats/\">" + base_url_india + "/cats/</a></p>")
 
             # Add pub_content at the end.
             lb_content += pub_content
@@ -235,8 +236,8 @@ def build_env(e):
     content += ("<p>Environment ID: " + str(env_id) + "</p>")
     content += ("<p>Admin User*: " + user + "</p>")
     content += ("<p>Admin PW*: " + password + "</p>")
-    content += ("<p>Skytap Environment: <a href=\\\"" + config_url + "\\\">" + config_url + "</a></p>")
-    content += ("<p>Environment Dashboard: <a href=\\\"" + dash_url + "\\\">" + dash_url + "</a></p>")
+    content += ("<p>Skytap Environment: <a href=\"" + config_url + "\">" + config_url + "</a></p>")
+    content += ("<p>Environment Dashboard: <a href=\"" + dash_url + "\">" + dash_url + "</a></p>")
     content += ("<p>&nbsp;</p>")
 
     content += ("<p><strong>Mobility Details:</strong></p>")
@@ -261,9 +262,9 @@ def build_env(e):
     content += ("<p>&nbsp;</p><p>&nbsp;</p>")
 
     if has_app1 != "":
-        qr_url = ("<img src=\\\"http://api.qrserver.com/v1/create-qr-code/?data="
+        qr_url = ("<img src=\"http://api.qrserver.com/v1/create-qr-code/?data="
                   "" + has_app1 + ":" + str(port_mob) + ":1::"
-                  "" + env_name + "&amp;size=150x150\\\" />")
+                  "" + env_name + "&amp;size=150x150\" />")
 
         content += ("<table><tbody><tr><th><p>QR Code for app1:</p><p>"
                     "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
@@ -271,7 +272,7 @@ def build_env(e):
 
     content += ("</ac:layout-cell></ac:layout-section></ac:layout>")
 
-    content = clean_string(content)
+    # content = clean_string(content)
 
     # Temporary!
     if env_name.startswith("VZW"):
