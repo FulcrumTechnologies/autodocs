@@ -97,11 +97,14 @@ def build_env(e):
         # Create data in JSON for individual service information.
         for i in v.interfaces:
             vm_hostname = i.hostname
-            int_data = i.json()
-            print int_data
-            if "ip_address" in int_data["nat_addresses"]["vpn_nat_addresses"][0]:
-                vm_ip_us = int_data["nat_addresses"]["vpn_nat_addresses"][0]["ip_address"]
-            else:
+            int_data = json.loads(i.json())
+            try:
+                for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
+                    if n["vpn_id"] == "vpn-661182":
+                        vm_ip_us = n["ip_address"]
+                    elif n["vpn_id"] == "vpn-3288770":
+                        vm_ip_india = n["ip_address"]
+            except (KeyError, TypeError, IndexError):
                 vm_ip_us = i.ip
 
             count = int(i.public_ips_count)
