@@ -9,52 +9,6 @@ def clean_string(text):
     return text
 
 
-def build_vm(v):
-    """Build a Confluence page for a VM.
-
-    Just like build_env, this function is hard to look at.
-
-    This function also returns XHTML that can be used to create the page in
-    Confluence. It also returns the hostname out of necessity to win a battle
-    with a notoriously evasive bug.
-    """
-    print ("Writing content for VM...")
-
-    vm_name = v.name
-    vm_id = str(v.id)
-
-    content = "<p>"
-
-    content += ("ID: " + vm_id + "<br/><br/>")
-
-    #content += ("Configuration URL: " + v.configuration_url + "<br/>")
-
-    for i in v.interfaces:
-        vm_hostname = i.hostname
-        int_data = json.loads(i.json())
-
-        content += ("<br/>")
-        try:
-            for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
-                if (n["vpn_id"] == "vpn-3631944" or
-                        n["vpn_id"] == "vpn-661182"):
-                    content += ("NAT IP (US): " + n["ip_address"] + "<br/>")
-                elif n["vpn_id"] == "vpn-3288770":
-                    content += ("NAT IP (India): " + n["ip_address"] + "<br/>")
-        except (KeyError, IndexError):
-            content += ("NAT IP (US): " + i.ip + "<br/>")
-
-        content += ("Local IP: " + i.ip + "<br/>")
-
-    content += ("<br/><br/>")
-
-    content += ("<ac:structured-macro ac:name=\"iframe\" ac:schema-version=\"1\" ac:macro-id=\"1c30019c-dd2a-4c4c-bfa9-387ce00e1d4d\"><ac:parameter ac:name=\"src\"><ri:url ri:value=\"http://dashboard.fulcrum.net/" + vm_id + "\" /></ac:parameter><ac:parameter ac:name=\"width\">850</ac:parameter><ac:parameter ac:name=\"height\">535</ac:parameter><ac:rich-text-body><p>&nbsp;</p></ac:rich-text-body></ac:structured-macro>")
-
-    content += ("</p>")
-
-    return vm_hostname, content
-
-
 def build_env(e):
     """Build a Confluence page for an environment.
 
@@ -351,4 +305,50 @@ def build_env(e):
     # -------------------------------------------------------------------------
 
     return content
+
+
+def build_vm(v):
+    """Build a Confluence page for a VM.
+
+    Just like build_env, this function is hard to look at.
+
+    This function also returns XHTML that can be used to create the page in
+    Confluence. It also returns the hostname out of necessity to win a battle
+    with a notoriously evasive bug.
+    """
+    print ("Writing content for VM...")
+
+    vm_name = v.name
+    vm_id = str(v.id)
+
+    content = "<p>"
+
+    content += ("ID: " + vm_id + "<br/><br/>")
+
+    #content += ("Configuration URL: " + v.configuration_url + "<br/>")
+
+    for i in v.interfaces:
+        vm_hostname = i.hostname
+        int_data = json.loads(i.json())
+
+        content += ("<br/>")
+        try:
+            for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
+                if (n["vpn_id"] == "vpn-3631944" or
+                        n["vpn_id"] == "vpn-661182"):
+                    content += ("NAT IP (US): " + n["ip_address"] + "<br/>")
+                elif n["vpn_id"] == "vpn-3288770":
+                    content += ("NAT IP (India): " + n["ip_address"] + "<br/>")
+        except (KeyError, IndexError):
+            content += ("NAT IP (US): " + i.ip + "<br/>")
+
+        content += ("Local IP: " + i.ip + "<br/>")
+
+    content += ("<br/><br/>")
+
+    content += ("<ac:structured-macro ac:name=\"iframe\" ac:schema-version=\"1\" ac:macro-id=\"1c30019c-dd2a-4c4c-bfa9-387ce00e1d4d\"><ac:parameter ac:name=\"src\"><ri:url ri:value=\"http://dashboard.fulcrum.net/" + vm_id + "\" /></ac:parameter><ac:parameter ac:name=\"width\">850</ac:parameter><ac:parameter ac:name=\"height\">535</ac:parameter><ac:rich-text-body><p>&nbsp;</p></ac:rich-text-body></ac:structured-macro>")
+
+    content += ("</p>")
+
+    return vm_hostname, content
 
