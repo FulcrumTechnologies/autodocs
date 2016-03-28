@@ -22,7 +22,7 @@ def build_env(e):
     the Confluence page's code.
     """
 
-    print ("Writing content for environment..."),
+    #print ("Writing content for environment..."),
 
     # Making a json containing important information. This will be stored in a
     # file in JSONS directory and used to perform various functions.
@@ -39,6 +39,14 @@ def build_env(e):
     puppet_enabled = undef
     admin_access = undef
     user_access = undef
+
+    # Temporary!
+    if env_name.startswith("VZW"):
+        content = ("Auto documentation for this, and all Verizon environments, "
+                   "has been suspended due to security concerns until further "
+                   "notice.<br/><br/>Please go to this environment on Skytap to"
+                   " access information on this environment.")
+        return content
 
     # Exceptions are made when dealing with Verizon servers.
     if env_name.startswith("VZW"):
@@ -114,7 +122,7 @@ def build_env(e):
             count = int(i.public_ips_count)
             public_ips = i.public_ips
             for s in i.services:
-                print ("checking out services...")
+                #print ("checking out services...")
                 new_service = {}
                 try:
                     new_service["internal_ip"] = str(s.id)
@@ -162,12 +170,12 @@ def build_env(e):
         # This will hold main content for each VM block
         vm_info = []
 
-        print ("us ip is " + vm_ip_us)
-        print ("india ip is " + vm_ip_india)
+        #print ("us ip is " + vm_ip_us)
+        #print ("india ip is " + vm_ip_india)
 
         # If this VM isn't the load balancer...
         if vm_hostname != "lb":
-            print ("Writing content for something that isn't lb")
+            #print ("Writing content for something that isn't lb")
             vm_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             vm_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
@@ -179,7 +187,7 @@ def build_env(e):
 
             # Never write down URLs when a database
             if vm_hostname != "db":
-                print ("Writing content for something that isn't db")
+                #print ("Writing content for something that isn't db")
                 if vm_ip_us != "":
 
                     vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_us + ":" + str(port_home) + "/cats/\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
@@ -216,7 +224,7 @@ def build_env(e):
 
         # Print this stuff if this VM is load balancer
         else:
-            print ("Writing content for something that IS lb")
+            #print ("Writing content for something that IS lb")
             lb_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
             lb_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
@@ -295,13 +303,6 @@ def build_env(e):
 
     # content = clean_string(content)
 
-    # Temporary!
-    if env_name.startswith("VZW"):
-        content = ("Auto documentation for this, and all Verizon environments, "
-                   "has been suspended due to security concerns until further "
-                   "notice.<br/><br/>Please go to this environment on Skytap to"
-                   " access information on this environment.")
-
     # -------------------------------------------------------------------------
 
     return content
@@ -316,7 +317,7 @@ def build_vm(v):
     Confluence. It also returns the hostname out of necessity to win a battle
     with a notoriously evasive bug.
     """
-    print ("Writing content for VM...")
+    #print ("Writing content for VM...")
 
     vm_name = v.name
     vm_id = str(v.id)
