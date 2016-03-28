@@ -1,18 +1,18 @@
 """Write wiki pages of environments which currently have none."""
 
-import confy_actions as confy
 import build_page
+import confy_actions as confy
 import copy
 import json
 import skytap
 
 
-def start(envs):
+def start(envs, config_data):
     """Write all remaining pages of environments not currently listed."""
 
-    # Put the parent page information here.
-    space = "AutoDocs"
-    parent_id = 70385685
+    # Make sure you've configured config.yml! Else, this will crash the process.
+    space = config_data["wiki_space"]
+    parent_id = config_data["wiki_parent"]
 
     # Just counting up the total number, for stats
     env_all = 0
@@ -107,4 +107,3 @@ def start(envs):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
-

@@ -1,4 +1,5 @@
 *.pyc
+config.yml
 confy_actions.py
 confy_api.py
 confy_config.yml

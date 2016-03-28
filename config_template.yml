@@ -1,0 +1,5 @@
+# Save this as config.yml when you're done.
+
+space:      # Space key (str)
+parent_id:  # Parent page ID, under which all environment pages will go (int)
+india_id:   # India page ID, which holds information on India environments
