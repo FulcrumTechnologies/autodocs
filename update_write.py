@@ -13,6 +13,7 @@ def start(envs, config_data):
     # Make sure you've configured config.yml! Else, this will crash the process.
     space = config_data["space"]
     parent_id = config_data["parent_id"]
+    other_docs_id = config_data["other_docs_id"]
 
     # Just counting up the total number, for stats
     env_all = 0
@@ -22,6 +23,7 @@ def start(envs, config_data):
     existing_envs = []
 
     for e in envs:
+        break
         existing_envs.append(e.name + " -- AutoDocs")
 
         print ("\n--------------------\nTrying " + e.name + " ("
@@ -120,6 +122,31 @@ def start(envs, config_data):
     #        print ("Deleting " + e.name + " -- AutoDocs...")
     #        confy.delete_page_full(confy.get_page_id(i["title"] + " -- AutoDocs", space))
     #        print ("Done!")
+
+    envs = skytap.Environments()
+
+    content = "Any and all VZW environments with published services will be listed below.<br/>"
+
+    for e in envs:
+        env_found = False
+        if e.name.startswith("VZW"):
+            for v in e.vms:
+                for i in v.interfaces:
+                    for s in i.services:
+                        content += "<p>"
+                        content += "<ac:link><ri:page ri:content-title=\\\"" + e.name + " -- AutoDocs\\\" /><ac:plain-text-link-body><![CDATA[" + e.name + " --AutoDocs (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
+                        content += "</p>"
+                        env_found = True
+                        break
+                    if env_found:
+                        break
+                if env_found:
+                    break
+
+    print content
+
+    confy.delete_page(confy.get_page_id("VZW Published Services", space))
+    confy.create_page("VZW Published Services", other_docs_id, space, content)
 
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
