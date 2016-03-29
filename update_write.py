@@ -11,15 +11,19 @@ def start(envs, config_data):
     """Write all remaining pages of environments not currently listed."""
 
     # Make sure you've configured config.yml! Else, this will crash the process.
-    space = config_data["wiki_space"]
-    parent_id = config_data["wiki_parent"]
+    space = config_data["space"]
+    parent_id = config_data["parent_id"]
 
     # Just counting up the total number, for stats
     env_all = 0
     env_written = 0
     env_failed = 0
 
+    existing_envs = []
+
     for e in envs:
+        existing_envs.append(e.name + " -- AutoDocs")
+
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
         env_all += 1
@@ -40,9 +44,13 @@ def start(envs, config_data):
                        "to change.\nSkipping...")
                 continue
             else:
+                if e.name.startswith("VZW"):
+                    print ("Page for " + str(e.id) + " will not be updated "
+                           "since it is a VZW environment.")
+                    continue
                 print ("Page for " + str(e.id) + " exists and has outdated "
                        "information.\nDeleting in preparation for rewrite...")
-                confy.delete_page(env_page_id)
+                confy.delete_page_full(env_page_id)
         except IndexError:
             print ("No page found for " + str(e.id) + ".")
             pass
@@ -103,7 +111,18 @@ def start(envs, config_data):
             env_failed += 1
             continue
 
+    #written_envs = json.loads(confy.get_page_children(parent_id))
+
+    #print ("++++++++++++++++++++")
+    #print ("Checking for environment pages that no longer should exist...")
+    #for i in written_envs["results"]:
+    #    if (i["title"] + " -- AutoDocs") not in existing_envs:
+    #        print ("Deleting " + e.name + " -- AutoDocs...")
+    #        confy.delete_page_full(confy.get_page_id(i["title"] + " -- AutoDocs", space))
+    #        print ("Done!")
+
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
+
