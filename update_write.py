@@ -133,7 +133,7 @@ def start(envs, config_data):
                 for i in v.interfaces:
                     for s in i.services:
                         content += "<p>"
-                        content += "<ac:link><ri:page ri:content-title=\\\"" + e.name + " -- AutoDocs\\\" /><ac:plain-text-link-body><![CDATA[" + e.name + " --AutoDocs (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
+                        content += "<ac:link><ri:page ri:content-title=\"" + e.name + " -- AutoDocs\" /><ac:plain-text-link-body><![CDATA[" + e.name + " -- AutoDocs (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
                         content += "</p>"
                         env_found = True
                         break
@@ -144,7 +144,12 @@ def start(envs, config_data):
 
     print content
 
-    confy.delete_page(confy.get_page_id("VZW Published Services", space))
+    try:
+        confy.delete_page(confy.get_page_id("VZW Published Services", space))
+    except IndexError:
+        # Page doesn't exist
+        pass
+
     confy.create_page("VZW Published Services", other_docs_id, space, content)
 
     print ("\n\n\n--------------------")
