@@ -23,7 +23,6 @@ def start(envs, config_data):
     existing_envs = []
 
     for e in envs:
-        break
         existing_envs.append(e.name + " -- AutoDocs")
 
         print ("\n--------------------\nTrying " + e.name + " ("
