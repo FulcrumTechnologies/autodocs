@@ -1,6 +1,7 @@
 import os
 import skytap
 import sys
+import update_india
 import update_write
 
 
@@ -34,7 +35,7 @@ def start(args):
     if (args[1] == "india"):
         os.system("clear")
         print ("Writing India wiki page.")
-        update_india.start(config_data)
+        update_india.start(envs, config_data)
     else:
         print ("Command not recognized.")
 
@@ -43,3 +44,4 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
+

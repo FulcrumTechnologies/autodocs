@@ -1,7 +1,8 @@
 # Save this as config.yml when you're done.
 
 space:      # Space key (str)
+space_parent_id:  # ID of the space's "main" page
 parent_id:  # Parent page ID, under which all environment pages will go (int)
-india_id:   # India page ID, which holds information on India environments
+india_name: # India page name (not ID!)
 other_docs_id:  # ID for other docs page
 
