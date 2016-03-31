@@ -23,7 +23,7 @@ def start(envs, config_data):
     existing_envs = []
 
     for e in envs:
-        existing_envs.append(e.name + " -- AutoDocs")
+        existing_envs.append(e.name)
 
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
@@ -39,7 +39,7 @@ def start(envs, config_data):
         # Otherwise, page does not exist, and continue to write new page.
         print ("Checking if " + str(e.id) + " currently has existing page...")
         try:
-            env_page_id = json.loads(confy.get_page_full_more(e.name + " -- AutoDocs", space))["results"][0]["id"]
+            env_page_id = json.loads(confy.get_page_full_more(e.name, space))["results"][0]["id"]
             if content == confy.get_page_content(env_page_id):
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
@@ -58,7 +58,7 @@ def start(envs, config_data):
 
         print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
-            result = json.loads(confy.create_page(e.name + " -- AutoDocs",
+            result = json.loads(confy.create_page(e.name,
                                 parent_id, space, content))
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
@@ -87,7 +87,7 @@ def start(envs, config_data):
                 hostname, content = build_page.build_vm(v)
 
                 new_page_name = (hostname + " - " + v.name + " - "
-                                 "" + new_e.name + " -- AutoDocs")
+                                 "" + new_e.name)
 
                 print ("Checking if " + str(v.id) + " currently has existing "
                        "page...")
@@ -101,7 +101,7 @@ def start(envs, config_data):
                     pass
 
                 print ("Writing content to Confluence for " + str(v.id) + "...")
-                confy.create_page(hostname + " - " + v.name + " - " + new_e.name + " -- AutoDocs", parent_page_id, space, content)
+                confy.create_page(hostname + " - " + v.name + " - " + new_e.name, parent_page_id, space, content)
                 print ("Write successful!")
 
             env_written += 1
@@ -118,8 +118,8 @@ def start(envs, config_data):
     #print ("Checking for environment pages that no longer should exist...")
     #for i in written_envs["results"]:
     #    if (i["title"] + " -- AutoDocs") not in existing_envs:
-    #        print ("Deleting " + e.name + " -- AutoDocs...")
-    #        confy.delete_page_full(confy.get_page_id(i["title"] + " -- AutoDocs", space))
+    #        print ("Deleting " + e.name + "...")
+    #        confy.delete_page_full(confy.get_page_id(i["title"] + "", space))
     #        print ("Done!")
 
     envs = skytap.Environments()
@@ -133,7 +133,7 @@ def start(envs, config_data):
                 for i in v.interfaces:
                     for s in i.services:
                         content += "<p>"
-                        content += "<ac:link><ri:page ri:content-title=\"" + e.name + " -- AutoDocs\" /><ac:plain-text-link-body><![CDATA[" + e.name + " -- AutoDocs (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
+                        content += "<ac:link><ri:page ri:content-title=\"" + e.name + "\" /><ac:plain-text-link-body><![CDATA[" + e.name + " (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
                         content += "</p>"
                         env_found = True
                         break
