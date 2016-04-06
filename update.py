@@ -32,7 +32,7 @@ def start(args):
         os.system("clear")
         print ("Writing wiki pages.")
         update_write.start(envs, config_data)
-    if (args[1] == "india"):
+    elif (args[1] == "india"):
         os.system("clear")
         print ("Writing India wiki page.")
         update_india.start(envs, config_data)

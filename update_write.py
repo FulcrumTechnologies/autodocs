@@ -1,9 +1,9 @@
 """Write wiki pages of environments which currently have none."""
 
 import build_page
-import confy_actions as confy
 import copy
 import json
+import pyconfluence as pyco
 import skytap
 
 
@@ -39,8 +39,8 @@ def start(envs, config_data):
         # Otherwise, page does not exist, and continue to write new page.
         print ("Checking if " + str(e.id) + " currently has existing page...")
         try:
-            env_page_id = json.loads(confy.get_page_full_more(e.name, space))["results"][0]["id"]
-            if content == confy.get_page_content(env_page_id):
+            env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
+            if content == pyco.get_page_content(env_page_id):
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
@@ -51,14 +51,14 @@ def start(envs, config_data):
                     continue
                 print ("Page for " + str(e.id) + " exists and has outdated "
                        "information.\nDeleting in preparation for rewrite...")
-                confy.delete_page_full(env_page_id)
+                pyco.delete_page_full(env_page_id)
         except IndexError:
             print ("No page found for " + str(e.id) + ".")
             pass
 
         print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
-            result = json.loads(confy.create_page(e.name,
+            result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
@@ -92,16 +92,16 @@ def start(envs, config_data):
                 print ("Checking if " + str(v.id) + " currently has existing "
                        "page...")
                 try:
-                    vm_page_id = json.loads(confy.get_page_full_more(new_page_name, space))["results"][0]["id"]
+                    vm_page_id = json.loads(pyco.get_page_full_more(new_page_name, space))["results"][0]["id"]
                     print ("Page for " + str(v.id) + " exists.\nDeleting in "
                            "preparation for rewrite (this is normal)...")
-                    confy.delete_page(vm_page_id)
+                    pyco.delete_page(vm_page_id)
                 except IndexError:
                     print ("No page found for " + str(v.id) + ".")
                     pass
 
                 print ("Writing content to Confluence for " + str(v.id) + "...")
-                confy.create_page(hostname + " - " + v.name + " - " + new_e.name, parent_page_id, space, content)
+                pyco.create_page(hostname + " - " + v.name + " - " + new_e.name, parent_page_id, space, content)
                 print ("Write successful!")
 
             env_written += 1
@@ -112,15 +112,15 @@ def start(envs, config_data):
             env_failed += 1
             continue
 
-    #written_envs = json.loads(confy.get_page_children(parent_id))
+    written_envs = json.loads(pyco.get_page_children(parent_id))
 
-    #print ("++++++++++++++++++++")
-    #print ("Checking for environment pages that no longer should exist...")
-    #for i in written_envs["results"]:
-    #    if (i["title"] + " -- AutoDocs") not in existing_envs:
-    #        print ("Deleting " + e.name + "...")
-    #        confy.delete_page_full(confy.get_page_id(i["title"] + "", space))
-    #        print ("Done!")
+    print ("\n\n++++++++++++++++++++")
+    print ("Checking for environment pages that no longer should exist...")
+    for i in written_envs["results"]:
+        if (i["title"]) not in existing_envs:
+            print ("Deleting " + i["title"] + "...")
+            pyco.delete_page_full(pyco.get_page_id(i["title"], space))
+            print ("Done!")
 
     envs = skytap.Environments()
 
@@ -145,12 +145,12 @@ def start(envs, config_data):
     print content
 
     try:
-        confy.delete_page(confy.get_page_id("VZW Published Services", space))
+        pyco.delete_page(pyco.get_page_id("VZW Published Services", space))
     except IndexError:
         # Page doesn't exist
         pass
 
-    confy.create_page("VZW Published Services", other_docs_id, space, content)
+    pyco.create_page("VZW Published Services", other_docs_id, space, content)
 
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))

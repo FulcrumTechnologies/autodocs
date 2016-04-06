@@ -1,7 +1,7 @@
 """Update India environments page with current information."""
 
-import confy_actions as confy
 import json
+import pyconfluence as pyco
 import skytap
 
 
@@ -49,9 +49,9 @@ def start(envs, config_data):
             content += "<ac:link><ri:page ri:content-title=\"" + i + "\" /><ac:plain-text-link-body><![CDATA[" + i + "]]></ac:plain-text-link-body></ac:link>"
             content += "</p>"
 
-    if content != confy.get_page_content(confy.get_page_id(india_name, space)):
-        confy.delete_page(confy.get_page_id(india_name, space))
-        confy.create_page(india_name, space_parent_id, space, content)
+    if content != pyco.get_page_content(pyco.get_page_id(india_name, space)):
+        pyco.delete_page(pyco.get_page_id(india_name, space))
+        pyco.create_page(india_name, space_parent_id, space, content)
     else:
         print ("No differences detected. Page not updated.")
 
