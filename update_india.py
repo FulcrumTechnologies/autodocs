@@ -44,7 +44,7 @@ def start(envs, config_data):
 
     if len(usw) > 0:
         content += "<p>&nbsp;</p><p>All USW environments that have a VPN connection to India are listed below:</p>"
-        for i in apac:
+        for i in usw:
             content += "<p>"
             content += "<ac:link><ri:page ri:content-title=\"" + i + "\" /><ac:plain-text-link-body><![CDATA[" + i + "]]></ac:plain-text-link-body></ac:link>"
             content += "</p>"
