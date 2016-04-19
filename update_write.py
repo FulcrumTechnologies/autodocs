@@ -5,6 +5,7 @@ import copy
 import json
 import pyconfluence as pyco
 import skytap
+import skytapdns
 
 
 def start(envs, config_data):
@@ -22,12 +23,18 @@ def start(envs, config_data):
 
     existing_envs = []
 
+    copy_envs = skytap.Environments()
+
     for e in envs:
+
         existing_envs.append(e.name)
 
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
         env_all += 1
+
+        e_copy = copy_envs[e.id]
+        skytapdns.recreate_all_vm_dns(e_copy, True)
 
         print ("Fetching current environment information...")
         content = build_page.build_env(e)
@@ -112,15 +119,21 @@ def start(envs, config_data):
             env_failed += 1
             continue
 
+    envs = skytap.Environments()
     written_envs = json.loads(pyco.get_page_children(parent_id))
 
-    print ("\n\n++++++++++++++++++++")
-    print ("Checking for environment pages that no longer should exist...")
-    for i in written_envs["results"]:
-        if (i["title"]) not in existing_envs:
-            print ("Deleting " + i["title"] + "...")
-            pyco.delete_page_full(pyco.get_page_id(i["title"], space))
-            print ("Done!")
+    # print ("\n\n++++++++++++++++++++")
+    # print ("Checking for environment pages that no longer should exist...")
+    # for i in written_envs["results"]:
+    #     try:
+    #         if (i["title"]) not in existing_envs:
+    #             print ("Deleting " + i["title"] + "...")
+    #             pyco.delete_page_full(pyco.get_page_id(i["title"], space))
+    #             e = envs[pyco.get_page_id(i["title"], space)]
+    #             skytapdns.recreate_all_vm_dns(e, False)
+    #             print ("Done!")
+    #     except (ValueError, KeyError):
+    #         pass
 
     envs = skytap.Environments()
 
@@ -156,4 +169,3 @@ def start(envs, config_data):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
-

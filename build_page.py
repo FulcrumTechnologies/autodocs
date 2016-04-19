@@ -1,6 +1,7 @@
 """Builds the XHTML source that will become a Confluence page."""
 import commands
 import json
+import skytapdns
 
 
 def clean_string(text):
@@ -134,14 +135,22 @@ def build_env(e):
                 except AttributeError:
                     pass
 
-        # if e.name == "XO Staging":
-            # if vm_ip_us != "":
-                # status, output = commands.getstatusoutput("cli53 rrcreate ZXN2JBL17W6BS \'" + vm_hostname + "." + str(vm_id) + ".skytap 60 A " + vm_ip_us + "\'")
-                # vm_ip_us = "" + vm_hostname + "." + str(vm_id) + ".skytap.fulcrum.net"
-            # if vm_ip_india != "":
-                # status, output = commands.getstatusoutput("cli53 rrcreate ZXN2JBL17W6BS \'" + vm_hostname + "." + str(vm_id) + ".skytap 60 A " + vm_ip_india + "\'")
-                # vm_ip_india = "" + vm_hostname + "." + str(vm_id) + ".skytap.fulcrum.net"
-            
+        env_dns_alias = None
+
+        if "env_dns_alias" in e.user_data:
+            env_dns_alias = e.user_data.env_dns_alias
+
+        # if vm_ip_us != "":
+        #     if not env_dns_alias:
+        #         vm_ip_us = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
+        #     else:
+        #         vm_ip_us = "" + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net"
+        # elif vm_ip_india != "":
+        #     if not env_dns_alias:
+        #         vm_ip_india = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
+        #     else:
+        #         vm_ip_india = "" + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net"
+
         base_url_us = url + vm_ip_us
         base_url_india = url + vm_ip_india
 
@@ -361,4 +370,3 @@ def build_vm(v):
     content += ("</p>")
 
     return vm_hostname, content
-
