@@ -15,6 +15,7 @@ def start(envs, config_data):
 
     for e in envs:
         if "env_dns_alias" in e.user_data:
+            print ("Found alias: " + e.user_data.env_dns_alias + " - in " + e.name)
             content += "<p>"
             content += e.user_data.env_dns_alias
             content += " - <ac:link><ri:page ri:content-title=\"" + e.name + "\" /><ac:plain-text-link-body><![CDATA[" + e.name + "]]></ac:plain-text-link-body></ac:link>"
@@ -29,10 +30,11 @@ def start(envs, config_data):
 
     for alias, names in records.iteritems():
         if len(names) > 1:
-            last_content += alias + "<br/>"
+            print ("Found duplicate alias: " + alias)
+            last_content += "<p>" + alias + ":<br/>"
             for n in names:
                 last_content += " - <ac:link><ri:page ri:content-title=\"" + n + "\" /><ac:plain-text-link-body><![CDATA[" + n + "]]></ac:plain-text-link-body></ac:link><br/>"
-            last_content += "<br/>"
+            last_content += "</p>"
 
     if last_content != "":
         content += ("<br/><p>All environments with identical env_dns_alias "

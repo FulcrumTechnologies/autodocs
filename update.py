@@ -1,8 +1,10 @@
 import os
 import skytap
 import sys
+import update_aliases
 import update_india
 import update_write
+import update_services
 
 
 def start(args):
@@ -36,6 +38,14 @@ def start(args):
         os.system("clear")
         print ("Writing India wiki page.")
         update_india.start(envs, config_data)
+    elif (args[1] == "services"):
+        os.system("clear")
+        print ("Writing Services wiki page.")
+        update_services.start(envs, config_data)
+    elif (args[1] == "aliases"):
+        os.system("clear")
+        print ("Writing Aliases wiki page.")
+        update_aliases.start(envs, config_data)
     else:
         print ("Command not recognized.")
 
