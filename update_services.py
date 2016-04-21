@@ -27,14 +27,15 @@ def start(envs, config_data):
 
     print content
 
-    if content == pyco.get_page_content(pyco.get_page_id("VZW Published Services", space)):
+    if content.strip() == pyco.get_page_content(pyco.get_page_id("VZW Published Services", space)).strip():
         print ("Content has not changed; skipping update.")
         return
 
     try:
-        pyco.get_page_id("VZW Published Services", space)
+        pyco.delete_page(pyco.get_page_id("VZW Published Services", space))
     except IndexError:
-        pyco.create_page("VZW Published Services", other_docs_id, space, content)
-        return
+        # Page doesn't exist
+        pass
 
-    pyco.edit_page(pyco.get_page_id("VZW Published Services", space), "VZW Published Services", space, content)
+    pyco.create_page("VZW Published Services", other_docs_id, space, content)
+
