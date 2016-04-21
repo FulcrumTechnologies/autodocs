@@ -43,12 +43,12 @@ def build_env(e):
     user_access = undef
 
     # Temporary!
-    if env_name.startswith("VZW"):
-        content = ("Auto documentation for this, and all Verizon environments, "
-                   "has been suspended due to security concerns until further "
-                   "notice.<br/><br/>Please go to this environment on Skytap to"
-                   " access information on this environment.")
-        return content
+    #if env_name.startswith("VZW"):
+    #    content = ("Auto documentation for this, and all Verizon environments, "
+    #               "has been suspended due to security concerns until further "
+    #               "notice.<br/><br/>Please go to this environment on Skytap to"
+    #               " access information on this environment.")
+    #    return content
 
     # Exceptions are made when dealing with Verizon servers.
     if env_name.startswith("VZW"):

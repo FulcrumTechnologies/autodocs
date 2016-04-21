@@ -52,10 +52,10 @@ def start(envs, config_data):
                        "to change.\nSkipping...")
                 continue
             else:
-                if e.name.startswith("VZW"):
-                    print ("Page for " + str(e.id) + " will not be updated "
-                           "since it is a VZW environment.")
-                    continue
+                #if e.name.startswith("VZW"):
+                #    print ("Page for " + str(e.id) + " will not be updated "
+                #           "since it is a VZW environment.")
+                #    continue
                 print ("Page for " + str(e.id) + " exists and has outdated "
                        "information.\nDeleting in preparation for rewrite...")
                 pyco.delete_page_full(env_page_id)
@@ -75,10 +75,10 @@ def start(envs, config_data):
 
         print ("Write successful!")
 
-        if e.name.startswith("VZW"):
-            print ("This is a Verizon environment; as such, no VM pages will be"
-                   " generated.")
-            continue
+        #if e.name.startswith("VZW"):
+        #    print ("This is a Verizon environment; as such, no VM pages will be"
+        #           " generated.")
+        #    continue
 
         new_envs = skytap.Environments()
         new_e = new_envs[e.id]
