@@ -119,8 +119,8 @@ def start(envs, config_data):
             env_failed += 1
             continue
 
-    envs = skytap.Environments()
-    written_envs = json.loads(pyco.get_page_children(parent_id))
+    #envs = skytap.Environments()
+    #written_envs = json.loads(pyco.get_page_children(parent_id))
 
     # print ("\n\n++++++++++++++++++++")
     # print ("Checking for environment pages that no longer should exist...")
@@ -134,36 +134,6 @@ def start(envs, config_data):
     #             print ("Done!")
     #     except (ValueError, KeyError):
     #         pass
-
-    envs = skytap.Environments()
-
-    content = "Any and all VZW environments with published services will be listed below.<br/>"
-
-    for e in envs:
-        env_found = False
-        if e.name.startswith("VZW"):
-            for v in e.vms:
-                for i in v.interfaces:
-                    for s in i.services:
-                        content += "<p>"
-                        content += "<ac:link><ri:page ri:content-title=\"" + e.name + "\" /><ac:plain-text-link-body><![CDATA[" + e.name + " (" + str(e.id) + ")]]></ac:plain-text-link-body></ac:link>"
-                        content += "</p>"
-                        env_found = True
-                        break
-                    if env_found:
-                        break
-                if env_found:
-                    break
-
-    print content
-
-    try:
-        pyco.delete_page(pyco.get_page_id("VZW Published Services", space))
-    except IndexError:
-        # Page doesn't exist
-        pass
-
-    pyco.create_page("VZW Published Services", other_docs_id, space, content)
 
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
