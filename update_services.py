@@ -30,12 +30,6 @@ def start(envs, config_data):
     if content.strip() == pyco.get_page_content(pyco.get_page_id("VZW Published Services", space)).strip():
         print ("Content has not changed; skipping update.")
         return
-
-    try:
-        pyco.delete_page(pyco.get_page_id("VZW Published Services", space))
-    except IndexError:
-        # Page doesn't exist
-        pass
-
-    pyco.create_page("VZW Published Services", other_docs_id, space, content)
+    else:
+        print pyco.edit_page(76318788, "VZW Published Services", "AutoDocs", content)
 
