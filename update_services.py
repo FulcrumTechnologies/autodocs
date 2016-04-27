@@ -31,5 +31,5 @@ def start(envs, config_data):
         print ("Content has not changed; skipping update.")
         return
     else:
-        print pyco.edit_page(76318788, "VZW Published Services", "AutoDocs", content)
+        print pyco.edit_page(pyco.get_page_id("VZW Published Services", space), "VZW Published Services", space, content)
 

@@ -43,10 +43,9 @@ def start(envs, config_data):
 
     print content
 
-    try:
-        pyco.delete_page(pyco.get_page_id("Environment DNS Aliases", space))
-    except IndexError:
-        # Page doesn't exist
-        pass
+    if content.strip() == pyco.get_page_content(pyco.get_page_id("Environment DNS Aliases", space)).strip():
+        print ("Content has not changed; skipping update.")
+        return
+    else:
+        print pyco.edit_page(pyco.get_page_id("Environment DNS Aliases", space), "Environment DNS Aliases", space, content)
 
-    pyco.create_page("Environment DNS Aliases", other_docs_id, space, content)

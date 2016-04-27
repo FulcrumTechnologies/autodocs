@@ -279,6 +279,20 @@ def build_env(e):
 
     content += ("</ac:layout-cell>")
     content += ("<ac:layout-cell>")
+
+    userdata_content = ""
+
+    if "shutdown_delay" in e.user_data:
+        userdata_content += ("<p>shutdown_delay: " + str(e.user_data.shutdown_delay) + "</p>")
+    if "shutdown_time" in e.user_data:
+        userdata_content += ("<p>shutdown_time: " + str(e.user_data.shutdown_time) + "</p>")
+    if "env_dns_alias" in e.user_data:
+        userdata_content += ("<p>env_dns_alias: " + e.user_data.env_dns_alias + "</p>")
+
+    if userdata_content != "":
+        content += ("<p><strong>Environment Userdata</strong></p>" + userdata_content)
+        content += ("<p>&nbsp;</p>")
+
     content += ("<p><strong>Additional Details</strong></p>")
     content += ("<p>Environment ID: " + str(env_id) + "</p>")
     content += ("<p>Admin User*: " + user + "</p>")
@@ -370,3 +384,4 @@ def build_vm(v):
     content += ("</p>")
 
     return vm_hostname, content
+
