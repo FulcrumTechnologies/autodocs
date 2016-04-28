@@ -21,13 +21,9 @@ def start(envs, config_data):
     env_written = 0
     env_failed = 0
 
-    existing_envs = []
-
     copy_envs = skytap.Environments()
 
     for e in envs:
-
-        existing_envs.append(e.name)
 
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
@@ -119,23 +115,8 @@ def start(envs, config_data):
             env_failed += 1
             continue
 
-    #envs = skytap.Environments()
-    #written_envs = json.loads(pyco.get_page_children(parent_id))
-
-    # print ("\n\n++++++++++++++++++++")
-    # print ("Checking for environment pages that no longer should exist...")
-    # for i in written_envs["results"]:
-    #     try:
-    #         if (i["title"]) not in existing_envs:
-    #             print ("Deleting " + i["title"] + "...")
-    #             pyco.delete_page_full(pyco.get_page_id(i["title"], space))
-    #             e = envs[pyco.get_page_id(i["title"], space)]
-    #             skytapdns.recreate_all_vm_dns(e, False)
-    #             print ("Done!")
-    #     except (ValueError, KeyError):
-    #         pass
-
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
+

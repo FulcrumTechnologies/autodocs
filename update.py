@@ -3,6 +3,7 @@ import skytap
 import sys
 import update_aliases
 import update_india
+import update_purge
 import update_write
 import update_services
 
@@ -34,6 +35,10 @@ def start(args):
         os.system("clear")
         print ("Writing wiki pages.")
         update_write.start(envs, config_data)
+    elif (args[1] == "purge"):
+        os.system("clear")
+        print ("Purging wiki pages for nonexistent environments.")
+        update_purge.start(envs, config_data)
     elif (args[1] == "india"):
         os.system("clear")
         print ("Writing India wiki page.")
@@ -54,3 +59,4 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
+
