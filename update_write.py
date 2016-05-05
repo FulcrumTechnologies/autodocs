@@ -29,9 +29,6 @@ def start(envs, config_data):
                "" + str(e.id) + ")...")
         env_all += 1
 
-        e_copy = copy_envs[e.id]
-        skytapdns.recreate_all_vm_dns(e_copy, True)
-
         print ("Fetching current environment information...")
         content = build_page.build_env(e)
 
@@ -63,6 +60,8 @@ def start(envs, config_data):
         try:
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
+            e_copy = copy_envs[e.id]
+            skytapdns.recreate_all_vm_dns(e_copy, True)
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             print ("Write failed.")
