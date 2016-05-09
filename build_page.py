@@ -140,12 +140,17 @@ def build_env(e):
         if "env_dns_alias" in e.user_data:
             env_dns_alias = e.user_data.env_dns_alias
 
+        origin_ip_us = ""
+        origin_ip_india = ""
+
         if vm_ip_us != "":
+            origin_ip_us = vm_ip_us
             if not env_dns_alias:
                 vm_ip_us = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
             else:
                 vm_ip_us = "" + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net"
         elif vm_ip_india != "":
+            origin_ip_india = vm_ip_india
             if not env_dns_alias:
                 vm_ip_india = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
             else:
@@ -199,8 +204,10 @@ def build_env(e):
 
             # IPs should be displayed when...
             if vm_ip_us != "":
+                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + origin_ip_us + "</p>")
                 vm_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
+                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + origin_ip_india + "</p>")
                 vm_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
 
             # Never write down URLs when a database
@@ -247,8 +254,10 @@ def build_env(e):
             lb_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
 
             if vm_ip_us != "":
+                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + origin_ip_us + "</p>")
                 lb_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
             if vm_ip_india != "":
+                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + origin_ip_india + "</p>")
                 lb_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
 
             if vm_ip_us != "":
