@@ -52,6 +52,10 @@ def start(args):
         os.system("clear")
         print ("Writing Aliases wiki page.")
         update_aliases.start(envs, config_data)
+    elif (args[1] == "shutdown_times"):
+        os.system("clear")
+        print ("Writing Shutdown Times wiki page.")
+        update_shutdown_times.start(envs, config_data)
     else:
         print ("Command not recognized.")
 
