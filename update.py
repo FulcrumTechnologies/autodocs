@@ -1,11 +1,12 @@
 import os
 import skytap
 import sys
-import update_aliases
-import update_india
-import update_purge
-import update_write
-import update_services
+from update_scripts import update_aliases
+from update_scripts import update_india
+from update_scripts import update_purge
+from update_scripts import update_services
+from update_scripts import update_shutdown_times
+from update_scripts import update_write
 
 
 def start(args):
