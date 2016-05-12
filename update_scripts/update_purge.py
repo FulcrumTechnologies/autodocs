@@ -3,6 +3,7 @@ import pyconfluence as pyco
 import skytap
 import skytapdns
 
+
 def start(envs, config_data):
     """Start purging environment documentation for nonexistent environments."""
 
