@@ -2,6 +2,20 @@ from jinja2 import Template
 import pyconfluence as pyco
 
 
+def improve_storage(storage):
+    """Get better string depicting storage."""
+
+    sizes = ["KB", "MB", "GB", "TB", "uhhh...PB?"]
+
+    cur_size = 0
+
+    while storage > 1024:
+        storage = storage / 1024
+        cur_size += 1
+
+    return (str(storage) + " " + sizes[cur_size])
+
+
 def start(envs, config_data):
     """Start writing the environment shutdown times page."""
 
@@ -20,6 +34,15 @@ def start(envs, config_data):
     for e in envs:
         print ("Updating for " + e.name + "...")
         name = e.name
+        svms = e.svms
+        storage = improve_storage(e.storage)
+
+        if e.runstate == "running":
+            status = "Ok-icon-small.png"
+        elif e.runstate == "stopped" or e.runstate == "suspended":
+            status = "Close-2-icon-small.png"
+        else:
+            status = "Lamp-icon.png"
 
         if "shutdown_delay" in e.user_data:
             shutdown_delay = str(e.user_data.shutdown_delay) + " days"
@@ -47,17 +70,19 @@ def start(envs, config_data):
         else:
             color2 = "Blue"
 
-        with open("update_scripts/update_shutdown_times_html/environment.html", "r") as f:
-            t = Template(f.read())
-
         if shutdown_delay == "-" or shutdown_time == "-":
-            environments_wo += t.render(name=name, color=color,
-                                        days=shutdown_delay, color2=color2,
-                                        time_utc=shutdown_time).strip("\n")
+            with open("update_scripts/update_shutdown_times_html/environment_wo.html", "r") as f:
+                t = Template(f.read())
+            environments_wo += t.render(name=name, svms=svms, storage=storage).strip("\n")
             continue
+        else:
+            with open("update_scripts/update_shutdown_times_html/environment.html", "r") as f:
+                t = Template(f.read())
 
-        environments += t.render(name=name, color=color, days=shutdown_delay,
-                                 color2=color2, time_utc=shutdown_time).strip("\n")
+        environments += t.render(status=status, name=name, color=color,
+                                 days=shutdown_delay, color2=color2,
+                                 time_utc=shutdown_time, svms=svms,
+                                 storage=storage).strip("\n")
 
     with open("update_scripts/update_shutdown_times_html/template.html", "r") as f:
         t = Template(f.read())
@@ -67,7 +92,11 @@ def start(envs, config_data):
 
     content = t.render(comment=comment, info=info,
                        environments=environments).strip("\n")
-    content_wo = t.render(comment=comment_wo, info="",
+
+    with open("update_scripts/update_shutdown_times_html/template_wo.html", "r") as f:
+        t = Template(f.read())
+
+    content_wo = t.render(comment=comment_wo,
                           environments=environments_wo).strip("\n")
 
     print content
