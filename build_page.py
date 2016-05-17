@@ -244,6 +244,8 @@ def build_env(e):
     db_exists = False
     db_id = undef
 
+    has_app1 = ""
+
     user = "?"
     password = "?"
     mob_ver = "?"
@@ -259,6 +261,7 @@ def build_env(e):
     etl = ""
     userdata = ""
     db_info = ""
+    qr = ""
 
     # Loop through every VM and affix xhtml to vm_content.
     for v in e.vms:
@@ -330,6 +333,7 @@ def build_env(e):
         base_url_india = url + vm_ip_india
 
         # Writing service information
+        services_html = ""
         pub_services = ""
         if len(services) != 0:
             with open("build_html/pub_services.html", "r") as f:
@@ -341,6 +345,7 @@ def build_env(e):
             services_html = t.render(pub_services=pub_services)
 
         # Writing public IP information
+        pub_ips_html = ""
         pub_ips = ""
         if count > 0:
             with open("build_html/pub_ips.html", "r") as f:
@@ -353,7 +358,7 @@ def build_env(e):
         if vm_hostname == "lb":
             lb_html = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
                                vm_ip_india, origin_ip_us, origin_ip_india,
-                               pub_services, pub_ips)
+                               services_html, pub_ips_html)
         # Never write down URLs when a database
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
@@ -373,19 +378,19 @@ def build_env(e):
 
             db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
-                          pub_services, pub_ips)
-        elif vm_hostname == "etl":
+                          services_html, pub_ips_html)
+        elif (vm_hostname == "etl" or vm_hostname == "etl-db"):
             etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           pub_services, pub_ips)
+                           services_html, pub_ips_html)
         elif vm_hostname == "nfs":
             nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           pub_services, pub_ips)
+                           services_html, pub_ips_html)
         else:
             apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
                               vm_ip_india, origin_ip_us, origin_ip_india,
-                              pub_services, pub_ips)
+                              services_html, pub_ips_html)
 
         if vm_hostname == "app1" or vm_hostname == "app":
             has_app1 = vm_ip_us
