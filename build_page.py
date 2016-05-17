@@ -1,5 +1,6 @@
 """Builds the XHTML source that will become a Confluence page."""
 import commands
+from jinja2 import Template
 import json
 import skytapdns
 
@@ -9,6 +10,179 @@ def clean_string(text):
     text = text.replace("\'", "")
 
     return text
+
+
+def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
+             origin_ip_india, pub_services, pub_ips):
+    """Build load balancer HTML."""
+    with open("build_html/lb_ip.html", "r") as f:
+        t = Template(f.read())
+
+    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
+                  False)
+
+    with open("build_html/lb.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
+                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+
+
+def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
+             origin_ip_india, pub_services, pub_ips):
+    """Build database HTML."""
+    if vm_name.startswith("VZW"):
+        is_vzw = True
+    else:
+        is_vzw = False
+
+    with open("build_html/app_ip.html", "r") as f:
+        t = Template(f.read())
+
+    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
+                  is_vzw)
+
+    with open("build_html/app.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
+                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+
+
+def build_etl():
+    """Build ETL DB HTML."""
+    pass
+
+
+def build_nfs():
+    """Build NFS HTML."""
+    pass
+
+
+def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
+              origin_ip_india, pub_services, pub_ips):
+    """Build app/host/etc. HTML."""
+    if vm_name.startswith("VZW"):
+        is_vzw = True
+    else:
+        is_vzw = False
+
+    with open("build_html/app_ip.html", "r") as f:
+        t = Template(f.read())
+
+    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india,
+                  False, is_vzw)
+
+    with open("build_html/app.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
+                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+
+
+def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
+             is_vzw):
+    """Build IP info HTML."""
+
+    good_ip = ""
+
+    if vm_ip_us != "":
+        good_ip = vm_ip_us
+        ip = t.render(loc="US", origin_ip=origin_ip_us, ip=vm_ip_us)
+    elif vm_ip_india != "":
+        good_ip = vm_ip_india
+        ip = t.render(loc="India", origin_ip=origin_ip_india, ip=vm_ip_india)
+    else:
+        ip = ""
+        good_ip = ip
+
+    if not is_short:
+        if not is_vzw:
+            ports = ["8443", "8444", "8445", "8446"]
+        else:
+            ports = ["8001", "8003", "8004", "8002"]
+
+        with open("build_html/web.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(protocol="https", port=ports[0], ip=good_ip)
+        with open("build_html/reports.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(protocol="https", port=ports[1], ip=good_ip)
+        with open("build_html/services.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(protocol="https", port=ports[2], ip=good_ip)
+        with open("build_html/mobility.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(protocol="https", port=ports[3], ip=good_ip)
+
+    return ip.strip("\n")
+
+
+def build_pub_services(internal_port, external_ip, external_port):
+    """Build published services HTML."""
+    with open("build_html/pub_service_item.html", "r") as f:
+        t = Template(f.read())
+    return t.render(internal_port=internal_port, external_ip=external_ip,
+                    external_port=external_port).strip("\n")
+
+
+def build_pub_ips(addr):
+    """Build public IPs HTML."""
+    with open("build_html/pub_ip_item.html", "r") as f:
+        t = Template(f.read())
+    return t.render(pub_ip=addr).strip("\n")
+
+
+def build_userdata(data):
+    """Build userdata HTML."""
+    userdata_html = ""
+
+    with open("build_html/userdata_item.html", "r") as f:
+        t = Template(f.read())
+
+    if "shutdown_time" in data:
+        userdata_html += t.render(key="shutdown_time",
+                                  value=str(data.shutdown_time))
+    if "shutdown_delay" in data:
+        userdata_html += t.render(key="shutdown_delay",
+                                  value=(data.shutdown_delay))
+
+
+def build_add_details(env_id, user, password):
+    """Build Additional Details HTML."""
+    with open("build_html/add_details.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(env_id=env_id, admin_user=user, admin_pass=password)
+
+
+def build_mob_details(mob_ver, apk_build, war_build):
+    """Build Additional Details HTML."""
+    with open("build_html/mob_details.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(mob_version=mob_ver, apk_build=apk_build,
+                    war_build=war_build)
+
+
+def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
+                  db_sid, oracle_port):
+    """Build DB info HTML."""
+    if db_ip_us != "":
+        good_ip = db_ip_us
+        loc = "US"
+    elif db_ip_india != "":
+        good_ip = db_ip_india
+        loc = "India"
+    else:
+        return ""
+
+    with open("build_html/db_info.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(os_user=oracle_user, loc=loc, db_ip=good_ip,
+                    db_schema=db_schema, dp_pass=db_password, sid=db_sid,
+                    db_port=oracle_port)
 
 
 def build_env(e):
@@ -42,14 +216,6 @@ def build_env(e):
     admin_access = undef
     user_access = undef
 
-    # Temporary!
-    #if env_name.startswith("VZW"):
-    #    content = ("Auto documentation for this, and all Verizon environments, "
-    #               "has been suspended due to security concerns until further "
-    #               "notice.<br/><br/>Please go to this environment on Skytap to"
-    #               " access information on this environment.")
-    #    return content
-
     # Exceptions are made when dealing with Verizon servers.
     if env_name.startswith("VZW"):
         url = "http://"
@@ -69,26 +235,21 @@ def build_env(e):
     db_exists = False
     db_id = undef
 
-    comment = ("Maintained by AutoDocs; any changes made on this page will be "
-               "undone on the next iteration.")
     user = "?"
     password = "?"
     mob_ver = "?"
     apk_build = "?"
     war_build = "?"
 
-    # First block of xhtml.
-    # "content" will be affixed with vm_content and lb_content later on.
-    content = ("<ac:layout><ac:layout-section ac:type=\"two_equal\"><ac:lay"
-               "out-cell><p>" + comment + "</p></ac:layout-cell><ac:layout"
-               "-cell><p>&nbsp;</p></ac:layout-cell></ac:layout-section>")
-
-    content += ("<ac:layout-section ac:type=\"two_equal\">")
-    content += ("<ac:layout-cell>")
-
-    vm_content = ""
-    lb_content = ""
-    has_app1 = ""
+    comment = ("Maintained by AutoDocs; any changes made on this page will be "
+               "undone on the next iteration.")
+    lb = ""
+    apps = ""
+    nfs = ""
+    db = ""
+    etl = ""
+    userdata = ""
+    db_info = ""
 
     # Loop through every VM and affix xhtml to vm_content.
     for v in e.vms:
@@ -159,116 +320,33 @@ def build_env(e):
         base_url_us = url + vm_ip_us
         base_url_india = url + vm_ip_india
 
-        # pub_content holds information displayed at the end of the individual
-        # VM blocks.
-        pub_content = ""
-
         # Writing service information
-        serv_count = 0
+        pub_services = ""
         if len(services) != 0:
-            pub_content += ("<p><strong> - Published Services:</strong></p>")
+            with open("build_html/pub_services.html", "r") as f:
+                t = Template(f.read())
             for s in services:
-                serv_count += 1
-                pub_content += ("<p style=\"margin-left: 30.0px;\">Internal Port " + str(s["internal_port"]) + " mapped to " + str(s["external_ip"]) + ":" + str(s["external_port"]) + "<span style=\"line-height: 1.4285715;\">&nbsp;</span></p>")
+                pub_services += build_pub_services(str(s["internal_port"]),
+                                                   str(s["external_ip"]),
+                                                   str(s["external_port"]))
+            services_html = t.render(pub_services=pub_services)
 
         # Writing public IP information
+        pub_ips = ""
         if count > 0:
-            pub_content += ("<p><strong> - Public IP Addresses:</strong></p>")
+            with open("build_html/pub_ips.html", "r") as f:
+                t = Template(f.read())
             for k in public_ips:
-                addr = k["address"]
-                pub_content += ("<p><ac:structured-macro ac:macro-id=\"d245b98a-9f3e-46d0-9684-e07e3830153f\" ac:name=\"expand\" ac:schema-version=\"1\">")
-                pub_content += ("<ac:parameter ac:name=\"title\">")
-                pub_content += ("https://" + addr + "/cats/")
-                pub_content += ("</ac:parameter>")
-                pub_content += ("<ac:rich-text-body>")
-
-                pub_content += ("<p>Direct link: <a href=\"https://" + addr + "/cats/\">https://" + addr + "/cats/</a></p>")
-
-                qrc = ("<img src=\"http://api.qrserver.com/v1/create-qr-code/?data=https://" + addr + "/cats/&amp;size=150x150\" />")
-
-                pub_content += ("<p>" + qrc + "</p>")
-
-                pub_content += ("</ac:rich-text-body></ac:structured-macro></p>")
-
-        # This will hold main content for each VM block
-        vm_info = []
-
-        #print ("us ip is " + vm_ip_us)
-        #print ("india ip is " + vm_ip_india)
+                pub_ips += build_pub_ips(k["address"])
+            pub_ips_html = t.render(pub_ips=pub_ips)
 
         # If this VM isn't the load balancer...
-        if vm_hostname != "lb":
-            #print ("Writing content for something that isn't lb")
-            vm_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
-            vm_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
-
-            # IPs should be displayed when...
-            if vm_ip_us != "":
-                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + origin_ip_us + "</p>")
-                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
-            if vm_ip_india != "":
-                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + origin_ip_india + "</p>")
-                vm_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
-
-            # Never write down URLs when a database
-            if vm_hostname != "db":
-                #print ("Writing content for something that isn't db")
-                if vm_ip_us != "":
-
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_us + ":" + str(port_home) + "/cats/\">" + base_url_us + ":" + str(port_home) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_us + ":" + str(port_reports) + "/cats/\">" + base_url_us + ":" + str(port_reports) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_us + ":" + str(port_services) + "/cats/\">" + base_url_us + ":" + str(port_services) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_us + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
-
-                    if vm_ip_india != "":
-                        vm_content += ("<p><ac:structured-macro ac:macro-id=\"d245b98a-9f3e-46d0-9684-e07e3830153f\" ac:name=\"expand\" ac:schema-version=\"1\">")
-                        vm_content += ("<ac:parameter ac:name=\"title\">")
-                        vm_content += ("India VPN details:")
-                        vm_content += ("</ac:parameter>")
-                        vm_content += ("<ac:rich-text-body>")
-
-                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_india + ":" + str(port_home) + "/cats/\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
-                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_india + ":" + str(port_reports) + "/cats/\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
-                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_india + ":" + str(port_services) + "/cats/\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
-                        vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
-
-                        vm_content += ("</ac:rich-text-body></ac:structured-macro></p>")
-                elif vm_ip_india != "":
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Web: <a href=\"" + base_url_india + ":" + str(port_home) + "/cats/\">" + base_url_india + ":" + str(port_home) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Reports: <a href=\"" + base_url_india + ":" + str(port_reports) + "/cats/\">" + base_url_india + ":" + str(port_reports) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Services: <a href=\"" + base_url_india + ":" + str(port_services) + "/cats/\">" + base_url_india + ":" + str(port_services) + "/cats/</a></p>")
-                    vm_content += ("<p style=\"margin-left: 30.0px;\">CATS Mobility: <a href=\"" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/\">" + base_url_india + ":" + str(port_mob) + "/" + mob_end + "/</a></p>")
-
-                # Add pub_content at the end.
-                vm_content += pub_content
-
-            if vm_hostname == "app1" or vm_hostname == "app":
-                has_app1 = vm_ip_us
-                if vm_ip_us == "":
-                    has_app1 = vm_ip_india
-
-        # Print this stuff if this VM is load balancer
-        else:
-            #print ("Writing content for something that IS lb")
-            lb_content += ("<h2><strong style=\"line-height: 1.4285715;\">" + vm_hostname + " - " + vm_name + "</strong></h2>")
-            lb_content += ("<p style=\"margin-left: 30.0px;\">VM ID: " + vm_id + "</p>")
-
-            if vm_ip_us != "":
-                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + origin_ip_us + "</p>")
-                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (US): " + vm_ip_us + "</p>")
-            if vm_ip_india != "":
-                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + origin_ip_india + "</p>")
-                lb_content += ("<p style=\"margin-left: 30.0px;\">IP (India): " + vm_ip_india + "</p>")
-
-            if vm_ip_us != "":
-                lb_content += ("<p style=\"margin-left: 30.0px;\">Load Balancer URL (US): <a href=\"" + base_url_us + "/cats/\">" + base_url_us + "/cats/</a></p>")
-            if vm_ip_india != "":
-                lb_content += ("<p style=\"margin-left: 30.0px;\">Load Balancer URL (India): <a href=\"" + base_url_india + "/cats/\">" + base_url_india + "/cats/</a></p>")
-
-            # Add pub_content at the end.
-            lb_content += pub_content
-
-        if vm_hostname == "db":
+        if vm_hostname == "lb":
+            lb_html = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
+                               vm_ip_india, origin_ip_us, origin_ip_india,
+                               pub_services, pub_ips)
+        # Never write down URLs when a database
+        elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
             db_exists = True
             db_id = vm_id
@@ -284,65 +362,43 @@ def build_env(e):
             db_sid = "orcl"
             oracle_port = "1521"
 
-    content += ("" + lb_content + vm_content)
+            db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+                          vm_ip_india, origin_ip_us, origin_ip_india,
+                          pub_services, pub_ips)
+        elif vm_hostname == "etl":
+            etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+                           vm_ip_india, origin_ip_us, origin_ip_india,
+                           pub_services, pub_ips)
+        elif vm_hostname == "nfs":
+            nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+                           vm_ip_india, origin_ip_us, origin_ip_india,
+                           pub_services, pub_ips)
+        else:
+            apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
+                              vm_ip_india, origin_ip_us, origin_ip_india,
+                              pub_services, pub_ips)
 
-    content += ("</ac:layout-cell>")
-    content += ("<ac:layout-cell>")
+        if vm_hostname == "app1" or vm_hostname == "app":
+            has_app1 = vm_ip_us
+            if vm_ip_us == "":
+                has_app1 = vm_ip_india
 
-    userdata_content = ""
+    userdata = build_userdata(e.userdata)
 
-    if "shutdown_delay" in e.user_data:
-        userdata_content += ("<p>shutdown_delay: " + str(e.user_data.shutdown_delay) + "</p>")
-    if "shutdown_time" in e.user_data:
-        userdata_content += ("<p>shutdown_time: " + str(e.user_data.shutdown_time) + "</p>")
-    if "env_dns_alias" in e.user_data:
-        userdata_content += ("<p>env_dns_alias: " + e.user_data.env_dns_alias + "</p>")
+    add_details = build_add_details(env_id, user, password)
 
-    if userdata_content != "":
-        content += ("<p><strong>Environment Userdata</strong></p>" + userdata_content)
-        content += ("<p>&nbsp;</p>")
-
-    content += ("<p><strong>Additional Details</strong></p>")
-    content += ("<p>Environment ID: " + str(env_id) + "</p>")
-    content += ("<p>Admin User*: " + user + "</p>")
-    content += ("<p>Admin PW*: " + password + "</p>")
-    content += ("<p>Skytap Environment: <a href=\"" + config_url + "\">" + config_url + "</a></p>")
-    content += ("<p>Environment Dashboard: <a href=\"" + dash_url + "\">" + dash_url + "</a></p>")
-    content += ("<p>&nbsp;</p>")
-
-    content += ("<p><strong>Mobility Details:</strong></p>")
-    content += ("<p>Version*: " + mob_ver + "</p>")
-    content += ("<p>APK Build*: " + apk_build + "</p>")
-    content += ("<p>WAR Build: " + war_build + "</p>")
-    content += ("<p>&nbsp;</p>")
+    mob_details = build_mob_details(mob_ver, apk_build, war_build)
 
     if db_exists:
-        content += ("<p><strong>Oracle DB Info</strong></p>")
-        content += ("<ul><li>Oracle OS User: " + oracle_user + "</li>")
-        if db_ip_us != "":
-            content += ("<li>IP (US): " + db_ip_us + "</li>")
-        if db_ip_india != "":
-            content += ("<li>IP (India): " + db_ip_india + "</li>")
-        content += ("<li>DB Schema: " + db_schema + "</li>")
-        content += ("<li>DB Password: " + db_password + "</li>")
-        content += ("<li>SID: " + db_sid + "</li>")
-        content += ("<li>Port: " + oracle_port + "</li>")
-        content += ("</ul>")
-
-    content += ("<p>&nbsp;</p><p>&nbsp;</p>")
+        db_info = build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema,
+                                db_password, db_sid, oracle_port)
 
     if has_app1 != "":
-        qr_url = ("<img src=\"http://api.qrserver.com/v1/create-qr-code/?data="
-                  "" + has_app1 + ":" + str(port_mob) + ":1::"
-                  "" + env_name + "&amp;size=150x150\" />")
+        with open("build_html/qr.html", "r") as f:
+            t = Template(f.read())
 
-        content += ("<table><tbody><tr><th><p>QR Code for app1:</p><p>"
-                    "(Android only)</p></th><th>" + qr_url + "</th></tr></tbody>"
-                    "</table><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>")
-
-    content += ("</ac:layout-cell></ac:layout-section></ac:layout>")
-
-    # content = clean_string(content)
+        qr = t.render(vm_name="app1", ip=has_app1, port=str(port_mob),
+                      env_name=env_name)
 
     # -------------------------------------------------------------------------
 
@@ -393,4 +449,3 @@ def build_vm(v):
     content += ("</p>")
 
     return vm_hostname, content
-
