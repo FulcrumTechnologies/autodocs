@@ -147,6 +147,15 @@ def build_userdata(data):
         userdata_html += t.render(key="shutdown_delay",
                                   value=(data.shutdown_delay))
 
+    if "env_dns_alias" in data:
+        userdata_html += t.render(key="env_dns_alias",
+                                  value=(data.env_dns_alias))
+
+    with open("build_html/userdata.html", "r") as f:
+        t = Template(f.read())
+
+    return t.render(userdata_items=userdata_html)
+
 
 def build_add_details(env_id, user, password):
     """Build Additional Details HTML."""
@@ -383,7 +392,7 @@ def build_env(e):
             if vm_ip_us == "":
                 has_app1 = vm_ip_india
 
-    userdata = build_userdata(e.userdata)
+    userdata = build_userdata(e.user_data)
 
     add_details = build_add_details(env_id, user, password)
 
@@ -405,7 +414,9 @@ def build_env(e):
     with open("build_html/template.html", "r") as f:
         t = Template(f.read())
 
-    content = t.render()
+    content = t.render(comment=comment, lb=lb, apps=apps, nfs=nfs, db=db,
+                       etl=etl, userdata=userdata, add_details=add_details,
+                       mob_details=mob_details, db_info=db_info, qr=qr)
 
     return content
 
