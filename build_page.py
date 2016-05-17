@@ -402,6 +402,11 @@ def build_env(e):
 
     # -------------------------------------------------------------------------
 
+    with open("build_html/template.html", "r") as f:
+        t = Template(f.read())
+
+    content = t.render()
+
     return content
 
 
