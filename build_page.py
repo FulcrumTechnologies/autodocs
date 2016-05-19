@@ -18,14 +18,17 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/lb_ip.html", "r") as f:
         t = Template(f.read())
 
+    img = "http://i.imgur.com/oAMkqDR.png"
+
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
                   False)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
-                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+    return t.render(img=img, hostname=vm_hostname, name=vm_name, id=vm_id,
+                    ip=ip, pub_services=pub_services,
+                    pub_ips=pub_ips).strip("\n")
 
 
 def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
@@ -36,6 +39,8 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    img = "http://i.imgur.com/KSLHUEi.png"
+
     with open("build_html/app_ip.html", "r") as f:
         t = Template(f.read())
 
@@ -45,8 +50,9 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
-                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+    return t.render(img=img, hostname=vm_hostname, name=vm_name, id=vm_id,
+                    ip=ip, pub_services=pub_services,
+                    pub_ips=pub_ips).strip("\n")
 
 
 def build_etl():
@@ -67,6 +73,8 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    img = "http://i.imgur.com/g35icku.png"
+
     with open("build_html/app_ip.html", "r") as f:
         t = Template(f.read())
 
@@ -76,8 +84,9 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(hostname=vm_hostname, name=vm_name, id=vm_id, ip=ip,
-                    pub_services=pub_services, pub_ips=pub_ips).strip("\n")
+    return t.render(img=img, hostname=vm_hostname, name=vm_name, id=vm_id,
+                    ip=ip, pub_services=pub_services,
+                    pub_ips=pub_ips).strip("\n")
 
 
 def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
@@ -89,9 +98,11 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
     if vm_ip_us != "":
         good_ip = vm_ip_us
         ip = t.render(loc="US", origin_ip=origin_ip_us, ip=vm_ip_us)
+        loc_img = "http://i.imgur.com/OhFPUNT.png"
     elif vm_ip_india != "":
         good_ip = vm_ip_india
         ip = t.render(loc="India", origin_ip=origin_ip_india, ip=vm_ip_india)
+        loc_img = "http://i.imgur.com/yMxa7oP.png"
     else:
         ip = ""
         good_ip = ip
@@ -169,13 +180,13 @@ def build_add_details(runstate, env_id, user, password):
         t = Template(f.read())
 
     if runstate == "running":
-        url = "http://i.imgur.com/60gzHIt.png"
+        img = "http://i.imgur.com/60gzHIt.png"
     elif (runstate == "stopped" or runstate == "suspended"):
-        url = "http://i.imgur.com/mOS9FfK.png"
+        img = "http://i.imgur.com/mOS9FfK.png"
     else:
-        url = "placeholder"
+        img = "placeholder"
 
-    return t.render(url=url, env_id=env_id, admin_user=user,
+    return t.render(img=img, env_id=env_id, admin_user=user,
                     admin_pass=password)
 
 
@@ -194,18 +205,20 @@ def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
     if db_ip_us != "":
         good_ip = db_ip_us
         loc = "US"
+        loc_img = "http://i.imgur.com/OhFPUNT.png"
     elif db_ip_india != "":
         good_ip = db_ip_india
         loc = "India"
+        loc_img = "http://i.imgur.com/yMxa7oP.png"
     else:
         return ""
 
     with open("build_html/db_info.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(os_user=oracle_user, loc=loc, db_ip=good_ip,
-                    db_schema=db_schema, dp_pass=db_password, sid=db_sid,
-                    db_port=oracle_port)
+    return t.render(os_user=oracle_user, loc=loc, loc_img=loc_img,
+                    db_ip=good_ip, db_schema=db_schema, dp_pass=db_password,
+                    sid=db_sid, db_port=oracle_port)
 
 
 def build_env(e):
@@ -220,8 +233,6 @@ def build_env(e):
     Unlike Cthulhu, this function returns a big ball of XHTML that will serve as
     the Confluence page's code.
     """
-
-    #print ("Writing content for environment..."),
 
     # Making a json containing important information. This will be stored in a
     # file in JSONS directory and used to perform various functions.
@@ -370,9 +381,9 @@ def build_env(e):
 
         # If this VM isn't the load balancer...
         if vm_hostname == "lb":
-            lb_html = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
-                               vm_ip_india, origin_ip_us, origin_ip_india,
-                               services_html, pub_ips_html)
+            lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
+                          vm_ip_india, origin_ip_us, origin_ip_india,
+                          services_html, pub_ips_html)
         # Never write down URLs when a database
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
