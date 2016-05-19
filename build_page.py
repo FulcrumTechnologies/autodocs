@@ -13,10 +13,10 @@ def clean_string(text):
 
 
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips):
+             origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build load balancer HTML."""
 
-    if vm_name.startswith("VZW"):
+    if env_name.startswith("VZW"):
         is_vzw = True
     else:
         is_vzw = False
@@ -27,7 +27,7 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     img = "http://i.imgur.com/oAMkqDR.png"
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw)
+                  is_vzw, vm_hostname)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
@@ -38,9 +38,9 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
 
 
 def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips):
+             origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build database HTML."""
-    if vm_name.startswith("VZW"):
+    if env_name.startswith("VZW"):
         is_vzw = True
     else:
         is_vzw = False
@@ -72,9 +72,9 @@ def build_nfs():
 
 
 def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-              origin_ip_india, pub_services, pub_ips):
+              origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build app/host/etc. HTML."""
-    if vm_name.startswith("VZW"):
+    if env_name.startswith("VZW"):
         is_vzw = True
     else:
         is_vzw = False
@@ -103,12 +103,12 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
 
     if vm_ip_us != "":
         good_ip = vm_ip_us
-        loc_img = "http://i.imgur.com/OhFPUNT.png"
-        ip = t.render(loc_img=loc_img, origin_ip=origin_ip_us, ip=vm_ip_us)
+        loc = "US"
+        ip = t.render(loc=loc, origin_ip=origin_ip_us, ip=vm_ip_us)
     elif vm_ip_india != "":
         good_ip = vm_ip_india
-        loc_img = "http://i.imgur.com/yMxa7oP.png"
-        ip = t.render(loc_img=loc_img, origin_ip=origin_ip_india,
+        loc = "India"
+        ip = t.render(loc=loc, origin_ip=origin_ip_india,
                       ip=vm_ip_india)
     else:
         ip = ""
@@ -226,17 +226,17 @@ def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
     """Build DB info HTML."""
     if db_ip_us != "":
         good_ip = db_ip_us
-        loc_img = "http://i.imgur.com/OhFPUNT.png"
+        loc = "US"
     elif db_ip_india != "":
         good_ip = db_ip_india
-        loc_img = "http://i.imgur.com/yMxa7oP.png"
+        loc = "India"
     else:
         return ""
 
     with open("build_html/db_info.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(os_user=oracle_user, loc_img=loc_img, db_ip=good_ip,
+    return t.render(os_user=oracle_user, loc=loc, db_ip=good_ip,
                     db_schema=db_schema, dp_pass=db_password, sid=db_sid,
                     db_port=oracle_port)
 
@@ -403,7 +403,7 @@ def build_env(e):
         if vm_hostname == "lb":
             lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html)
+                          services_html, pub_ips_html, env_name)
         # Never write down URLs when a database
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
@@ -423,19 +423,19 @@ def build_env(e):
 
             db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html)
+                          services_html, pub_ips_html, env_name)
         elif (vm_hostname == "etl" or vm_hostname == "etl-db"):
             etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           services_html, pub_ips_html)
+                           services_html, pub_ips_html, env_name)
         elif vm_hostname == "nfs":
             nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           services_html, pub_ips_html)
+                           services_html, pub_ips_html, env_name)
         else:
             apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
                               vm_ip_india, origin_ip_us, origin_ip_india,
-                              services_html, pub_ips_html)
+                              services_html, pub_ips_html, env_name)
 
         if vm_hostname == "app1" or vm_hostname == "app":
             has_app1 = vm_ip_us
