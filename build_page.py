@@ -15,13 +15,19 @@ def clean_string(text):
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
              origin_ip_india, pub_services, pub_ips):
     """Build load balancer HTML."""
+
+    if vm_name.startswith("VZW"):
+        is_vzw = True
+    else:
+        is_vzw = False
+
     with open("build_html/lb_ip.html", "r") as f:
         t = Template(f.read())
 
     img = "http://i.imgur.com/oAMkqDR.png"
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  False)
+                  is_vzw)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
@@ -90,32 +96,43 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
 
 
 def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
-             is_vzw):
+             is_vzw, vm_hostname=""):
     """Build IP info HTML."""
 
     good_ip = ""
 
     if vm_ip_us != "":
         good_ip = vm_ip_us
-        ip = t.render(loc="US", origin_ip=origin_ip_us, ip=vm_ip_us)
         loc_img = "http://i.imgur.com/OhFPUNT.png"
+        ip = t.render(loc_img=loc_img, origin_ip=origin_ip_us, ip=vm_ip_us)
     elif vm_ip_india != "":
         good_ip = vm_ip_india
-        ip = t.render(loc="India", origin_ip=origin_ip_india, ip=vm_ip_india)
         loc_img = "http://i.imgur.com/yMxa7oP.png"
+        ip = t.render(loc_img=loc_img, origin_ip=origin_ip_india,
+                      ip=vm_ip_india)
     else:
         ip = ""
         good_ip = ip
+
+    if is_vzw and vm_hostname == "lb":
+        with open("build_html/web.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(protocol="https", port_1=":80", port_2="", ip=good_ip)
+
+        with open("build_html/mobility_mobile.html", "r") as f:
+            t = Template(f.read())
+        ip += t.render(ip=good_ip, port="3020")
 
     if not is_short:
         if not is_vzw:
             ports = ["8443", "8444", "8445", "8446"]
         else:
-            ports = ["8001", "8003", "8004", "8002"]
+            ports = ["8001", "8003", "8004", "8002", "3020"]
 
         with open("build_html/web.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port=ports[0], ip=good_ip)
+        ip += t.render(protocol="https", port_1=ports[0],
+                       port_2=(":" + ports[0]), ip=good_ip)
         with open("build_html/reports.html", "r") as f:
             t = Template(f.read())
         ip += t.render(protocol="https", port=ports[1], ip=good_ip)
@@ -125,6 +142,11 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
         with open("build_html/mobility.html", "r") as f:
             t = Template(f.read())
         ip += t.render(protocol="https", port=ports[3], ip=good_ip)
+
+        if is_vzw:
+            with open("build_html/mobility_mobile.html", "r") as f:
+                t = Template(f.read())
+            ip += t.render(ip=good_ip, port=ports[4])
 
     return ip.strip("\n")
 
@@ -204,11 +226,9 @@ def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
     """Build DB info HTML."""
     if db_ip_us != "":
         good_ip = db_ip_us
-        loc = "US"
         loc_img = "http://i.imgur.com/OhFPUNT.png"
     elif db_ip_india != "":
         good_ip = db_ip_india
-        loc = "India"
         loc_img = "http://i.imgur.com/yMxa7oP.png"
     else:
         return ""
@@ -216,9 +236,9 @@ def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
     with open("build_html/db_info.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(os_user=oracle_user, loc=loc, loc_img=loc_img,
-                    db_ip=good_ip, db_schema=db_schema, dp_pass=db_password,
-                    sid=db_sid, db_port=oracle_port)
+    return t.render(os_user=oracle_user, loc_img=loc_img, db_ip=good_ip,
+                    db_schema=db_schema, dp_pass=db_password, sid=db_sid,
+                    db_port=oracle_port)
 
 
 def build_env(e):
