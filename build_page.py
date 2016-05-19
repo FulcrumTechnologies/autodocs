@@ -141,14 +141,20 @@ def build_userdata(data):
         t = Template(f.read())
 
     if "shutdown_time" in data:
-        userdata_html += t.render(key="shutdown_time",
+        userdata_html += t.render(key="shutdown_time", color="Blue",
                                   value=str(data.shutdown_time))
     if "shutdown_delay" in data:
-        userdata_html += t.render(key="shutdown_delay",
+        if data.shutdown_delay == 0:
+            color = "Red"
+        elif data.shutdown_delay < 3:
+            color = "Yellow"
+        else:
+            color = "Green"
+        userdata_html += t.render(key="shutdown_delay", color=color,
                                   value=(data.shutdown_delay))
 
     if "env_dns_alias" in data:
-        userdata_html += t.render(key="env_dns_alias",
+        userdata_html += t.render(key="env_dns_alias", color="Grey",
                                   value=(data.env_dns_alias))
 
     with open("build_html/userdata.html", "r") as f:
