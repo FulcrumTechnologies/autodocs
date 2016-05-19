@@ -163,12 +163,20 @@ def build_userdata(data):
     return t.render(userdata_items=userdata_html)
 
 
-def build_add_details(env_id, user, password):
+def build_add_details(runstate, env_id, user, password):
     """Build Additional Details HTML."""
     with open("build_html/add_details.html", "r") as f:
         t = Template(f.read())
 
-    return t.render(env_id=env_id, admin_user=user, admin_pass=password)
+    if runstate == "running":
+        url = "http://i.imgur.com/60gzHIt.png"
+    elif (runstate == "stopped" or runstate == "suspended"):
+        url = "http://i.imgur.com/mOS9FfK.png"
+    else:
+        url = "placeholder"
+
+    return t.render(url=url, env_id=env_id, admin_user=user,
+                    admin_pass=password)
 
 
 def build_mob_details(mob_ver, apk_build, war_build):
@@ -405,7 +413,7 @@ def build_env(e):
 
     userdata = build_userdata(e.user_data)
 
-    add_details = build_add_details(env_id, user, password)
+    add_details = build_add_details(e.runstate, env_id, user, password)
 
     mob_details = build_mob_details(mob_ver, apk_build, war_build)
 
