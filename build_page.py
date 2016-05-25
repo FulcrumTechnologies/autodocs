@@ -480,16 +480,9 @@ def build_vm(v):
     Confluence. It also returns the hostname out of necessity to win a battle
     with a notoriously evasive bug.
     """
-    #print ("Writing content for VM...")
 
     vm_name = v.name
     vm_id = str(v.id)
-
-    content = "<p>"
-
-    content += ("ID: " + vm_id + "<br/><br/>")
-
-    #content += ("Configuration URL: " + v.configuration_url + "<br/>")
 
     for i in v.interfaces:
         vm_hostname = i.hostname
@@ -508,10 +501,9 @@ def build_vm(v):
 
         content += ("Local IP: " + i.ip + "<br/>")
 
-    content += ("<br/><br/>")
+    with open("build_html/vm_page.html", "r") as f:
+        t = Template(f.read())
 
-    content += ("<ac:structured-macro ac:name=\"iframe\" ac:schema-version=\"1\" ac:macro-id=\"1c30019c-dd2a-4c4c-bfa9-387ce00e1d4d\"><ac:parameter ac:name=\"src\"><ri:url ri:value=\"http://dashboard.fulcrum.net/" + vm_id + "\" /></ac:parameter><ac:parameter ac:name=\"width\">850</ac:parameter><ac:parameter ac:name=\"height\">535</ac:parameter><ac:rich-text-body><p>&nbsp;</p></ac:rich-text-body></ac:structured-macro>")
-
-    content += ("</p>")
+    content = t.render(vm_id=vm_id, vpn_stuff=content)
 
     return vm_hostname, content
