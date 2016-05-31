@@ -254,23 +254,19 @@ def build_env(e):
     the Confluence page's code.
     """
 
-    # Making a json containing important information. This will be stored in a
-    # file in JSONS directory and used to perform various functions.
-
-    # Placeholder variables.
+    # Placeholder variable
     undef = "Unavailable"
-    undef_err = "Unavailable: data missing"
 
+    # Getting basic info about environment
     env_id = str(e.id)
     env_name = clean_string(e.name)
-
     config_url = e.url
     dash_url = "http://dashboard.fulcrum.net/" + env_id
     puppet_enabled = undef
     admin_access = undef
     user_access = undef
 
-    # Exceptions are made when dealing with Verizon servers.
+    # Some exceptions are made when dealing with Verizon servers.
     if env_name.startswith("VZW"):
         url = "http://"
         port_home = 8001
@@ -287,7 +283,6 @@ def build_env(e):
         mob_end = "catsmob"
 
     db_exists = False
-    db_id = undef
 
     has_app1 = ""
 
@@ -308,10 +303,10 @@ def build_env(e):
     db_info = ""
     qr = ""
 
-    # Loop through every VM and affix xhtml to vm_content.
+    # Loop through every VM and make XHTML based on what the VM is used for
     for v in e.vms:
+        # Getting basic info about VM
         vm_name = v.name
-
         vm_id = str(v.id)
         vm_user = undef
         vm_pass = undef
@@ -325,10 +320,11 @@ def build_env(e):
 
         services = []
 
-        # Create data in JSON for individual service information.
+        # Some information can only be retrieved from interfaces
         for i in v.interfaces:
             vm_hostname = i.hostname
             int_data = json.loads(i.json())
+            # VPN: India or US?
             try:
                 for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
                     if (n["vpn_id"] == "vpn-661182" or
@@ -353,11 +349,12 @@ def build_env(e):
                 except AttributeError:
                     pass
 
+        # Get the DNS alias
         env_dns_alias = None
-
         if "env_dns_alias" in e.user_data:
             env_dns_alias = e.user_data.env_dns_alias
 
+        # "Origin IP" is the *real* IP address (not the DNS name)
         origin_ip_us = ""
         origin_ip_india = ""
 
@@ -407,6 +404,7 @@ def build_env(e):
         # Never write down URLs when a database
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
+            # Some of this is currently unused.
             db_exists = True
             db_id = vm_id
             db_ip_us = vm_ip_us
@@ -437,21 +435,21 @@ def build_env(e):
                               vm_ip_india, origin_ip_us, origin_ip_india,
                               services_html, pub_ips_html, env_name)
 
+        # This determines if a QR code should be written at the end.
         if vm_hostname == "app1" or vm_hostname == "app":
             has_app1 = vm_ip_us
             if vm_ip_us == "":
                 has_app1 = vm_ip_india
 
+    # Build the stuff on the rightmost column
     userdata = build_userdata(e.user_data)
-
     add_details = build_add_details(e.runstate, env_id, user, password)
-
     mob_details = build_mob_details(mob_ver, apk_build, war_build)
-
     if db_exists:
         db_info = build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema,
                                 db_password, db_sid, oracle_port)
 
+    # Build QR stuff if there is at least one app VM in the environment
     if has_app1 != "":
         with open("build_html/qr.html", "r") as f:
             t = Template(f.read())
@@ -459,7 +457,7 @@ def build_env(e):
         qr = t.render(vm_name="app1", ip=has_app1, port=str(port_mob),
                       env_name=env_name)
 
-    # -------------------------------------------------------------------------
+    # Finally, put all the stuff into the template.html Jinja template
 
     with open("build_html/template.html", "r") as f:
         t = Template(f.read())
@@ -481,9 +479,11 @@ def build_vm(v):
     with a notoriously evasive bug.
     """
 
+    # Get basic VM info
     vm_name = v.name
     vm_id = str(v.id)
 
+    # Some information can only be obtained in interfaces
     for i in v.interfaces:
         vm_hostname = i.hostname
         int_data = json.loads(i.json())
