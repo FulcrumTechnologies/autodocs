@@ -101,14 +101,22 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
 
     good_ip = ""
 
+    if not is_vzw:
+        ports = ["8443", "8444", "8445", "8446"]
+        protocol = "https"
+    else:
+        ports = ["8001", "8003", "8004", "8002", "3020"]
+        protocol = "http"
+
     if vm_ip_us != "":
         good_ip = vm_ip_us
         loc = "US"
-        ip = t.render(loc=loc, origin_ip=origin_ip_us, ip=vm_ip_us)
+        ip = t.render(protocol=protocol, loc=loc, origin_ip=origin_ip_us,
+                      ip=vm_ip_us)
     elif vm_ip_india != "":
         good_ip = vm_ip_india
         loc = "India"
-        ip = t.render(loc=loc, origin_ip=origin_ip_india,
+        ip = t.render(protocol=protocol, loc=loc, origin_ip=origin_ip_india,
                       ip=vm_ip_india)
     else:
         ip = ""
@@ -117,31 +125,26 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
     if is_vzw and vm_hostname == "lb":
         with open("build_html/web.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port_1=":80", port_2="", ip=good_ip)
+        ip += t.render(protocol=protocol, port_1=":80", port_2="", ip=good_ip)
 
         with open("build_html/mobility_mobile.html", "r") as f:
             t = Template(f.read())
         ip += t.render(ip=good_ip, port="3020")
 
     if not is_short:
-        if not is_vzw:
-            ports = ["8443", "8444", "8445", "8446"]
-        else:
-            ports = ["8001", "8003", "8004", "8002", "3020"]
-
         with open("build_html/web.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port_1=ports[0],
+        ip += t.render(protocol=protocol, port_1=ports[0],
                        port_2=(":" + ports[0]), ip=good_ip)
         with open("build_html/reports.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port=ports[1], ip=good_ip)
+        ip += t.render(protocol=protocol, port=ports[1], ip=good_ip)
         with open("build_html/services.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port=ports[2], ip=good_ip)
+        ip += t.render(protocol=protocol, port=ports[2], ip=good_ip)
         with open("build_html/mobility.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(protocol="https", port=ports[3], ip=good_ip)
+        ip += t.render(protocol=protocol, port=ports[3], ip=good_ip)
 
         if is_vzw:
             with open("build_html/mobility_mobile.html", "r") as f:
@@ -479,6 +482,8 @@ def build_vm(v):
     with a notoriously evasive bug.
     """
 
+    content = ""
+
     # Get basic VM info
     vm_name = v.name
     vm_id = str(v.id)
@@ -507,3 +512,4 @@ def build_vm(v):
     content = t.render(vm_id=vm_id, vpn_stuff=content)
 
     return vm_hostname, content
+

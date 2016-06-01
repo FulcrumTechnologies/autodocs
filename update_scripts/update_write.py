@@ -24,7 +24,6 @@ def start(envs, config_data):
     copy_envs = skytap.Environments()
 
     for e in envs:
-
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
         env_all += 1
