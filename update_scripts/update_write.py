@@ -6,6 +6,17 @@ import json
 import pyconfluence as pyco
 import skytap
 import skytapdns
+import re
+
+
+def clean_content(content):
+    """Clean content of 'random' values for matching purposes."""
+    while "ac:macro-id=" in content:
+        # We want to remove these bits since the string following is randomly
+        # determined, making it difficult to determine if there is new info
+        content = content[0:content.find("ac:macro-id=")-1] + content[content.find("ac:macro-id=")+64:]
+
+    return content
 
 
 def start(envs, config_data):
@@ -29,7 +40,6 @@ def start(envs, config_data):
         env_all += 1
 
         e_copy = copy_envs[e.id]
-        skytapdns.recreate_all_vm_dns(e_copy, True)
 
         print ("Fetching current environment information...")
         content = build_page.build_env(e)
@@ -40,17 +50,15 @@ def start(envs, config_data):
         #   content.
         # Otherwise, page does not exist, and continue to write new page.
         print ("Checking if " + str(e.id) + " currently has existing page...")
+        env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
+        cleaned_content_1 = clean_content(content)
+        cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
         try:
-            env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
-            if content == pyco.get_page_content(env_page_id):
+            if cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
             else:
-                #if e.name.startswith("VZW"):
-                #    print ("Page for " + str(e.id) + " will not be updated "
-                #           "since it is a VZW environment.")
-                #    continue
                 print ("Page for " + str(e.id) + " exists and has outdated "
                        "information.\nDeleting in preparation for rewrite...")
                 pyco.delete_page_full(env_page_id)
@@ -62,6 +70,7 @@ def start(envs, config_data):
         try:
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
+            skytapdns.recreate_all_vm_dns(e_copy, True)
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             print ("Write failed.")
@@ -69,11 +78,6 @@ def start(envs, config_data):
             continue
 
         print ("Write successful!")
-
-        #if e.name.startswith("VZW"):
-        #    print ("This is a Verizon environment; as such, no VM pages will be"
-        #           " generated.")
-        #    continue
 
         new_envs = skytap.Environments()
         new_e = new_envs[e.id]
@@ -118,4 +122,3 @@ def start(envs, config_data):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
-
