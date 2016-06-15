@@ -15,7 +15,6 @@ def clean_string(text):
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
              origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build load balancer HTML."""
-
     if env_name.startswith("VZW"):
         is_vzw = True
     else:
@@ -512,4 +511,3 @@ def build_vm(v):
     content = t.render(vm_id=vm_id, vpn_stuff=content)
 
     return vm_hostname, content
-

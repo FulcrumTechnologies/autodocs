@@ -50,10 +50,15 @@ def start(envs, config_data):
         #   content.
         # Otherwise, page does not exist, and continue to write new page.
         print ("Checking if " + str(e.id) + " currently has existing page...")
-        env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
-        cleaned_content_1 = clean_content(content)
-        cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
         try:
+            # Due to macro stuff, random strings are generated and those will
+            # make the environment rewrite itself every time. So let's compare
+            # "clean" versions of the environments, with randomness removed.
+            env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
+            cleaned_content_1 = clean_content(content)
+            cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
+
+            # Compare content, sans randomness
             if cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
@@ -68,22 +73,26 @@ def start(envs, config_data):
 
         print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
+            skytapdns.recreate_all_vm_dns(e_copy, True)
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
-            skytapdns.recreate_all_vm_dns(e_copy, True)
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             print ("Write failed.")
             env_failed += 1
             continue
 
+        # Implied from the fact that we didn't hit the TypeError above.
         print ("Write successful!")
 
+        # I have to re-fetch the Environments, just to get the Environment
+        # object of the current Environment.
         new_envs = skytap.Environments()
         new_e = new_envs[e.id]
 
         print ("Writing VMs for " + e.name + "...")
         try:
+            # Getting ID of Confluence page to write under
             parent_page_id = result["id"]
 
             for v in new_e.vms:
