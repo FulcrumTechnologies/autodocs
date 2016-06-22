@@ -1,6 +1,7 @@
 """Write wiki pages of environments which currently have none."""
 
 import build_page
+import commands
 import copy
 import json
 import pyconfluence as pyco
@@ -31,6 +32,20 @@ def start(envs, config_data):
     env_all = 0
     env_written = 0
     env_failed = 0
+
+    #env_ids = []
+
+    #status, output = commands.getstatusoutput("aws route53 list-resource-record-sets --hosted-zone-id /hostedzone/ZXN2JBL17W6BS")
+
+    #data = json.loads(output)
+
+    #for cur_env in data["ResourceRecordSets"]:
+    #    if ".skytap.fulcrum.net." not in cur_env["Name"]:
+    #        continue
+    #    id = cur_env["Name"][(cur_env["Name"].find(".skytap.fulcrum.net.") - 7):(cur_env["Name"].find(".skytap.fulcrum.net."))]
+
+    #    if id not in env_ids:
+    #        env_ids.append(id)
 
     copy_envs = skytap.Environments()
 
@@ -74,6 +89,9 @@ def start(envs, config_data):
         print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
             skytapdns.recreate_all_vm_dns(e_copy, True)
+            #if str(e.id) in env_ids:
+            #    env_ids.remove(str(e.id))
+            #    print ("Removed " + str(e.id) + " from list.")
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
         except TypeError:
@@ -131,3 +149,4 @@ def start(envs, config_data):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
+
