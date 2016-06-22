@@ -18,16 +18,18 @@ def start(envs, config_data):
         written.append(r["title"])
 
     existing = []
+    existing_names = []
 
     for e in envs:
-        existing.append(e.name)
+        existing.append(e)
+        existing_names.append(e.name)
 
     for w in written:
-        if w not in existing:
+        if w not in existing_names:
             print ("Deleting " + w + "..."),
             try:
                 pyco.delete_page_full(pyco.get_page_id(w, space))
+                skytapdns.delete_listed_dns(w)
                 print ("done.")
             except ValueError:
                 print ("cannot interact with pages whose names include \"+\".")
-
