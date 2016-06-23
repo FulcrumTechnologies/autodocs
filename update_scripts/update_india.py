@@ -3,6 +3,7 @@
 import json
 import pyconfluence as pyco
 import skytap
+from jinja2 import Template
 
 
 def start(envs, config_data):
@@ -35,23 +36,27 @@ def start(envs, config_data):
 
     content = ""
 
+    with open("update_scripts/update_india/header.html", "r") as f:
+        header = Template(f.read())
+
+    with open("update_scripts/update_india/environment.html", "r") as f:
+        env = Template(f.read())
+
     if len(apac) > 0:
-        content += "<p>All APAC environments that have a VPN connection to India are listed below:</p>"
+        comment = "All APAC environments that have a VPN connection to India are listed below:"
+        content += header.render(comment=comment)
         for i in apac:
-            content += "<p>"
-            content += "<ac:link><ri:page ri:content-title=\"" + i + "\" /><ac:plain-text-link-body><![CDATA[" + i + "]]></ac:plain-text-link-body></ac:link>"
-            content += "</p>"
+            content += env.render(name=i)
 
     if len(usw) > 0:
-        content += "<p>&nbsp;</p><p>All USW environments that have a VPN connection to India are listed below:</p>"
+        content += "<p>&nbsp;</p>"
+        comment = "All USW environments that have a VPN connection to India are listed below:"
+        content += header.render(comment=comment)
         for i in usw:
-            content += "<p>"
-            content += "<ac:link><ri:page ri:content-title=\"" + i + "\" /><ac:plain-text-link-body><![CDATA[" + i + "]]></ac:plain-text-link-body></ac:link>"
-            content += "</p>"
+            content += env.render(name=i)
 
     if content != pyco.get_page_content(pyco.get_page_id(india_name, space)):
         pyco.delete_page(pyco.get_page_id(india_name, space))
         pyco.create_page(india_name, space_parent_id, space, content)
     else:
         print ("No differences detected. Page not updated.")
-

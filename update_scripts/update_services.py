@@ -1,5 +1,6 @@
 import pyconfluence as pyco
 import skytap
+from jinja2 import Template
 
 
 def start(envs, config_data):
@@ -9,15 +10,16 @@ def start(envs, config_data):
 
     content = "Any and all VZW environments with published services will be listed below.<br/>"
 
+    with open("update_scripts/update_services/service.html", "r") as f:
+        t = Template(f.read())
+
     for e in envs:
         env_found = False
         if e.name.startswith("VZW"):
             for v in e.vms:
                 for i in v.interfaces:
                     for s in i.services:
-                        content += "<p>"
-                        content += "<ac:link><ri:page ri:content-title=\"" + e.name + "\" /><ac:plain-text-link-body><![CDATA[" + e.name + "]]></ac:plain-text-link-body></ac:link>"
-                        content += "</p>"
+                        content += t.render(name=e.name)
                         env_found = True
                         break
                     if env_found:
@@ -32,4 +34,3 @@ def start(envs, config_data):
         return
     else:
         print pyco.edit_page(pyco.get_page_id("VZW Published Services", space), "VZW Published Services", space, content)
-
