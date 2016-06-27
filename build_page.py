@@ -23,6 +23,7 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/lb_ip.html", "r") as f:
         t = Template(f.read())
 
+    # Load Balancer image
     img = "http://i.imgur.com/oAMkqDR.png"
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
@@ -44,6 +45,7 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    # Database image
     img = "http://i.imgur.com/KSLHUEi.png"
 
     with open("build_html/app_ip.html", "r") as f:
@@ -78,6 +80,7 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    # Application image
     img = "http://i.imgur.com/g35icku.png"
 
     with open("build_html/app_ip.html", "r") as f:
@@ -98,6 +101,7 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
              is_vzw, vm_hostname=""):
     """Build IP info HTML."""
 
+    # "Main" IP used for this VM block
     good_ip = ""
 
     if not is_vzw:
@@ -130,6 +134,7 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
             t = Template(f.read())
         ip += t.render(ip=good_ip, port="3020")
 
+    # If not is_short, write the web/reports/services/mobility stuff.
     if not is_short:
         with open("build_html/web.html", "r") as f:
             t = Template(f.read())
@@ -286,6 +291,7 @@ def build_env(e):
 
     db_exists = False
 
+    # Used to determine if QR code should be written
     has_app1 = ""
 
     user = "?"
@@ -294,8 +300,11 @@ def build_env(e):
     apk_build = "?"
     war_build = "?"
 
+    # This goes at the top of every environment page
     comment = ("Maintained by AutoDocs; any changes made on this page will be "
                "undone on the next iteration.")
+
+    # Essentially dummy string variables for parts of the page
     lb = ""
     apps = ""
     nfs = ""
@@ -323,6 +332,7 @@ def build_env(e):
         services = []
 
         # Some information can only be retrieved from interfaces
+        # This is how we determine if VPN is India or US
         for i in v.interfaces:
             vm_hostname = i.hostname
             int_data = json.loads(i.json())
@@ -340,7 +350,6 @@ def build_env(e):
             count = int(i.public_ips_count)
             public_ips = i.public_ips
             for s in i.services:
-                #print ("checking out services...")
                 new_service = {}
                 try:
                     new_service["internal_ip"] = str(s.id)
@@ -360,6 +369,7 @@ def build_env(e):
         origin_ip_us = ""
         origin_ip_india = ""
 
+        # Construct IP that has DNS name
         if vm_ip_us != "":
             origin_ip_us = vm_ip_us
             if not env_dns_alias:

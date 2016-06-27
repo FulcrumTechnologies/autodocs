@@ -31,6 +31,7 @@ def start(envs, config_data):
             else:
                 records[e.user_data.env_dns_alias].append(e.name)
 
+    # This contains the duplicate alias data
     last_content = ""
 
     for alias, names in records.iteritems():

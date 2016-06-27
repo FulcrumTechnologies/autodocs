@@ -32,6 +32,8 @@ def start(args):
                          "template.yml and follow the listed guidelines.\n")
         exit(1)
 
+    # Go to specific functions based on passed arguments
+    # Ex. "python update.py write" or "python update.py services"
     if (args[1] == "write"):
         os.system("clear")
         print ("Writing wiki pages.")
@@ -64,4 +66,3 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
-

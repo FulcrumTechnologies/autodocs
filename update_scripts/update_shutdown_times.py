@@ -99,12 +99,8 @@ def start(envs, config_data):
     content_wo = t.render(comment=comment_wo,
                           environments=environments_wo).strip("\n")
 
-    print content
-
     print pyco.edit_page(pyco.get_page_id("Environment Shutdown Times", space),
                          "Environment Shutdown Times", space, content)
-
-    print content_wo
 
     print pyco.edit_page(pyco.get_page_id("Environments w/o Shutdown Times", space),
                          "Environments w/o Shutdown Times", space, content_wo)

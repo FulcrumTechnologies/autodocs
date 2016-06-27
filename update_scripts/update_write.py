@@ -15,6 +15,7 @@ def clean_content(content):
     while "ac:macro-id=" in content:
         # We want to remove these bits since the string following is randomly
         # determined, making it difficult to determine if there is new info
+        # TODO: stop being lazy and try regex here
         content = content[0:content.find("ac:macro-id=")-1] + content[content.find("ac:macro-id=")+64:]
 
     return content
@@ -33,6 +34,8 @@ def start(envs, config_data):
     env_written = 0
     env_failed = 0
 
+    # Get second set of Skytap environment objects.
+    # Temporary solution to the "for loop destroying envs list" problem
     copy_envs = skytap.Environments()
 
     for e in envs:
@@ -40,8 +43,12 @@ def start(envs, config_data):
                "" + str(e.id) + ")...")
         env_all += 1
 
-        e_copy = copy_envs[e.id]
+        # Get copies of environment object from copy_envs to deal with dns stuff
+        # and vms stuff
+        e_copy_dns = copy_envs[e.id]
+        e_copy_vms = copy_envs[e.id]
 
+        # Use build_page.py to construct XHTML source based on info about e
         print ("Fetching current environment information...")
         content = build_page.build_env(e)
 
@@ -74,14 +81,14 @@ def start(envs, config_data):
 
         print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
-            skytapdns.recreate_all_vm_dns(e_copy, True)
-            #if str(e.id) in env_ids:
-            #    env_ids.remove(str(e.id))
-            #    print ("Removed " + str(e.id) + " from list.")
+            # Only mess with DNS stuff if environment page is changed.
+            skytapdns.recreate_all_vm_dns(e_copy_dns, True)
+            # Create page
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
+            # Reasons for this: parent_id not valid, name not valid ("+", "/")
             print ("Write failed.")
             env_failed += 1
             continue
@@ -89,24 +96,20 @@ def start(envs, config_data):
         # Implied from the fact that we didn't hit the TypeError above.
         print ("Write successful!")
 
-        # I have to re-fetch the Environments, just to get the Environment
-        # object of the current Environment.
-        new_envs = skytap.Environments()
-        new_e = new_envs[e.id]
-
         print ("Writing VMs for " + e.name + "...")
         try:
-            # Getting ID of Confluence page to write under
+            # Getting ID of newly-written Confluence page to write under
             parent_page_id = result["id"]
 
-            for v in new_e.vms:
+            for v in e_copy_vms.vms:
                 print ("==========\nTrying " + str(v.id) + "...")
 
                 print ("Fetching current VM information...")
+                # Build page
                 hostname, content = build_page.build_vm(v)
 
                 new_page_name = (hostname + " - " + v.name + " - "
-                                 "" + new_e.name)
+                                 "" + e_copy_vms.name)
 
                 print ("Checking if " + str(v.id) + " currently has existing "
                        "page...")
@@ -120,7 +123,7 @@ def start(envs, config_data):
                     pass
 
                 print ("Writing content to Confluence for " + str(v.id) + "...")
-                pyco.create_page(hostname + " - " + v.name + " - " + new_e.name, parent_page_id, space, content)
+                pyco.create_page(hostname + " - " + v.name + " - " + e_copy_vms.name, parent_page_id, space, content)
                 print ("Write successful!")
 
             env_written += 1
