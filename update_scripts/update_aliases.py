@@ -21,6 +21,7 @@ def start(envs, config_data):
     with open("update_scripts/update_aliases/alias.html", "r") as f:
         t = Template(f.read())
 
+    # Get aliases from userdata and append to records
     for e in envs:
         if "env_dns_alias" in e.user_data:
             print ("Found alias: " + e.user_data.env_dns_alias + " - in " + e.name)
@@ -34,6 +35,7 @@ def start(envs, config_data):
     # This contains the duplicate alias data
     last_content = ""
 
+    # Find what environments, if any, have duplicate aliases
     for alias, names in records.iteritems():
         if len(names) > 1:
             print ("Found duplicate alias: " + alias)

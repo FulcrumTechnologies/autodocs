@@ -16,6 +16,7 @@ def start(envs, config_data):
     apac = []
     usw = []
 
+    # Append environments related to India/USW VPNs to appropriate lists
     for e in envs:
         for v in e.vms:
             for i in v.interfaces:
@@ -36,12 +37,15 @@ def start(envs, config_data):
 
     content = ""
 
+    # Get readyyyyyy to Jinjaaaaa
     with open("update_scripts/update_india/header.html", "r") as f:
         header = Template(f.read())
 
     with open("update_scripts/update_india/environment.html", "r") as f:
         env = Template(f.read())
 
+    # For both USW and APAC, check if the lists have stuff in them, and then
+    # write XHTML for each if so.
     if len(apac) > 0:
         comment = "All APAC environments that have a VPN connection to India are listed below:"
         content += header.render(comment=comment)
