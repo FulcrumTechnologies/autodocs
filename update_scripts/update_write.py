@@ -22,7 +22,7 @@ def clean_content(content):
 
 
 def start(envs, config_data):
-    """Write all remaining pages of environments not currently listed."""
+    """Write Confluence pages for Skytap environments."""
 
     # Make sure you've configured config.yml! Else, this will crash the process.
     space = config_data["space"]
@@ -76,6 +76,7 @@ def start(envs, config_data):
                        "information.\nDeleting in preparation for rewrite...")
                 pyco.delete_page_full(env_page_id)
         except IndexError:
+            # No page found, so we want to write one. Continue on!
             print ("No page found for " + str(e.id) + ".")
             pass
 
@@ -128,9 +129,8 @@ def start(envs, config_data):
 
             env_written += 1
         except (TypeError, KeyError):
-            print ("Oops, I lied. Write was apparently successful, but the "
-                   "page ID could not be obtained.\nVM pages cannot be written."
-                   "\nMoving to next.")
+            print ("Page could not be created; check if the information in "
+                   "config.yml is correct, then try again.")
             env_failed += 1
             continue
 

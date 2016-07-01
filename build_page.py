@@ -315,6 +315,7 @@ def build_env(e):
     qr = ""
 
     # Loop through every VM and make XHTML based on what the VM is used for
+    # (db, lb, app, etc.)
     for v in e.vms:
         # Getting basic info about VM
         vm_name = v.name
@@ -327,8 +328,10 @@ def build_env(e):
         vm_ip_us = ""
         vm_ip_india = ""
 
+        # This is used to track number of public ips
         count = 0
 
+        # Contains information about published services
         services = []
 
         # Some information can only be retrieved from interfaces
@@ -408,12 +411,11 @@ def build_env(e):
                 pub_ips += build_pub_ips(k["address"])
             pub_ips_html = t.render(pub_ips=pub_ips)
 
-        # If this VM isn't the load balancer...
+        # If this VM is the load balancer...
         if vm_hostname == "lb":
             lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
                           services_html, pub_ips_html, env_name)
-        # Never write down URLs when a database
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
             # Some of this is currently unused.

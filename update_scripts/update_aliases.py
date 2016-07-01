@@ -11,10 +11,7 @@ def start(envs, config_data):
     with open("update_scripts/update_aliases/header.html", "r") as f:
         t = Template(f.read())
 
-    comment = ("All variables with the name \"env_dns_alias\" will appear "
-               "below, alongside details of their respective environments.")
-
-    content = t.render(comment=comment)
+    content = t.render()
 
     records = {}
 
@@ -33,7 +30,7 @@ def start(envs, config_data):
                 records[e.user_data.env_dns_alias].append(e.name)
 
     # This contains the duplicate alias data
-    last_content = ""
+    end_content = ""
 
     # Find what environments, if any, have duplicate aliases
     for alias, names in records.iteritems():
@@ -46,14 +43,12 @@ def start(envs, config_data):
             dups = ""
             for n in names:
                 dups += t2.render(name=n)
-            last_content += t.render(alias=alias, dups=dups)
+            end_content += t.render(alias=alias, dups=dups)
 
-    if last_content != "":
+    if end_content != "":
         with open("update_scripts/update_aliases/dup_alias_header.html", "r") as f:
             t = Template(f.read())
-        comment += ("All environments with identical env_dns_alias variable "
-                    "values will appear below.")
-        content += t.render(comment=comment) + last_content
+        content += t.render() + end_content
 
     print content
 
