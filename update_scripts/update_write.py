@@ -36,17 +36,25 @@ def start(envs, config_data):
 
     # Get second set of Skytap environment objects.
     # Temporary solution to the "for loop destroying envs list" problem
-    copy_envs = skytap.Environments()
+    copy_envs_dns = skytap.Environments()
+    copy_envs_vms = skytap.Environments()
 
     for e in envs:
+        if "burke" not in e.name.lower():
+            continue
+
+        # Excluding environment(s)
+        if "CATS Interim Solution QA Environment" in e.name:
+            continue
+
         print ("\n--------------------\nTrying " + e.name + " ("
                "" + str(e.id) + ")...")
         env_all += 1
 
         # Get copies of environment object from copy_envs to deal with dns stuff
         # and vms stuff
-        e_copy_dns = copy_envs[e.id]
-        e_copy_vms = copy_envs[e.id]
+        e_copy_dns = copy_envs_dns[e.id]
+        e_copy_vms = copy_envs_vms[e.id]
 
         # Use build_page.py to construct XHTML source based on info about e
         print ("Fetching current environment information...")
