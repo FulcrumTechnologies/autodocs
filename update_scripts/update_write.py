@@ -40,9 +40,6 @@ def start(envs, config_data):
     copy_envs_vms = skytap.Environments()
 
     for e in envs:
-        if "burke" not in e.name.lower():
-            continue
-
         # Excluding environment(s)
         if "CATS Interim Solution QA Environment" in e.name:
             continue
