@@ -92,6 +92,7 @@ def start(envs, config_data):
             # Create page
             result = json.loads(pyco.create_page(e.name,
                                 parent_id, space, content))
+            print json.dumps(result)
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
