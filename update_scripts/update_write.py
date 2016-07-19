@@ -10,6 +10,11 @@ import skytapdns
 import re
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def clean_content(content):
     """Clean content of 'random' values for matching purposes."""
     while "ac:macro-id=" in content:
@@ -41,10 +46,10 @@ def start(envs, config_data):
 
     for e in envs:
         # Excluding environment(s)
-        if "CATS Interim Solution QA Environment" in e.name:
+        if "CATS Interim Solution QA Environment" in clean_name(e.name):
             continue
 
-        print ("\n--------------------\nTrying " + e.name + " ("
+        print ("\n--------------------\nTrying " + clean_name(e.name) + " ("
                "" + str(e.id) + ")...")
         env_all += 1
 
@@ -67,7 +72,7 @@ def start(envs, config_data):
             # Due to macro stuff, random strings are generated and those will
             # make the environment rewrite itself every time. So let's compare
             # "clean" versions of the environments, with randomness removed.
-            env_page_id = json.loads(pyco.get_page_full_more(e.name, space))["results"][0]["id"]
+            env_page_id = json.loads(pyco.get_page_full_more(clean_name(e.name), space))["results"][0]["id"]
             cleaned_content_1 = clean_content(content)
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
@@ -90,9 +95,8 @@ def start(envs, config_data):
             # Only mess with DNS stuff if environment page is changed.
             skytapdns.recreate_all_vm_dns(e_copy_dns, True)
             # Create page
-            result = json.loads(pyco.create_page(e.name,
+            result = json.loads(pyco.create_page(clean_name(e.name),
                                 parent_id, space, content))
-            print json.dumps(result)
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
@@ -103,7 +107,7 @@ def start(envs, config_data):
         # Implied from the fact that we didn't hit the TypeError above.
         print ("Write successful!")
 
-        print ("Writing VMs for " + e.name + "...")
+        print ("Writing VMs for " + clean_name(e.name) + "...")
         try:
             # Getting ID of newly-written Confluence page to write under
             parent_page_id = result["id"]
@@ -144,3 +148,4 @@ def start(envs, config_data):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
+
