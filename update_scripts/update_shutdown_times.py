@@ -2,6 +2,11 @@ from jinja2 import Template
 import pyconfluence as pyco
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def improve_storage(storage):
     """Get better string depicting storage."""
 
@@ -32,8 +37,8 @@ def start(envs, config_data):
                   "and an environment_shutdown number in its metadata.")
 
     for e in envs:
-        print ("Updating for " + e.name + "...")
-        name = e.name
+        print ("Updating for " + clean_name(e.name) + "...")
+        name = clean_name(e.name)
         svms = e.svms
         storage = improve_storage(e.storage)
 
@@ -104,3 +109,4 @@ def start(envs, config_data):
 
     print pyco.edit_page(pyco.get_page_id("Environments w/o Shutdown Times", space),
                          "Environments w/o Shutdown Times", space, content_wo)
+

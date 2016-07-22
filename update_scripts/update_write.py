@@ -107,6 +107,9 @@ def start(envs, config_data):
         # Implied from the fact that we didn't hit the TypeError above.
         print ("Write successful!")
 
+        print ("Skipping writing VMs. Modify update_write.py to change this.")
+        continue
+
         print ("Writing VMs for " + clean_name(e.name) + "...")
         try:
             # Getting ID of newly-written Confluence page to write under

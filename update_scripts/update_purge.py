@@ -4,6 +4,11 @@ import skytap
 import skytapdns
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def start(envs, config_data):
     """Start purging environment documentation for nonexistent environments."""
 
@@ -22,7 +27,7 @@ def start(envs, config_data):
 
     for e in envs:
         existing.append(e)
-        existing_names.append(e.name)
+        existing_names.append(clean_name(e.name))
 
     for w in written:
         if w not in existing_names:
@@ -33,3 +38,4 @@ def start(envs, config_data):
                 print ("done.")
             except ValueError:
                 print ("cannot interact with pages whose names include \"+\".")
+
