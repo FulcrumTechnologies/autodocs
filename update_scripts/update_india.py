@@ -6,6 +6,11 @@ import skytap
 from jinja2 import Template
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def start(envs, config_data):
     """Starting point for update_india.py."""
 
@@ -25,15 +30,15 @@ def start(envs, config_data):
                         "vpn_nat_addresses" in data["nat_addresses"]):
                     for a in data["nat_addresses"]["vpn_nat_addresses"]:
                         if (a["vpn_id"] == "vpn-3288770" and
-                                e.name not in apac):
-                            apac.append(e.name)
+                                clean_name(e.name) not in apac):
+                            apac.append(clean_name(e.name))
                             print ("APAC - ID: " + str(e.id) + "...Name: "
-                                   "" + e.name)
+                                   "" + clean_name(e.name))
                         elif (a["vpn_id"] == "vpn-3631944" and
-                                e.name not in usw):
-                            usw.append(e.name)
+                                clean_name(e.name) not in usw):
+                            usw.append(clean_name(e.name))
                             print ("USW - ID: " + str(e.id) + "...Name: "
-                                   "" + e.name)
+                                   "" + clean_name(e.name))
 
     content = ""
 
@@ -64,3 +69,4 @@ def start(envs, config_data):
         pyco.create_page(india_name, space_parent_id, space, content)
     else:
         print ("No differences detected. Page not updated.")
+

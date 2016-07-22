@@ -3,6 +3,11 @@ import skytap
 from jinja2 import Template
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def start(envs, config_data):
     """Print all known aliases (in environment userdata) to a page."""
     space = config_data["space"]
@@ -21,13 +26,13 @@ def start(envs, config_data):
     # Get aliases from userdata and append to records
     for e in envs:
         if "env_dns_alias" in e.user_data:
-            print ("Found alias: " + e.user_data.env_dns_alias + " - in " + e.name)
-            content += t.render(alias=e.user_data.env_dns_alias, name=e.name)
+            print ("Found alias: " + e.user_data.env_dns_alias + " - in " + clean_name(e.name))
+            content += t.render(alias=e.user_data.env_dns_alias, name=clean_name(e.name))
 
             if e.user_data.env_dns_alias not in records:
-                records[e.user_data.env_dns_alias] = [e.name]
+                records[e.user_data.env_dns_alias] = [clean_name(e.name)]
             else:
-                records[e.user_data.env_dns_alias].append(e.name)
+                records[e.user_data.env_dns_alias].append(clean_name(e.name))
 
     # This contains the duplicate alias data
     end_content = ""
@@ -57,3 +62,4 @@ def start(envs, config_data):
         return
     else:
         print pyco.edit_page(pyco.get_page_id("Environment DNS Aliases", space), "Environment DNS Aliases", space, content)
+

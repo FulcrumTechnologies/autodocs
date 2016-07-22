@@ -3,6 +3,11 @@ import skytap
 from jinja2 import Template
 
 
+def clean_name(name):
+    """Clean name of environment."""
+    return name.replace("+", "(and)").replace("/", "(slash)")
+
+
 def start(envs, config_data):
     """Print all VZW environments with published services to a page."""
     space = config_data["space"]
@@ -15,11 +20,11 @@ def start(envs, config_data):
 
     for e in envs:
         env_found = False
-        if e.name.startswith("VZW"):
+        if clean_name(e.name).startswith("VZW"):
             for v in e.vms:
                 for i in v.interfaces:
                     for s in i.services:
-                        content += t.render(name=e.name)
+                        content += t.render(name=clean_name(e.name))
                         env_found = True
                         break
                     if env_found:
@@ -34,3 +39,4 @@ def start(envs, config_data):
         return
     else:
         print pyco.edit_page(pyco.get_page_id("VZW Published Services", space), "VZW Published Services", space, content)
+
