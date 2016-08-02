@@ -45,7 +45,6 @@ def start(envs, config_data):
     copy_envs_vms = skytap.Environments()
 
     for e in envs:
-        # Excluding environment(s)
         if "CATS Interim Solution QA Environment" in clean_name(e.name):
             continue
 
