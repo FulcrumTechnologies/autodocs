@@ -155,6 +155,10 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
                 t = Template(f.read())
             ip += t.render(ip=good_ip, port=ports[4])
 
+            with open("build_html/weblogic.html", "r") as f:
+                t = Template(f.read())
+            ip += t.render(protocol=protocol, ip=good_ip)
+
     return ip.strip("\n")
 
 
