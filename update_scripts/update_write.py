@@ -26,7 +26,7 @@ def clean_content(content):
     return content
 
 
-def start(envs, config_data):
+def start(envs, config_data, name_filter=None):
     """Write Confluence pages for Skytap environments."""
 
     # Make sure you've configured config.yml! Else, this will crash the process.
@@ -45,6 +45,12 @@ def start(envs, config_data):
     copy_envs_vms = skytap.Environments()
 
     for e in envs:
+        # If this variable isn't None
+        if name_filter:
+            # If this name is not in the current e.name
+            if name_filter not in e.name:
+                continue
+
         if "CATS Interim Solution QA Environment" in clean_name(e.name):
             continue
 

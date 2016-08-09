@@ -36,8 +36,13 @@ def start(args):
     # Ex. "python update.py write" or "python update.py services"
     if (args[1] == "write"):
         os.system("clear")
-        print ("Writing wiki pages.")
-        update_write.start(envs, config_data)
+        if len(args) < 3:
+            print ("Writing wiki pages.")
+            update_write.start(envs, config_data)
+        else:
+            print ("Writing wiki pages for all environments with \""
+                   "" + args[2] + "\" in the name.")
+            update_write.start(envs, config_data, args[2].strip())
     elif (args[1] == "purge"):
         os.system("clear")
         print ("Purging wiki pages for nonexistent environments.")
@@ -66,3 +71,4 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
+
