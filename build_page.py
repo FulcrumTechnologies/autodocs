@@ -15,7 +15,7 @@ def clean_string(text):
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
              origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build load balancer HTML."""
-    if env_name.startswith("VZW"):
+    if env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name:
         is_vzw = True
     else:
         is_vzw = False
@@ -75,7 +75,7 @@ def build_nfs():
 def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
               origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build app/host/etc. HTML."""
-    if env_name.startswith("VZW"):
+    if env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name:
         is_vzw = True
     else:
         is_vzw = False
@@ -278,7 +278,7 @@ def build_env(e):
     user_access = undef
 
     # Some exceptions are made when dealing with Verizon servers.
-    if env_name.startswith("VZW"):
+    if env_name.startswith("VZW") or "CATS Interim Solution QA Environment" in env_name:
         url = "http://"
         port_home = 8001
         port_reports = 8003

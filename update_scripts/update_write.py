@@ -51,9 +51,6 @@ def start(envs, config_data, name_filter=None):
             if name_filter not in e.name:
                 continue
 
-        if "CATS Interim Solution QA Environment" in clean_name(e.name):
-            continue
-
         print ("\n--------------------\nTrying " + clean_name(e.name) + " ("
                "" + str(e.id) + ")...")
         env_all += 1
