@@ -321,6 +321,20 @@ def build_env(e):
     # Loop through every VM and make XHTML based on what the VM is used for
     # (db, lb, app, etc.)
     for v in e.vms:
+
+        # puppet facts find vmid#######-envid#######.dev.fulcrum.net
+        status, output = commands.getstatusoutput("puppet facts find vmid"
+                                                  "" + str(v.id) + "-envid"
+                                                  "" + env_id + ".dev.fulcrum"
+                                                  ".net")
+
+        data = json.loads(output)
+        facter_vm_hostname = data["vm_hostname"]
+        facter_vm_name = data["vm_name"]
+        facter_vm_ip = data["vm_ip"]
+        facter_vm_vpn_id = data["vm_vpn_id"]
+
+
         # Getting basic info about VM
         vm_name = v.name
         vm_id = str(v.id)
