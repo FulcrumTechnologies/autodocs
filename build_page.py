@@ -352,21 +352,28 @@ def build_env(e):
         # Contains information about published services
         services = []
 
+        if facter_vm_vpn_id == "vpn-661182" or facter_vm_vpn_id == "vpn-3631944":
+            vm_ip_us = facter_vm_ip
+        elif facter_vm_vpn_id == "vpn-3288770":
+            vm_ip_india = facter_vm_ip
+        else:
+            vm_ip_us = "placeholder"
+
         # Some information can only be retrieved from interfaces
         # This is how we determine if VPN is India or US
         for i in v.interfaces:
-            vm_hostname = i.hostname
-            int_data = json.loads(i.json())
-            # VPN: India or US?
-            try:
-                for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
-                    if (n["vpn_id"] == "vpn-661182" or
-                            n["vpn_id"] == "vpn-3631944"):
-                        vm_ip_us = n["ip_address"]
-                    elif n["vpn_id"] == "vpn-3288770":
-                        vm_ip_india = n["ip_address"]
-            except (KeyError, TypeError, IndexError):
-                vm_ip_us = i.ip
+            # vm_hostname = i.hostname
+            # int_data = json.loads(i.json())
+            # # VPN: India or US?
+            # try:
+            #     for n in int_data["nat_addresses"]["vpn_nat_addresses"]:
+            #         if (n["vpn_id"] == "vpn-661182" or
+            #                 n["vpn_id"] == "vpn-3631944"):
+            #             vm_ip_us = n["ip_address"]
+            #         elif n["vpn_id"] == "vpn-3288770":
+            #             vm_ip_india = n["ip_address"]
+            # except (KeyError, TypeError, IndexError):
+            #     vm_ip_us = i.ip
 
             count = int(i.public_ips_count)
             public_ips = i.public_ips
@@ -431,7 +438,7 @@ def build_env(e):
 
         # If this VM is the load balancer...
         if vm_hostname == "lb":
-            lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
+            lb = build_lb(facter_vm_hostname, facter_vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
                           services_html, pub_ips_html, env_name)
         elif vm_hostname == "db":
@@ -451,24 +458,24 @@ def build_env(e):
             db_sid = "orcl"
             oracle_port = "1521"
 
-            db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+            db = build_db(facter_vm_hostname, facter_vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
                           services_html, pub_ips_html, env_name)
         elif (vm_hostname == "etl" or vm_hostname == "etl-db"):
-            etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+            etl = build_db(facter_vm_hostname, facter_vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
                            services_html, pub_ips_html, env_name)
         elif vm_hostname == "nfs":
-            nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
+            nfs = build_db(facter_vm_hostname, facter_vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
                            services_html, pub_ips_html, env_name)
         else:
-            apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
+            apps += build_app(facter_vm_hostname, facter_vm_name, vm_id, vm_ip_us,
                               vm_ip_india, origin_ip_us, origin_ip_india,
                               services_html, pub_ips_html, env_name)
 
         # This determines if a QR code should be written at the end.
-        if vm_hostname == "app1" or vm_hostname == "app":
+        if facter_vm_hostname == "app1" or facter_vm_hostname == "app":
             has_app1 = vm_ip_us
             if vm_ip_us == "":
                 has_app1 = vm_ip_india
