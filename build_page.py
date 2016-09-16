@@ -325,7 +325,7 @@ def build_env(e):
 
         # Fulcrum Autodocs using Skytap module in place of Puppet facter facts
         # at the moment (will be reimplemented soon, because Puppet facts are
-        # faster to get). Here's how the facts are gotten:
+        # way better for this). Here's how the facts are gotten:
         #
         # # puppet facts find vmid#######-envid#######.dev.fulcrum.net
         # status, output = commands.getstatusoutput("puppet facts find vmid"
