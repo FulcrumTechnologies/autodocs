@@ -259,7 +259,8 @@ def build_env(e):
     80 character length rule.
 
     This function is a bit like Cthulhu. Keep trying to figure it out, and
-    you'll go insane.
+    you'll go insane. (Edit: not as much now, but I'm keeping this comment up
+    for giggles)
 
     Unlike Cthulhu, this function returns a big ball of XHTML that will serve as
     the Confluence page's code.
@@ -321,6 +322,24 @@ def build_env(e):
     # Loop through every VM and make XHTML based on what the VM is used for
     # (db, lb, app, etc.)
     for v in e.vms:
+
+        # Fulcrum Autodocs using Skytap module in place of Puppet facter facts
+        # at the moment (will be reimplemented soon, because Puppet facts are
+        # faster to get). Here's how the facts are gotten:
+        #
+        # # puppet facts find vmid#######-envid#######.dev.fulcrum.net
+        # status, output = commands.getstatusoutput("puppet facts find vmid"
+        #                                           "" + str(v.id) + "-envid"
+        #                                           "" + env_id + ".dev.fulcrum"
+        #                                           ".net")
+        #
+        # data = json.loads(output)
+        # facter_vm_hostname = data["vm_hostname"]
+        # facter_vm_name = data["vm_name"]
+        # facter_vm_ip = data["vm_ip"]
+        # facter_vm_vpn_id = data["vm_vpn_id"]
+        # (and so on)
+
         # Getting basic info about VM
         vm_name = v.name
         vm_id = str(v.id)
