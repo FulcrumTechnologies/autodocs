@@ -85,20 +85,26 @@ def start(envs, config_data, name_filter=None):
                 continue
             else:
                 print ("Page for " + str(e.id) + " exists and has outdated "
-                       "information.\nDeleting in preparation for rewrite...")
-                pyco.delete_page_full(env_page_id)
+                       "information.\nPreparing to rewrite...")
+                # pyco.delete_page_full(env_page_id)
         except IndexError:
             # No page found, so we want to write one. Continue on!
             print ("No page found for " + str(e.id) + ".")
             pass
 
-        print ("Writing content to Confluence for " + str(e.id) + "...")
         try:
             # Only mess with DNS stuff if environment page is changed.
             skytapdns.recreate_all_vm_dns(e_copy_dns, True)
             # Create page
-            result = json.loads(pyco.create_page(clean_name(e.name),
-                                parent_id, space, content))
+            print ("Writing content to Confluence for " + str(e.id) + "...")
+            try:
+                result = json.loads(pyco.edit_page(pyco.get_page_id(clean_name(e.name), space),
+                                    clean_name(e.name), space, content))
+                print ("Edit successfull!")
+            except ValueError:
+                result = json.loads(pyco.create_page(clean_name(e.name),
+                                    parent_id, space, content))
+                print ("Write successfull!")
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
@@ -106,51 +112,47 @@ def start(envs, config_data, name_filter=None):
             env_failed += 1
             continue
 
-        # Implied from the fact that we didn't hit the TypeError above.
-        print ("Write successful!")
-
         print ("Skipping writing VMs. Modify update_write.py to change this.")
         continue
 
-        print ("Writing VMs for " + clean_name(e.name) + "...")
-        try:
-            # Getting ID of newly-written Confluence page to write under
-            parent_page_id = result["id"]
-
-            for v in e_copy_vms.vms:
-                print ("==========\nTrying " + str(v.id) + "...")
-
-                print ("Fetching current VM information...")
-                # Build page
-                hostname, content = build_page.build_vm(v)
-
-                new_page_name = (hostname + " - " + v.name + " - "
-                                 "" + e_copy_vms.name)
-
-                print ("Checking if " + str(v.id) + " currently has existing "
-                       "page...")
-                try:
-                    vm_page_id = json.loads(pyco.get_page_full_more(new_page_name, space))["results"][0]["id"]
-                    print ("Page for " + str(v.id) + " exists.\nDeleting in "
-                           "preparation for rewrite (this is normal)...")
-                    pyco.delete_page(vm_page_id)
-                except IndexError:
-                    print ("No page found for " + str(v.id) + ".")
-                    pass
-
-                print ("Writing content to Confluence for " + str(v.id) + "...")
-                pyco.create_page(hostname + " - " + v.name + " - " + e_copy_vms.name, parent_page_id, space, content)
-                print ("Write successful!")
-
-            env_written += 1
-        except (TypeError, KeyError):
-            print ("Page could not be created; check if the information in "
-                   "config.yml is correct, then try again.")
-            env_failed += 1
-            continue
+        # print ("Writing VMs for " + clean_name(e.name) + "...")
+        # try:
+        #     # Getting ID of newly-written Confluence page to write under
+        #     parent_page_id = result["id"]
+        #
+        #     for v in e_copy_vms.vms:
+        #         print ("==========\nTrying " + str(v.id) + "...")
+        #
+        #         print ("Fetching current VM information...")
+        #         # Build page
+        #         hostname, content = build_page.build_vm(v)
+        #
+        #         new_page_name = (hostname + " - " + v.name + " - "
+        #                          "" + e_copy_vms.name)
+        #
+        #         print ("Checking if " + str(v.id) + " currently has existing "
+        #                "page...")
+        #         try:
+        #             vm_page_id = json.loads(pyco.get_page_full_more(new_page_name, space))["results"][0]["id"]
+        #             print ("Page for " + str(v.id) + " exists.\nDeleting in "
+        #                    "preparation for rewrite (this is normal)...")
+        #             pyco.delete_page(vm_page_id)
+        #         except IndexError:
+        #             print ("No page found for " + str(v.id) + ".")
+        #             pass
+        #
+        #         print ("Writing content to Confluence for " + str(v.id) + "...")
+        #         pyco.create_page(hostname + " - " + v.name + " - " + e_copy_vms.name, parent_page_id, space, content)
+        #         print ("Write successful!")
+        #
+        #     env_written += 1
+        # except (TypeError, KeyError):
+        #     print ("Page could not be created; check if the information in "
+        #            "config.yml is correct, then try again.")
+        #     env_failed += 1
+        #     continue
 
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
-
