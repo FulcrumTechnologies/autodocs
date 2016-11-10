@@ -94,7 +94,11 @@ def start(envs, config_data, name_filter=None):
 
         try:
             # Only mess with DNS stuff if environment page is changed.
-            skytapdns.recreate_all_vm_dns(e_copy_dns, True)
+            try:
+                skytapdns.recreate_all_vm_dns(e_copy_dns, True)
+            except ValueError:
+                print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
+                       "INTERN ABOUT THIS FOR BEST RESULTS")
             # Create page
             print ("Writing content to Confluence for " + str(e.id) + "...")
             try:
