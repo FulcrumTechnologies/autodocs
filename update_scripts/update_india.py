@@ -67,6 +67,6 @@ def start(envs, config_data):
     if content != pyco.get_page_content(pyco.get_page_id(india_name, space)):
         #pyco.delete_page(pyco.get_page_id(india_name, space))
         #pyco.create_page(india_name, space_parent_id, space, content)
-        pyco.edit_page(pyco.get_page_id(india_name), india_name, space, content))
+        pyco.edit_page(pyco.get_page_id(india_name), india_name, space, content)
     else:
         print ("No differences detected. Page not updated.")
