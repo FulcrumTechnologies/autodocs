@@ -6,7 +6,7 @@ import skytapdns
 
 def clean_name(name):
     """Clean name of environment."""
-    return name.replace("+", "(and)").replace("/", "(slash)")
+    return name.replace("+", "(and)").replace("/", "(slash)").strip()
 
 
 def start(envs, config_data):
@@ -20,17 +20,16 @@ def start(envs, config_data):
     written = []
 
     for r in children["results"]:
-        written.append(r["title"])
+        written.append(r["title"].strip())
 
     existing = []
-    existing_names = []
 
     for e in envs:
-        existing.append(e)
-        existing_names.append(clean_name(e.name))
+        existing.append(clean_name(e.name))
 
     for w in written:
-        if w not in existing_names:
+        if w not in existing:
+            w = w.strip()
             print ("Deleting " + w + "..."),
             try:
                 pyco.delete_page_full(pyco.get_page_id(w, space))
@@ -38,4 +37,3 @@ def start(envs, config_data):
                 print ("done.")
             except ValueError:
                 print ("cannot interact with pages whose names include \"+\".")
-

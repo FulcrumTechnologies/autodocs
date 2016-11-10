@@ -12,7 +12,7 @@ import re
 
 def clean_name(name):
     """Clean name of environment."""
-    return name.replace("+", "(and)").replace("/", "(slash)")
+    return name.replace("+", "(and)").replace("/", "(slash)").strip()
 
 
 def clean_content(content):
@@ -110,47 +110,6 @@ def start(envs, config_data, name_filter=None):
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
             print ("Write failed.")
             env_failed += 1
-            continue
-
-        print ("Skipping writing VMs. Modify update_write.py to change this.")
-        continue
-
-        # print ("Writing VMs for " + clean_name(e.name) + "...")
-        # try:
-        #     # Getting ID of newly-written Confluence page to write under
-        #     parent_page_id = result["id"]
-        #
-        #     for v in e_copy_vms.vms:
-        #         print ("==========\nTrying " + str(v.id) + "...")
-        #
-        #         print ("Fetching current VM information...")
-        #         # Build page
-        #         hostname, content = build_page.build_vm(v)
-        #
-        #         new_page_name = (hostname + " - " + v.name + " - "
-        #                          "" + e_copy_vms.name)
-        #
-        #         print ("Checking if " + str(v.id) + " currently has existing "
-        #                "page...")
-        #         try:
-        #             vm_page_id = json.loads(pyco.get_page_full_more(new_page_name, space))["results"][0]["id"]
-        #             print ("Page for " + str(v.id) + " exists.\nDeleting in "
-        #                    "preparation for rewrite (this is normal)...")
-        #             pyco.delete_page(vm_page_id)
-        #         except IndexError:
-        #             print ("No page found for " + str(v.id) + ".")
-        #             pass
-        #
-        #         print ("Writing content to Confluence for " + str(v.id) + "...")
-        #         pyco.create_page(hostname + " - " + v.name + " - " + e_copy_vms.name, parent_page_id, space, content)
-        #         print ("Write successful!")
-        #
-        #     env_written += 1
-        # except (TypeError, KeyError):
-        #     print ("Page could not be created; check if the information in "
-        #            "config.yml is correct, then try again.")
-        #     env_failed += 1
-        #     continue
 
     print ("\n\n\n--------------------")
     print ("Total environments: " + str(env_all))
