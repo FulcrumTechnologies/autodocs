@@ -4,7 +4,7 @@ import pyconfluence as pyco
 
 def clean_name(name):
     """Clean name of environment."""
-    return name.replace("+", "(and)").replace("/", "(slash)")
+    return name.replace("+", "(and)").replace("/", "(slash)").strip()
 
 
 def improve_storage(storage):
@@ -109,4 +109,3 @@ def start(envs, config_data):
 
     print pyco.edit_page(pyco.get_page_id("Environments w/o Shutdown Times", space),
                          "Environments w/o Shutdown Times", space, content_wo)
-

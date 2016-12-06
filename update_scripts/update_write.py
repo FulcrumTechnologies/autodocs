@@ -8,6 +8,7 @@ import pyconfluence as pyco
 import skytap
 import skytapdns
 import re
+import time
 
 
 def clean_name(name):
@@ -28,6 +29,9 @@ def clean_content(content):
 
 def start(envs, config_data, name_filter=None):
     """Write Confluence pages for Skytap environments."""
+
+    cur_hour = int(time.strftime("%H"))
+    print ("Current hour: " + str(cur_hour))
 
     # Make sure you've configured config.yml! Else, this will crash the process.
     space = config_data["space"]
@@ -62,7 +66,10 @@ def start(envs, config_data, name_filter=None):
 
         # Use build_page.py to construct XHTML source based on info about e
         print ("Fetching current environment information...")
-        content = build_page.build_env(e)
+        try:
+            content = build_page.build_env(e)
+        except TypeError:
+            print ("ERROR: TypeError encountered during page build.")
 
         # If a page with the same name is found:
         # - If content is the same, then there is nothing to change. Continue.
@@ -79,7 +86,7 @@ def start(envs, config_data, name_filter=None):
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
             # Compare content, sans randomness
-            if cleaned_content_1 == cleaned_content_2:
+            if cur_hour < 1 or cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue

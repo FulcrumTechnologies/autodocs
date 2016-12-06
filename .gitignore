@@ -1,5 +1,5 @@
 *.pyc
 update_scripts/*.pyc
+skytapdns/*.pyc
 config.yml
-skytapdns/
 
