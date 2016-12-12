@@ -86,7 +86,7 @@ def start(envs, config_data, name_filter=None):
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
             # Compare content, sans randomness
-            if cur_hour < 1 or cleaned_content_1 == cleaned_content_2:
+            if cur_hour < 2 or cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
