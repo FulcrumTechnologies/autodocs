@@ -15,10 +15,17 @@ def clean_string(text):
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
              origin_ip_india, pub_services, pub_ips, env_name=""):
     """Build load balancer HTML."""
+    # VZW exceptions
     if env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name:
         is_vzw = True
     else:
         is_vzw = False
+
+    # TMO exception
+    if env_name.startswith("TMO"):
+        is_tmo = True
+    else:
+        is_tmo = False
 
     with open("build_html/lb_ip.html", "r") as f:
         t = Template(f.read())
@@ -27,7 +34,7 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     img = "http://i.imgur.com/oAMkqDR.png"
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw, vm_hostname)
+                  is_vzw, is_tmo, vm_hostname)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
@@ -45,6 +52,11 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    if env_name.startswith("TMO"):
+        is_tmo = True
+    else:
+        is_tmo = False
+
     # Database image
     img = "http://i.imgur.com/KSLHUEi.png"
 
@@ -52,7 +64,7 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
         t = Template(f.read())
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw)
+                  is_vzw, is_tmo)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -80,6 +92,11 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     else:
         is_vzw = False
 
+    if env_name.startswith("TMO"):
+        is_tmo = True
+    else:
+        is_tmo = False
+
     # Application image
     img = "http://i.imgur.com/g35icku.png"
 
@@ -87,7 +104,7 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
         t = Template(f.read())
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india,
-                  False, is_vzw)
+                  False, is_vzw, is_tmo)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -98,17 +115,20 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
 
 
 def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
-             is_vzw, vm_hostname=""):
+             is_vzw, is_tmo, vm_hostname=""):
     """Build IP info HTML."""
 
     # "Main" IP used for this VM block
     good_ip = ""
 
-    if not is_vzw:
-        ports = ["8443", "8444", "8445", "8446"]
+    if not is_vzw and not is_tmo:
+        ports = ["8443", "8444", "8445", "8446", "0"]
         protocol = "https"
-    else:
+    elif is_vzw:
         ports = ["8001", "8003", "8004", "8002", "3020"]
+        protocol = "http"
+    else:
+        ports = ["8001", "8002", "8003", "3020", "3020"]
         protocol = "http"
 
     if vm_ip_us != "":
@@ -125,14 +145,14 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
         ip = ""
         good_ip = ip
 
-    if is_vzw and vm_hostname == "lb":
+    if (is_vzw or is_tmo) and vm_hostname == "lb":
         with open("build_html/web.html", "r") as f:
             t = Template(f.read())
         ip += t.render(protocol=protocol, port_1=":80", port_2="", ip=good_ip)
 
         with open("build_html/mobility_mobile.html", "r") as f:
             t = Template(f.read())
-        ip += t.render(ip=good_ip, port="3020")
+        ip += t.render(ip=good_ip, port=ports[4])
 
     # If not is_short, write the web/reports/services/mobility stuff.
     if not is_short:
@@ -150,7 +170,7 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
             t = Template(f.read())
         ip += t.render(protocol=protocol, port=ports[3], ip=good_ip)
 
-        if is_vzw:
+        if is_vzw or is_tmo:
             with open("build_html/mobility_mobile.html", "r") as f:
                 t = Template(f.read())
             ip += t.render(ip=good_ip, port=ports[4])
@@ -286,6 +306,15 @@ def build_env(e):
         port_services = 8004
         port_mob = 8002
         mob_end = "cats"
+        ssl = "0"
+    elif env_name.startswith("TMO"):
+        url = "http://"
+        port_home = 8001
+        port_reports = 8002
+        port_services = 8003
+        port_mob = 3020
+        mob_end = "cats"
+        ssl = "1"
     else:
         url = "https://"
         port_home = 8443
@@ -293,6 +322,7 @@ def build_env(e):
         port_services = 8445
         port_mob = 8446
         mob_end = "catsmob"
+        ssl = "1"
 
     db_exists = False
 
@@ -492,7 +522,7 @@ def build_env(e):
             t = Template(f.read())
 
         qr = t.render(vm_name="app1", ip=has_app1, port=str(port_mob),
-                      env_name=env_name)
+                      ssl=ssl, env_name=env_name)
 
     # Finally, put all the stuff into the template.html Jinja template
 

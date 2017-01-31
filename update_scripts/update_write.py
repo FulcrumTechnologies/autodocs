@@ -10,7 +10,6 @@ import skytapdns
 import re
 import time
 
-
 def clean_name(name):
     """Clean name of environment."""
     return name.replace("+", "(and)").replace("/", "(slash)").strip()
