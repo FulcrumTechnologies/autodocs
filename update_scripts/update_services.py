@@ -19,18 +19,20 @@ def start(envs, config_data):
         t = Template(f.read())
 
     for e in envs:
-        env_found = False
-        if clean_name(e.name).startswith("VZW"):
-            for v in e.vms:
-                for i in v.interfaces:
-                    for s in i.services:
-                        content += t.render(name=clean_name(e.name))
-                        env_found = True
-                        break
-                    if env_found:
-                        break
-                if env_found:
+        vm_list = ""
+        for v in e.vms:
+            vm_found = False
+            for i in v.interfaces:
+                vm_hostname = i.hostname
+                for s in i.services:
+                    vm_list += vm_hostname + ", "
+                    vm_found = True
                     break
+                if vm_found:
+                    break
+        if vm_list != "":
+            content += t.render(name=clean_name(e.name), vm_list=vm_list[:-2])
+
 
     print content
 
@@ -39,4 +41,3 @@ def start(envs, config_data):
         return
     else:
         print pyco.edit_page(pyco.get_page_id("VZW Published Services", space), "VZW Published Services", space, content)
-
