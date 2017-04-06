@@ -184,7 +184,6 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
 
 def build_pub_services(internal_port, external_ip, external_port, protocol):
     """Build published services HTML."""
-    print protocol
     with open("build_html/pub_service_item.html", "r") as f:
         t = Template(f.read())
     return t.render(internal_port=internal_port, external_ip=external_ip,
