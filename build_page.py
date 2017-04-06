@@ -576,3 +576,4 @@ def build_vm(v):
     content = t.render(vm_id=vm_id, vpn_stuff=content)
 
     return vm_hostname, content
+
