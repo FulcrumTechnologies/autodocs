@@ -182,12 +182,13 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
     return ip.strip("\n")
 
 
-def build_pub_services(internal_port, external_ip, external_port):
+def build_pub_services(internal_port, external_ip, external_port, protocol):
     """Build published services HTML."""
+    print protocol
     with open("build_html/pub_service_item.html", "r") as f:
         t = Template(f.read())
     return t.render(internal_port=internal_port, external_ip=external_ip,
-                    external_port=external_port).strip("\n")
+                    external_port=external_port, protocol=protocol).strip("\n")
 
 
 def build_pub_ips(addr):
@@ -451,7 +452,7 @@ def build_env(e):
             for s in services:
                 pub_services += build_pub_services(str(s["internal_port"]),
                                                    str(s["external_ip"]),
-                                                   str(s["external_port"]))
+                                                   str(s["external_port"]), url)
             services_html = t.render(pub_services=pub_services)
 
         # Writing public IP information
@@ -576,4 +577,3 @@ def build_vm(v):
     content = t.render(vm_id=vm_id, vpn_stuff=content)
 
     return vm_hostname, content
-
