@@ -67,8 +67,9 @@ def start(envs, config_data, name_filter=None):
         print ("Fetching current environment information...")
         try:
             content = build_page.build_env(e)
-        except TypeError:
-            print ("ERROR: TypeError encountered during page build.")
+        except TypeError as err:
+            print ("ERROR: TypeError encountered during page build - ", err)
+            continue
 
         # If a page with the same name is found:
         # - If content is the same, then there is nothing to change. Continue.

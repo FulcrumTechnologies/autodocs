@@ -13,10 +13,10 @@ def clean_string(text):
 
 
 def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips, env_name=""):
+             origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
     """Build load balancer HTML."""
     # VZW exceptions
-    if env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name:
+    if (env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name) or (userdata is not None and "env_type" in userdata and str(userdata.env_type) == "weblogic"):
         is_vzw = True
     else:
         is_vzw = False
@@ -34,7 +34,7 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     img = "http://i.imgur.com/oAMkqDR.png"
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw, is_tmo, vm_hostname)
+                  is_vzw, is_tmo, vm_hostname, userdata)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
@@ -45,9 +45,9 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
 
 
 def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips, env_name=""):
+             origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
     """Build database HTML."""
-    if env_name.startswith("VZW"):
+    if env_name.startswith("VZW") or (userdata is not None and "env_type" in userdata and str(userdata.env_type) == "weblogic"):
         is_vzw = True
     else:
         is_vzw = False
@@ -64,7 +64,7 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
         t = Template(f.read())
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw, is_tmo)
+                  is_vzw, is_tmo, None, userdata)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -85,9 +85,9 @@ def build_nfs():
 
 
 def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-              origin_ip_india, pub_services, pub_ips, env_name=""):
+              origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
     """Build app/host/etc. HTML."""
-    if env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name:
+    if (env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name) or ((userdata is not None) and ("env_type" in userdata) and (str(userdata.env_type) == "weblogic")):
         is_vzw = True
     else:
         is_vzw = False
@@ -104,7 +104,7 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
         t = Template(f.read())
 
     ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india,
-                  False, is_vzw, is_tmo)
+                  False, is_vzw, is_tmo, None, userdata)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -115,7 +115,7 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
 
 
 def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
-             is_vzw, is_tmo, vm_hostname=""):
+             is_vzw, is_tmo, vm_hostname="", userdata=None):
     """Build IP info HTML."""
 
     # "Main" IP used for this VM block
@@ -125,7 +125,10 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
         ports = ["8443", "8444", "8445", "8446", "0"]
         protocol = "https"
     elif is_vzw:
-        ports = ["8001", "8003", "8004", "8002", "3020"]
+        if userdata is not None and ("env_type" in userdata and str(userdata.env_type) == "weblogic"):
+            ports = ["8001", "8002", "8003", "8004", "3020"]
+        else:
+            ports = ["8001", "8003", "8004", "8002", "3020"]
         protocol = "http"
     else:
         ports = ["8001", "8002", "8003", "3020", "3020"]
@@ -307,6 +310,14 @@ def build_env(e):
         port_mob = 8002
         mob_end = "cats"
         ssl = "0"
+    elif "env_type" in e.user_data and str(e.user_data.env_type) == "weblogic":
+        url = "http://"
+        port_home = 8001
+        port_reports = 8002
+        port_services = 8003
+        port_mob = 8004
+        mob_end = "cats"
+        ssl = "0"
     elif env_name.startswith("TMO"):
         url = "http://"
         port_home = 8001
@@ -348,6 +359,9 @@ def build_env(e):
     userdata = ""
     db_info = ""
     qr = ""
+    qr_external = ""
+    qr_external_ip = None
+    qr_external_port = None
 
     # Loop through every VM and make XHTML based on what the VM is used for
     # (db, lb, app, etc.)
@@ -445,6 +459,7 @@ def build_env(e):
         # Writing service information
         services_html = ""
         pub_services = ""
+
         if len(services) != 0:
             with open("build_html/pub_services.html", "r") as f:
                 t = Template(f.read())
@@ -452,6 +467,11 @@ def build_env(e):
                 pub_services += build_pub_services(str(s["internal_port"]),
                                                    str(s["external_ip"]),
                                                    str(s["external_port"]), url)
+
+                if vm_hostname == "app1" and ((str(s["internal_port"]) == "8002") or (str(s["internal_port"]) == "8446")):
+                    qr_external_ip = str(s["external_ip"])
+                    qr_external_port = str(s["external_port"])
+
             services_html = t.render(pub_services=pub_services)
 
         # Writing public IP information
@@ -468,7 +488,7 @@ def build_env(e):
         if vm_hostname == "lb":
             lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html, env_name)
+                          services_html, pub_ips_html, env_name, e.user_data)
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
             # Some of this is currently unused.
@@ -488,19 +508,19 @@ def build_env(e):
 
             db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                           vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html, env_name)
+                          services_html, pub_ips_html, env_name, e.user_data)
         elif (vm_hostname == "etl" or vm_hostname == "etl-db"):
             etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           services_html, pub_ips_html, env_name)
+                           services_html, pub_ips_html, env_name, e.user_data)
         elif vm_hostname == "nfs":
             nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
                            vm_ip_india, origin_ip_us, origin_ip_india,
-                           services_html, pub_ips_html, env_name)
+                           services_html, pub_ips_html, env_name, e.user_data)
         else:
             apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
                               vm_ip_india, origin_ip_us, origin_ip_india,
-                              services_html, pub_ips_html, env_name)
+                              services_html, pub_ips_html, env_name, e.user_data)
 
         # This determines if a QR code should be written at the end.
         if vm_hostname == "app1" or vm_hostname == "app":
@@ -524,14 +544,23 @@ def build_env(e):
         qr = t.render(vm_name="app1", ip=has_app1, port=str(port_mob),
                       ssl=ssl, env_name=env_name)
 
-    # Finally, put all the stuff into the template.html Jinja template
+        # If there is a published service external IP to use
+        if qr_external_ip and qr_external_port:
+            with open("build_html/qr_external.html", "r") as f:
+                t = Template(f.read())
 
+            qr_external = t.render(vm_name="app1", ip=qr_external_ip,
+                                   port=qr_external_port, ssl=ssl,
+                                   env_name=env_name)
+
+    # Finally, put all the stuff into the template.html Jinja template
     with open("build_html/template.html", "r") as f:
         t = Template(f.read())
 
     content = t.render(comment=comment, lb=lb, apps=apps, nfs=nfs, db=db,
                        etl=etl, userdata=userdata, add_details=add_details,
-                       mob_details=mob_details, db_info=db_info, qr=qr)
+                       mob_details=mob_details, db_info=db_info, qr=qr,
+                       qr_external=qr_external)
 
     return content
 
