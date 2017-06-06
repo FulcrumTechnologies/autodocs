@@ -10,6 +10,7 @@ import skytapdns
 import re
 import time
 
+
 def clean_name(name):
     """Clean name of environment."""
     return name.replace("+", "(and)").replace("/", "(slash)").strip()
@@ -22,6 +23,8 @@ def clean_content(content):
         # determined, making it difficult to determine if there is new info
         # TODO: stop being lazy and try regex here
         content = content[0:content.find("ac:macro-id=")-1] + content[content.find("ac:macro-id=")+64:]
+
+    content = content.replace("<p></p>", "<p />")
 
     return content
 
@@ -37,7 +40,7 @@ def start(envs, config_data, name_filter=None):
     parent_id = config_data["parent_id"]
     other_docs_id = config_data["other_docs_id"]
 
-    # Just counting up the total number, for stats
+    # Just counting up the total number, for stats and numbers and things
     env_all = 0
     env_written = 0
     env_failed = 0
@@ -45,13 +48,10 @@ def start(envs, config_data, name_filter=None):
     # Get second set of Skytap environment objects.
     # Temporary solution to the "for loop destroying envs list" problem
     copy_envs_dns = skytap.Environments()
-    copy_envs_vms = skytap.Environments()
 
     for e in envs:
-        # If this variable isn't None
-        if name_filter:
-            # If this name is not in the current e.name
-            if name_filter not in e.name:
+        # If user gave a name filter in parameters, then check for that in name
+        if name_filter and name_filter not in e.name:
                 continue
 
         print ("\n--------------------\nTrying " + clean_name(e.name) + " ("
@@ -61,7 +61,6 @@ def start(envs, config_data, name_filter=None):
         # Get copies of environment object from copy_envs to deal with dns stuff
         # and vms stuff
         e_copy_dns = copy_envs_dns[e.id]
-        e_copy_vms = copy_envs_vms[e.id]
 
         # Use build_page.py to construct XHTML source based on info about e
         print ("Fetching current environment information...")
@@ -86,14 +85,13 @@ def start(envs, config_data, name_filter=None):
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
             # Compare content, sans randomness
-            if cur_hour < 2 or cleaned_content_1 == cleaned_content_2:
+            if cur_hour > 2 and cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
             else:
                 print ("Page for " + str(e.id) + " exists and has outdated "
                        "information.\nPreparing to rewrite...")
-                # pyco.delete_page_full(env_page_id)
         except IndexError:
             # No page found, so we want to write one. Continue on!
             print ("No page found for " + str(e.id) + ".")

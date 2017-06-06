@@ -121,7 +121,10 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
     # "Main" IP used for this VM block
     good_ip = ""
 
-    if not is_vzw and not is_tmo:
+    if userdata is not None and ("env_type" in userdata and str(userdata.env_type) == "demo"):
+        ports = ["8080", 0, 0, "8080", "2020"]
+        protocol = "http"
+    elif not is_vzw and not is_tmo:
         ports = ["8443", "8444", "8445", "8446", "0"]
         protocol = "https"
     elif is_vzw:
@@ -163,17 +166,26 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
             t = Template(f.read())
         ip += t.render(protocol=protocol, port_1=ports[0],
                        port_2=(":" + ports[0]), ip=good_ip)
-        with open("build_html/reports.html", "r") as f:
-            t = Template(f.read())
-        ip += t.render(protocol=protocol, port=ports[1], ip=good_ip)
-        with open("build_html/services.html", "r") as f:
-            t = Template(f.read())
-        ip += t.render(protocol=protocol, port=ports[2], ip=good_ip)
+
+        if ports[1] != 0:
+            with open("build_html/reports.html", "r") as f:
+                t = Template(f.read())
+            ip += t.render(protocol=protocol, port=ports[1], ip=good_ip)
+
+        if ports[2] != 0:
+            with open("build_html/services.html", "r") as f:
+                t = Template(f.read())
+            ip += t.render(protocol=protocol, port=ports[2], ip=good_ip)
+
         with open("build_html/mobility.html", "r") as f:
             t = Template(f.read())
         ip += t.render(protocol=protocol, port=ports[3], ip=good_ip)
 
-        if is_vzw or is_tmo:
+        if userdata is not None and ("env_type" in userdata and str(userdata.env_type) == "demo"):
+            with open("build_html/mobility_mobile.html", "r") as f:
+                t = Template(f.read())
+            ip += t.render(ip=good_ip, port=ports[4])
+        elif is_vzw or is_tmo:
             with open("build_html/mobility_mobile.html", "r") as f:
                 t = Template(f.read())
             ip += t.render(ip=good_ip, port=ports[4])
@@ -318,6 +330,14 @@ def build_env(e):
         port_mob = 8004
         mob_end = "cats"
         ssl = "0"
+    elif "env_type" in e.user_data and str(e.user_data.env_type) == "demo":
+        url = "http://"
+        port_home = 8080
+        port_reports = 0
+        port_services = 0
+        port_mob = 8080
+        mob_end = "catsmob"
+        ssl = "1"
     elif env_name.startswith("TMO"):
         url = "http://"
         port_home = 8001
