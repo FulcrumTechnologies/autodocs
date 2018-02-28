@@ -5,6 +5,7 @@ import json
 import pyconfluence as pyco
 import time
 
+
 def recreate_all_vm_dns(e, create):
     """Recreate DNS record sets and CNAMEs belonging to enviroment VMs.
 
@@ -38,68 +39,80 @@ def recreate_all_vm_dns(e, create):
         status, output = commands.getstatusoutput("aws route53 "
                                                   "list-resource-record-sets "
                                                   "--hosted-zone-id "
-                                                  "/hostedzone/ZXN2JBL17W6BS")
+                                                  "/hostedzone/Z2M6JEL5C4DYRL")
+        print ("Obtained record sets...")
+
         data = json.loads(output)
 
         for rrs in data["ResourceRecordSets"]:
-            if rrs["ResourceRecords"][0]["Value"] == (dns_name + ".fulcrum.net."):
+            break
+            if rrs["ResourceRecords"][0]["Value"] == (dns_name + ".skytap.fulcrum.net."):
                 cname = rrs["Name"].replace(".fulcrum.net.", "")
                 status, output = commands.getstatusoutput("cli53 rrdelete "
-                                                          "ZXN2JBL17W6BS "
+                                                          "Z2M6JEL5C4DYRL "
                                                           "" + cname + " CNAME")
-                print ("Deleted CNAME: " + cname + ".fulcrum.net")
+                print ("Deleted CNAME: " + cname + ".skytap.fulcrum.net")
 
-        status, output = commands.getstatusoutput("cli53 rrdelete ZXN2JBL17W6BS"
-                                                  " " + dns_name + " A")
+        # status, output = commands.getstatusoutput("cli53 rrdelete Z2M6JEL5C4DYRL"
+        #                                           " " + dns_name + " A")
 
-        print ("Deleted record set: " + dns_name + ".fulcrum.net")
+        # print ("Deleted record set: " + dns_name + ".skytap.fulcrum.net")
 
         # If variable "create" is True, then do the second phase
         if not create:
             return
-
+        
         if vm_ip_us:
             created = False
+            quit_count = 0
             while not created:
                 status, output = commands.getstatusoutput("cli53 rrcreate "
-                                                          "ZXN2JBL17W6BS \'"
+                                                          "Z2M6JEL5C4DYRL \'"
                                                           "" + vm_hostname + "-"
-                                                          "" + str(e.id) + ".skytap"
+                                                          "" + str(e.id) + ""
                                                           " 3600 A " + vm_ip_us + ""
                                                           "\'")
-                time.sleep(1)
+                print ("Created. Checking...")
+                time.sleep(3)
                 status, output = commands.getstatusoutput("aws route53 "
                                                           "list-resource-record-sets "
                                                           "--hosted-zone-id "
-                                                          "/hostedzone/ZXN2JBL17W6BS")
+                                                          "/hostedzone/Z2M6JEL5C4DYRL")
                 data = json.loads(output)
 
                 for rrs in data["ResourceRecordSets"]:
                     if (rrs["ResourceRecords"][0]["Value"] == (vm_ip_us) and
                             rrs["Name"] == vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net."):
                         created = True
-            print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
+                        print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
+
+                quit_count += 1
+
         elif vm_ip_india:
             created = False
+            quit_count = 0
             while not created:
                 status, output = commands.getstatusoutput("cli53 rrcreate "
-                                                          "ZXN2JBL17W6BS \'"
+                                                          "Z2M6JEL5C4DYRL \'"
                                                           "" + vm_hostname + "-"
-                                                          "" + str(e.id) + ".skytap"
+                                                          "" + str(e.id) + ""
                                                           " 3600 A " + vm_ip_india + ""
                                                           "\'")
-                time.sleep(1)
+                print ("Created. Checking...")
+                time.sleep(3)
                 status, output = commands.getstatusoutput("aws route53 "
                                                           "list-resource-record-sets "
                                                           "--hosted-zone-id "
-                                                          "/hostedzone/ZXN2JBL17W6BS")
+                                                          "/hostedzone/Z2M6JEL5C4DYRL")
                 data = json.loads(output)
 
                 for rrs in data["ResourceRecordSets"]:
                     if (rrs["ResourceRecords"][0]["Value"] == (vm_ip_india) and
                             rrs["Name"] == vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net."):
                         created = True
-            print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
+                        print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
+
+                quit_count += 1
 
         env_dns_alias = None
 
@@ -108,29 +121,30 @@ def recreate_all_vm_dns(e, create):
 
         if env_dns_alias:
             created = False
+            quit_count = 0
             while not created:
                 status, output = commands.getstatusoutput("cli53 rrcreate "
-                                                          "ZXN2JBL17W6BS \'"
+                                                          "Z2M6JEL5C4DYRL \'"
                                                           "" + vm_hostname + "-"
                                                           "" + env_dns_alias + ""
-                                                          ".skytap 3600 CNAME "
+                                                          " 3600 CNAME "
                                                           "" + vm_hostname + "-"
-                                                          "" + str(e.id) + ".skytap\'")
+                                                          "" + str(e.id) + "\'")
                 time.sleep(1)
                 status, output = commands.getstatusoutput("aws route53 "
                                                           "list-resource-record-sets "
                                                           "--hosted-zone-id "
-                                                          "/hostedzone/ZXN2JBL17W6BS")
+                                                          "/hostedzone/Z2M6JEL5C4DYRL")
                 data = json.loads(output)
 
                 for rrs in data["ResourceRecordSets"]:
-                    if (rrs["ResourceRecords"][0]["Value"] == (vm_hostname + "-" + str(e.id) + ".skytap") and
-                            rrs["Name"] == vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net."):
+                    if ((vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net").lower() in rrs["ResourceRecords"][0]["Value"] and
+                            (vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net").lower() in rrs["Name"]):
                         created = True
-                    else:
-                        # Only do one cycle of this for now, otherwise it bugs up.
-                        created = True
-            print ("Created CNAME: " + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net")
+                        print ("Created CNAME: " + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net")
+
+                quit_count += 1
+
 
 def delete_listed_dns(name):
     """Delete DNS names as listed in a Confluence page."""
@@ -152,11 +166,11 @@ def delete_listed_dns(name):
             to_delete_cname.append(vm["title"][:vm["title"].find(" - ")] + "-" + cname + ".skytap")
 
     for vm in to_delete:
-        status, output = commands.getstatusoutput("cli53 rrdelete ZXN2JBL17W6BS"
+        status, output = commands.getstatusoutput("cli53 rrdelete Z2M6JEL5C4DYRL"
                                                   " " + vm + " A")
 
     for vm in to_delete_cname:
         status, output = commands.getstatusoutput("cli53 rrdelete "
-                                                  "ZXN2JBL17W6BS "
+                                                  "Z2M6JEL5C4DYRL "
                                                   "" + vm + " CNAME")
 

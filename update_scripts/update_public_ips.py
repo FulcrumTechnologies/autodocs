@@ -9,13 +9,13 @@ def clean_name(name):
 
 
 def start(envs, config_data):
-    """Print all environments with published services to a page."""
+    """Print all environments with public IPs to a page."""
     space = config_data["space"]
     other_docs_id = config_data["other_docs_id"]
 
-    content = "All environments with published services will be listed below.<br/>"
+    content = "Any and all environments with public IPs will be listed below.<br/>"
 
-    with open("update_scripts/update_services/service.html", "r") as f:
+    with open("update_scripts/update_public_ips/public_ips.html", "r") as f:
         t = Template(f.read())
 
     for e in envs:
@@ -24,7 +24,7 @@ def start(envs, config_data):
             vm_found = False
             for i in v.interfaces:
                 vm_hostname = i.hostname
-                for s in i.services:
+                for p in i.public_ips:
                     vm_list += vm_hostname + ", "
                     vm_found = True
                     break
@@ -36,9 +36,9 @@ def start(envs, config_data):
 
     print content
 
-    if content.strip() == pyco.get_page_content(pyco.get_page_id("Published Services", space)).strip():
+    if content.strip() == pyco.get_page_content(pyco.get_page_id("Public IPs", space)).strip():
         print ("Content has not changed; skipping update.")
         return
     else:
-        print pyco.edit_page(pyco.get_page_id("Published Services", space), "Published Services", space, content)
+        print pyco.edit_page(pyco.get_page_id("Public IPs", space), "Public IPs", space, content)
 

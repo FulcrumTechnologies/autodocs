@@ -12,8 +12,9 @@ def clean_string(text):
     return text
 
 
-def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
+def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, vm_ip_aus,
+             origin_ip_us, origin_ip_india, origin_ip_aus, pub_services,
+             pub_ips, env_name="", userdata=None):
     """Build load balancer HTML."""
     # VZW exceptions
     if (env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name) or (userdata is not None and "env_type" in userdata and str(userdata.env_type) == "weblogic"):
@@ -33,8 +34,9 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     # Load Balancer image
     img = "http://i.imgur.com/oAMkqDR.png"
 
-    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw, is_tmo, vm_hostname, userdata)
+    ip = build_ip(t, vm_ip_us, vm_ip_india, vm_ip_aus, origin_ip_us,
+                  origin_ip_india, origin_ip_aus, True, is_vzw, is_tmo,
+                  vm_hostname, userdata)
 
     with open("build_html/lb.html", "r") as f:
         t = Template(f.read())
@@ -44,8 +46,9 @@ def build_lb(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
                     pub_ips=pub_ips).strip("\n")
 
 
-def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-             origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
+def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, vm_ip_aus,
+             origin_ip_us, origin_ip_india, origin_ip_aus, pub_services,
+             pub_ips, env_name="", userdata=None):
     """Build database HTML."""
     if env_name.startswith("VZW") or (userdata is not None and "env_type" in userdata and str(userdata.env_type) == "weblogic"):
         is_vzw = True
@@ -63,8 +66,9 @@ def build_db(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/app_ip.html", "r") as f:
         t = Template(f.read())
 
-    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, True,
-                  is_vzw, is_tmo, None, userdata)
+    ip = build_ip(t, vm_ip_us, vm_ip_india, vm_ip_aus, origin_ip_us,
+                  origin_ip_india, origin_ip_aus, True, is_vzw, is_tmo, None,
+                  userdata)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -84,8 +88,9 @@ def build_nfs():
     pass
 
 
-def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
-              origin_ip_india, pub_services, pub_ips, env_name="", userdata=None):
+def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, vm_ip_aus,
+              origin_ip_us, origin_ip_india, origin_ip_aus, pub_services,
+              pub_ips, env_name="", userdata=None):
     """Build app/host/etc. HTML."""
     if (env_name.startswith("VZW") or "IOPS" in env_name or "CATS Interim Solution QA Environment" in env_name) or ((userdata is not None) and ("env_type" in userdata) and (str(userdata.env_type) == "weblogic")):
         is_vzw = True
@@ -103,8 +108,9 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
     with open("build_html/app_ip.html", "r") as f:
         t = Template(f.read())
 
-    ip = build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india,
-                  False, is_vzw, is_tmo, None, userdata)
+    ip = build_ip(t, vm_ip_us, vm_ip_india, vm_ip_aus, origin_ip_us,
+                  origin_ip_india, origin_ip_aus, False, is_vzw, is_tmo, None,
+                  userdata)
 
     with open("build_html/app.html", "r") as f:
         t = Template(f.read())
@@ -114,8 +120,9 @@ def build_app(vm_hostname, vm_name, vm_id, vm_ip_us, vm_ip_india, origin_ip_us,
                     pub_ips=pub_ips).strip("\n")
 
 
-def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
-             is_vzw, is_tmo, vm_hostname="", userdata=None):
+def build_ip(t, vm_ip_us, vm_ip_india, vm_ip_aus, origin_ip_us, origin_ip_india,
+             origin_ip_aus, is_short, is_vzw, is_tmo, vm_hostname="",
+             userdata=None):
     """Build IP info HTML."""
 
     # "Main" IP used for this VM block
@@ -147,6 +154,11 @@ def build_ip(t, vm_ip_us, vm_ip_india, origin_ip_us, origin_ip_india, is_short,
         loc = "India"
         ip = t.render(protocol=protocol, loc=loc, origin_ip=origin_ip_india,
                       ip=vm_ip_india)
+    elif vm_ip_aus != "":
+        good_ip = vm_ip_aus
+        loc = "AUS"
+        ip = t.render(protocol=protocol, loc=loc, origin_ip=origin_ip_aus,
+                      ip=vm_ip_aus)
     else:
         ip = ""
         good_ip = ip
@@ -267,8 +279,8 @@ def build_mob_details(mob_ver, apk_build, war_build):
                     war_build=war_build)
 
 
-def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
-                  db_sid, oracle_port):
+def build_db_info(oracle_user, db_ip_us, db_ip_india, db_ip_aus, db_schema,
+                  db_password, db_sid, oracle_port):
     """Build DB info HTML."""
     if db_ip_us != "":
         good_ip = db_ip_us
@@ -276,6 +288,9 @@ def build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema, db_password,
     elif db_ip_india != "":
         good_ip = db_ip_india
         loc = "India"
+    elif db_ip_aus != "":
+        good_ip = db_ip_aus
+        loc = "AUS"
     else:
         return ""
 
@@ -414,6 +429,7 @@ def build_env(e):
 
         vm_ip_us = ""
         vm_ip_india = ""
+        vm_ip_aus = ""
 
         # This is used to track number of public ips
         count = 0
@@ -434,6 +450,8 @@ def build_env(e):
                         vm_ip_us = n["ip_address"]
                     elif n["vpn_id"] == "vpn-3288770":
                         vm_ip_india = n["ip_address"]
+                    else:
+                        vm_ip_aus = n["ip_address"]
             except (KeyError, TypeError, IndexError):
                 vm_ip_us = i.ip
 
@@ -458,6 +476,7 @@ def build_env(e):
         # "Origin IP" is the *real* IP address (not the DNS name)
         origin_ip_us = ""
         origin_ip_india = ""
+        origin_ip_aus = ""
 
         # Construct IP that has DNS name
         if vm_ip_us != "":
@@ -472,9 +491,17 @@ def build_env(e):
                 vm_ip_india = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
             else:
                 vm_ip_india = "" + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net"
+        elif vm_ip_aus != "":
+            origin_ip_aus = vm_ip_aus
+            if not env_dns_alias:
+                vm_ip_aus = "" + vm_hostname + "-" + str(env_id) + ".skytap.fulcrum.net"
+            else:
+                vm_ip_aus = "" + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net"
+
 
         base_url_us = url + vm_ip_us
         base_url_india = url + vm_ip_india
+        base_url_aus = url + vm_ip_aus
 
         # Writing service information
         services_html = ""
@@ -507,8 +534,9 @@ def build_env(e):
         # If this VM is the load balancer...
         if vm_hostname == "lb":
             lb = build_lb(vm_hostname, vm_name, vm_id, vm_ip_us,
-                          vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html, env_name, e.user_data)
+                          vm_ip_india, vm_ip_aus, origin_ip_us, origin_ip_india,
+                          origin_ip_aus, services_html, pub_ips_html, env_name,
+                          e.user_data)
         elif vm_hostname == "db":
             # This data will be used shortly for creating the database table.
             # Some of this is currently unused.
@@ -516,6 +544,7 @@ def build_env(e):
             db_id = vm_id
             db_ip_us = vm_ip_us
             db_ip_india = vm_ip_india
+            db_ip_aus = vm_ip_aus
             db_user = vm_user
             db_pass = vm_pass
             db_ssh = ssh_enabled
@@ -527,34 +556,40 @@ def build_env(e):
             oracle_port = "1521"
 
             db = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
-                          vm_ip_india, origin_ip_us, origin_ip_india,
-                          services_html, pub_ips_html, env_name, e.user_data)
+                          vm_ip_india, vm_ip_aus, origin_ip_us, origin_ip_india,
+                          origin_ip_aus, services_html, pub_ips_html, env_name,
+                          e.user_data)
         elif (vm_hostname == "etl" or vm_hostname == "etl-db"):
             etl = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
-                           vm_ip_india, origin_ip_us, origin_ip_india,
+                           vm_ip_india, vm_ip_aus, origin_ip_us,
+                           origin_ip_india, origin_ip_aus,
                            services_html, pub_ips_html, env_name, e.user_data)
         elif vm_hostname == "nfs":
             nfs = build_db(vm_hostname, vm_name, vm_id, vm_ip_us,
-                           vm_ip_india, origin_ip_us, origin_ip_india,
-                           services_html, pub_ips_html, env_name, e.user_data)
+                           vm_ip_india, vm_ip_aus, origin_ip_us,
+                           origin_ip_india, origin_ip_aus, services_html,
+                           pub_ips_html, env_name, e.user_data)
         else:
             apps += build_app(vm_hostname, vm_name, vm_id, vm_ip_us,
-                              vm_ip_india, origin_ip_us, origin_ip_india,
-                              services_html, pub_ips_html, env_name, e.user_data)
+                              vm_ip_india, vm_ip_aus, origin_ip_us,
+                              origin_ip_india, origin_ip_aus, services_html,
+                              pub_ips_html, env_name, e.user_data)
 
         # This determines if a QR code should be written at the end.
         if vm_hostname == "app1" or vm_hostname == "app":
             has_app1 = vm_ip_us
             if vm_ip_us == "":
                 has_app1 = vm_ip_india
+                if vm_ip_india == "":
+                    has_app1 = vm_ip_aus
 
     # Build the stuff on the rightmost column
     userdata = build_userdata(e.user_data)
     add_details = build_add_details(e.runstate, env_id, user, password)
     mob_details = build_mob_details(mob_ver, apk_build, war_build)
     if db_exists:
-        db_info = build_db_info(oracle_user, db_ip_us, db_ip_india, db_schema,
-                                db_password, db_sid, oracle_port)
+        db_info = build_db_info(oracle_user, db_ip_us, db_ip_india, db_ip_aus,
+                                db_schema, db_password, db_sid, oracle_port)
 
     # Build QR stuff if there is at least one app VM in the environment
     if has_app1 != "":
@@ -614,6 +649,8 @@ def build_vm(v):
                     content += ("NAT IP (US): " + n["ip_address"] + "<br/>")
                 elif n["vpn_id"] == "vpn-3288770":
                     content += ("NAT IP (India): " + n["ip_address"] + "<br/>")
+                else:
+                    content += ("NAT IP (AUS): " + n["ip_address"] + "<br/>")
         except (KeyError, IndexError):
             content += ("NAT IP (US): " + i.ip + "<br/>")
 

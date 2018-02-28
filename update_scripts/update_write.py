@@ -85,7 +85,7 @@ def start(envs, config_data, name_filter=None):
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
             # Compare content, sans randomness
-            if cur_hour > 2 and cleaned_content_1 == cleaned_content_2:
+            if 1 == 2 and cur_hour > 2 and cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
@@ -101,9 +101,17 @@ def start(envs, config_data, name_filter=None):
             # Only mess with DNS stuff if environment page is changed.
             try:
                 skytapdns.recreate_all_vm_dns(e_copy_dns, True)
-            except ValueError:
+            except: # (ValueError, Exception):
                 print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
                        "INTERN ABOUT THIS FOR BEST RESULTS")
+                print ("Trying DNS process again...")
+
+                try:
+                    retry_dns = skytap.Environments()[e.id]
+                    skytapdns.recreate_all_vm_dns(retry_dns, True)
+                except ValueError:
+                    print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
+                           "INTERN ABOUT THIS FOR BEST RESULTS")
             # Create page
             print ("Writing content to Confluence for " + str(e.id) + "...")
             try:
@@ -114,6 +122,15 @@ def start(envs, config_data, name_filter=None):
                 result = json.loads(pyco.create_page(clean_name(e.name),
                                     parent_id, space, content))
                 print ("Write successfull!")
+                print ("You know what? Let's try DNS again, for good measure.")
+                try:
+                    retry_dns = skytap.Environments()[e.id]
+                    skytapdns.recreate_all_vm_dns(retry_dns, True)
+                except ValueError:
+                    print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
+                           "INTERN ABOUT THIS FOR BEST RESULTS")
+
+                print ("Now we're done. Blame this on the AWS API.")
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
@@ -124,3 +141,4 @@ def start(envs, config_data, name_filter=None):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
+

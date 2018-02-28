@@ -5,6 +5,7 @@ from update_scripts import update_aliases
 from update_scripts import update_india
 from update_scripts import update_purge
 from update_scripts import update_services
+from update_scripts import update_public_ips
 from update_scripts import update_shutdown_times
 from update_scripts import update_write
 
@@ -55,6 +56,10 @@ def start(args):
         os.system("clear")
         print ("Writing Services wiki page.")
         update_services.start(envs, config_data)
+    elif (args[1] == "ips"):
+        os.system("clear")
+        print ("Writing Public IPs wiki page.")
+        update_public_ips.start(envs, config_data)
     elif (args[1] == "aliases"):
         os.system("clear")
         print ("Writing Aliases wiki page.")
