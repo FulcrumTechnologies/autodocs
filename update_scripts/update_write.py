@@ -32,23 +32,25 @@ def clean_content(content):
 def start(envs, config_data, name_filter=None):
     """Write Confluence pages for Skytap environments."""
 
-    cur_hour = int(time.strftime("%H"))
-    print ("Current hour: " + str(cur_hour))
+    # This is to keep track of when
+    # cur_hour = int(time.strftime("%H"))
+    # print ("Current hour: " + str(cur_hour))
 
     # Make sure you've configured config.yml! Else, this will crash the process.
     space = config_data["space"]
     parent_id = config_data["parent_id"]
     other_docs_id = config_data["other_docs_id"]
 
-    # Just counting up the total number, for stats and numbers and things
+    # Just counting up the stats
     env_all = 0
     env_written = 0
     env_failed = 0
 
     # Get second set of Skytap environment objects.
-    # Temporary solution to the "for loop destroying envs list" problem
-    copy_envs_dns = skytap.Environments()
+    # NOTE: This is a workaround to a bug with the Skytap API wrapper.
+    envs_set_2 = skytap.Environments()
 
+    open("dns.log", "w").close()
     for e in envs:
         # If user gave a name filter in parameters, then check for that in name
         if name_filter and name_filter not in e.name:
@@ -60,7 +62,7 @@ def start(envs, config_data, name_filter=None):
 
         # Get copies of environment object from copy_envs to deal with dns stuff
         # and vms stuff
-        e_copy_dns = copy_envs_dns[e.id]
+        e_copy_dns = envs_set_2[e.id]
 
         # Use build_page.py to construct XHTML source based on info about e
         print ("Fetching current environment information...")
@@ -85,7 +87,7 @@ def start(envs, config_data, name_filter=None):
             cleaned_content_2 = clean_content(pyco.get_page_content(env_page_id))
 
             # Compare content, sans randomness
-            if 1 == 2 and cur_hour > 2 and cleaned_content_1 == cleaned_content_2:
+            if cleaned_content_1 == cleaned_content_2:
                 print ("Page for " + str(e.id) + " exists but there is nothing "
                        "to change.\nSkipping...")
                 continue
@@ -95,23 +97,11 @@ def start(envs, config_data, name_filter=None):
         except IndexError:
             # No page found, so we want to write one. Continue on!
             print ("No page found for " + str(e.id) + ".")
-            pass
 
         try:
-            # Only mess with DNS stuff if environment page is changed.
-            try:
-                skytapdns.recreate_all_vm_dns(e_copy_dns, True)
-            except: # (ValueError, Exception):
-                print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
-                       "INTERN ABOUT THIS FOR BEST RESULTS")
-                print ("Trying DNS process again...")
+            # Create/update DNS names.
+            skytapdns.recreate_all_vm_dns(e_copy_dns)
 
-                try:
-                    retry_dns = skytap.Environments()[e.id]
-                    skytapdns.recreate_all_vm_dns(retry_dns, True)
-                except ValueError:
-                    print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
-                           "INTERN ABOUT THIS FOR BEST RESULTS")
             # Create page
             print ("Writing content to Confluence for " + str(e.id) + "...")
             try:
@@ -122,15 +112,6 @@ def start(envs, config_data, name_filter=None):
                 result = json.loads(pyco.create_page(clean_name(e.name),
                                     parent_id, space, content))
                 print ("Write successfull!")
-                print ("You know what? Let's try DNS again, for good measure.")
-                try:
-                    retry_dns = skytap.Environments()[e.id]
-                    skytapdns.recreate_all_vm_dns(retry_dns, True)
-                except ValueError:
-                    print ("ERROR: JSON VALUES COULDN'T BE FOUND, GO BOTHER THE "
-                           "INTERN ABOUT THIS FOR BEST RESULTS")
-
-                print ("Now we're done. Blame this on the AWS API.")
         except TypeError:
             # Can't parse this because of "oops!" message, just continue to next
             # Reasons for this: parent_id not valid, name not valid ("+", "/")
@@ -141,4 +122,3 @@ def start(envs, config_data, name_filter=None):
     print ("Total environments: " + str(env_all))
     print ("Total environments written: " + str(env_written))
     print ("Total environments failed: " + str(env_failed))
-

@@ -9,12 +9,76 @@ from update_scripts import update_public_ips
 from update_scripts import update_shutdown_times
 from update_scripts import update_write
 
+def write(args, envs, config_data, number, name=None):
+    """Begin process of writing wiki pages."""
+    os.system("clear")
+    if len(args) < 3:
+        if number == 1 or args[1] == "write":
+            print ("Writing wiki pages.")
+            update_write.start(envs, config_data)
+            return
+        elif number == 2:
+            name = raw_input("Enter a single word. All environments with this "
+                             "word in their title will be updated:")
+
+    # If a name was not given by the user, establish the input arg as the name.
+    if not name:
+        name = args[2]
+
+    print ("Writing wiki pages for all environments with \""
+           "" + name + "\" in the name.")
+    update_write.start(envs, config_data, name)
+
+
+def purge(envs, config_data):
+    """Begin process of purging pages for nonexistent environments."""
+    os.system("clear")
+    print ("Purging wiki pages for nonexistent environments.")
+    update_purge.start(envs, config_data)
+
+
+def india(envs, config_data):
+    """Begin process of updating India environments page."""
+    os.system("clear")
+    print ("Writing India wiki page.")
+    update_india.start(envs, config_data)
+
+
+def services(envs, config_data):
+    """Begin process of updating published services page."""
+    os.system("clear")
+    print ("Writing Services wiki page.")
+    update_services.start(envs, config_data)
+
+
+def ips(envs, config_data):
+    """Begin process of updating public IPs page."""
+    os.system("clear")
+    print ("Writing Public IPs wiki page.")
+    update_public_ips.start(envs, config_data)
+
+
+def aliases(envs, config_data):
+    """Begin process of updating DNS aliases page."""
+    os.system("clear")
+    print ("Writing Aliases wiki page.")
+    update_aliases.start(envs, config_data)
+
+
+def shutdown_times(envs, config_data):
+    """Begin process of updating shutdown times pages."""
+    os.system("clear")
+    print ("Writing Shutdown Times wiki page.")
+    update_shutdown_times.start(envs, config_data)
+
 
 def start(args):
-    """Redirect to update function based on args."""
+    """Redirect to update function based on input given."""
 
+    # Get all environments from Skytap
     envs = skytap.Environments()
 
+    # Import yaml and yada yada yada
     try:
         import yaml
     except ImportError:
@@ -33,41 +97,54 @@ def start(args):
                          "template.yml and follow the listed guidelines.\n")
         exit(1)
 
+    number = None
+
+    # Welcome text, if user types "python update.py"
+    if (len(args) == 1):
+        args.append(None) # Putting a dummy element in args for later on
+        options = 8 # Number of options available here
+        os.system("clear")
+        print ("Welcome to Autodocs!")
+        print ("To run a function, please enter the appropriate number below.")
+        print ("\n------------------\n")
+        print ("1 - Update wiki pages and DNS settings")
+        print ("2 - Update the wiki page and DNS settings of specific "
+               "environment(s)")
+        print ("3 - Purge wiki space of pages for nonexistent environments")
+        print ("4 - Update India environments wiki page")
+        print ("5 - Update published services wiki page")
+        print ("6 - Update public IPs wiki page")
+        print ("7 - Update DNS aliases wiki page")
+        print ("8 - Update shutdown times wiki pages")
+        print ("\n------------------\n")
+
+        while not number:
+            number = raw_input("Type the number of the function you wish to "
+                               "run:")
+            try:
+                number = int(number)
+                if number > options:
+                    number = None
+            except ValueError:
+                print ("Dude.")
+                number = None
+
     # Go to specific functions based on passed arguments
     # Ex. "python update.py write" or "python update.py services"
-    if (args[1] == "write"):
-        os.system("clear")
-        if len(args) < 3:
-            print ("Writing wiki pages.")
-            update_write.start(envs, config_data)
-        else:
-            print ("Writing wiki pages for all environments with \""
-                   "" + args[2] + "\" in the name.")
-            update_write.start(envs, config_data, args[2].strip())
-    elif (args[1] == "purge"):
-        os.system("clear")
-        print ("Purging wiki pages for nonexistent environments.")
-        update_purge.start(envs, config_data)
-    elif (args[1] == "india"):
-        os.system("clear")
-        print ("Writing India wiki page.")
-        update_india.start(envs, config_data)
-    elif (args[1] == "services"):
-        os.system("clear")
-        print ("Writing Services wiki page.")
-        update_services.start(envs, config_data)
-    elif (args[1] == "ips"):
-        os.system("clear")
-        print ("Writing Public IPs wiki page.")
-        update_public_ips.start(envs, config_data)
-    elif (args[1] == "aliases"):
-        os.system("clear")
-        print ("Writing Aliases wiki page.")
-        update_aliases.start(envs, config_data)
-    elif (args[1] == "shutdown_times"):
-        os.system("clear")
-        print ("Writing Shutdown Times wiki page.")
-        update_shutdown_times.start(envs, config_data)
+    if ((number == 1 or number == 2) or args[1] == "write"):
+        write(args, envs, config_data, number)
+    elif (number == 3 or args[1] == "purge"):
+        purge(envs, config_data)
+    elif (number == 4 or args[1] == "india"):
+        india(envs, config_data)
+    elif (number == 5 or args[1] == "services"):
+        services(envs, config_data)
+    elif (number == 6 or args[1] == "ips"):
+        ips(envs, config_data)
+    elif (number == 7 or args[1] == "aliases"):
+        aliases(envs, config_data)
+    elif (number == 8 or args[1] == "shutdown_times"):
+        shutdown_times(envs, config_data)
     else:
         print ("Command not recognized.")
 
@@ -76,4 +153,3 @@ def start(args):
 
 if __name__ == '__main__':
     start(sys.argv)
-

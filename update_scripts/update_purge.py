@@ -33,7 +33,7 @@ def start(envs, config_data):
             print ("Deleting " + w + "..."),
             try:
                 pyco.delete_page_full(pyco.get_page_id(w, space))
-                skytapdns.delete_listed_dns(w)
+                #skytapdns.delete_listed_dns(w)
                 print ("done.")
             except ValueError:
                 print ("cannot interact with pages whose names include \"+\".")

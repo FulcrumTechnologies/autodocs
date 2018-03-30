@@ -1,0 +1,18 @@
+{
+  "Comment": "Making a DNS name, don't mind me",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "DNS_NAME",
+        "Type": "A",
+        "TTL": 3600,
+        "ResourceRecords": [
+          {
+            "Value": "VALUE_NAME"
+          }
+        ]
+      }
+    }
+  ]
+}

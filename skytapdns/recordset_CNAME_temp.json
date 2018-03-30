@@ -1,0 +1,18 @@
+{
+  "Comment": "Making a CNAME, don't mind me",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "app1-vzwsmoke.skytap.fulcrum.net",
+        "Type": "CNAME",
+        "TTL": 3600,
+        "ResourceRecords": [
+          {
+            "Value": "app1-12063984.skytap.fulcrum.net"
+          }
+        ]
+      }
+    }
+  ]
+}

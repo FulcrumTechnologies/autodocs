@@ -16,7 +16,7 @@ def list_garbage():
     status, output = commands.getstatusoutput("aws route53 "
                                               "list-resource-record-sets "
                                               "--hosted-zone-id "
-                                              "/hostedzone/ZXN2JBL17W6BS")
+                                              "/hostedzone/Z2M6JEL5C4DYRL")
 
     all_dns = json.loads(output)
 
@@ -56,4 +56,3 @@ def list_garbage():
 
 if __name__ == "__main__":
     list_garbage()
-

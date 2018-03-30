@@ -1,0 +1,41 @@
+[2018-03-30 11:00:25] Successfully created record set for lb.
+[2018-03-30 11:00:25] Beginning to create CNAME for lb.
+[2018-03-30 11:00:25] Requesting creation of lb CNAME.
+[2018-03-30 11:00:28] Checking to see if record set status for lb is still pending.
+[2018-03-30 11:01:22] Successfully created CNAME for lb.
+[2018-03-30 11:01:23] Beginning to create record set for nfs.
+[2018-03-30 11:01:23] Requesting creation of nfs record set.
+[2018-03-30 11:01:26] Checking to see if the record set status for nfs is still pending.
+[2018-03-30 11:02:31] Successfully created record set for nfs.
+[2018-03-30 11:02:31] Beginning to create CNAME for nfs.
+[2018-03-30 11:02:31] Requesting creation of nfs CNAME.
+[2018-03-30 11:02:34] Checking to see if record set status for nfs is still pending.
+
+
+
+[2018-03-30 11:02:42] Starting DNS writing function for DEV Services.
+[2018-03-30 11:02:48] Finished setting up DNS settings for this environment.
+[2018-03-30 11:03:39] Successfully created CNAME for nfs.
+[2018-03-30 11:03:40] Beginning to create record set for etl-db.
+[2018-03-30 11:03:40] Requesting creation of etl-db record set.
+[2018-03-30 11:03:43] Checking to see if the record set status for etl-db is still pending.
+[2018-03-30 11:04:48] Successfully created record set for etl-db.
+[2018-03-30 11:04:48] Beginning to create CNAME for etl-db.
+[2018-03-30 11:04:48] Requesting creation of etl-db CNAME.
+[2018-03-30 11:04:51] Checking to see if record set status for etl-db is still pending.
+[2018-03-30 11:05:56] Successfully created CNAME for etl-db.
+[2018-03-30 11:05:57] Beginning to create record set for app2.
+[2018-03-30 11:05:57] Requesting creation of app2 record set.
+[2018-03-30 11:05:59] Checking to see if the record set status for app2 is still pending.
+[2018-03-30 11:06:54] Successfully created record set for app2.
+[2018-03-30 11:06:54] Beginning to create CNAME for app2.
+[2018-03-30 11:06:54] Requesting creation of app2 CNAME.
+[2018-03-30 11:06:57] Checking to see if record set status for app2 is still pending.
+[2018-03-30 11:07:51] Successfully created CNAME for app2.
+[2018-03-30 11:07:53] Beginning to create record set for app1.
+[2018-03-30 11:07:53] Requesting creation of app1 record set.
+[2018-03-30 11:07:55] Checking to see if the record set status for app1 is still pending.
+[2018-03-30 11:08:50] Successfully created record set for app1.
+[2018-03-30 11:08:50] Beginning to create CNAME for app1.
+[2018-03-30 11:08:50] Requesting creation of app1 CNAME.
+[2018-03-30 11:08:52] Checking to see if record set status for app1 is still pending.

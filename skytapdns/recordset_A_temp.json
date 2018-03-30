@@ -1,0 +1,18 @@
+{
+  "Comment": "Making a DNS name, don't mind me",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "app1-12063984.skytap.fulcrum.net",
+        "Type": "A",
+        "TTL": 3600,
+        "ResourceRecords": [
+          {
+            "Value": "172.16.0.61"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "Comment": "Making a CNAME, don't mind me",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "DNS_NAME",
+        "Type": "CNAME",
+        "TTL": 3600,
+        "ResourceRecords": [
+          {
+            "Value": "VALUE_NAME"
+          }
+        ]
+      }
+    }
+  ]
+}

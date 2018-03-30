@@ -54,48 +54,36 @@ def recreate_all_vm_dns(e):
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 with open("dns.log", "a") as logfile:
                     logfile.write("[" + timestamp + "] Requesting creation of " + vm_hostname + " record set.\n")
-
-                with open("skytapdns/recordset_A.json", "r") as file:
-                    filedata = file.read()
-
-                filedata = filedata.replace("DNS_NAME", vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
-                filedata = filedata.replace("VALUE_NAME", ip)
-
-                with open("skytapdns/recordset_A_temp.json", "w") as file:
-                    file.write(filedata)
-
-                status, output = commands.getstatusoutput("aws route53 change-"
-                                                          "resource-record-sets"
-                                                          " --hosted-zone-id "
-                                                          "Z2M6JEL5C4DYRL "
-                                                          "--change-batch file://"
-                                                          "~/autodocs/skytapdns"
-                                                          "/recordset_A_temp.json")
-
+                status, output = commands.getstatusoutput("cli53 rrcreate "
+                                                          "Z2M6JEL5C4DYRL \'"
+                                                          "" + vm_hostname + "-"
+                                                          "" + str(e.id) + ""
+                                                          " 3600 A " + ip + ""
+                                                          "\'")
                 time.sleep(2)
-
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                with open("dns.log", "a") as logfile:
+                    logfile.write("[" + timestamp + "] Requesting list of all record sets to check for creation success.\n")
+                status, output = commands.getstatusoutput("aws route53 "
+                                                          "list-resource-record-sets "
+                                                          "--hosted-zone-id "
+                                                          "/hostedzone/Z2M6JEL5C4DYRL")
                 try:
                     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     with open("dns.log", "a") as logfile:
-                        logfile.write("[" + timestamp + "] Checking to see if the record set status for " + vm_hostname + " is still pending.\n")
+                        logfile.write("[" + timestamp + "] Checking record set list for instance of " + vm_hostname + " record set.\n")
 
-                    status_id = json.loads(output)["ChangeInfo"]["Id"]
+                    data = json.loads(output)
+                    for rrs in data["ResourceRecordSets"]:
+                        if (rrs["ResourceRecords"][0]["Value"] == (ip) and
+                                rrs["Name"] == vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net."):
+                            created = True
 
-                    status = "blah"
-                    while (status != "INSYNC"):
-                        status, output = commands.getstatusoutput("aws route53 get-change --id " + status_id)
+                            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            with open("dns.log", "a") as logfile:
+                                logfile.write("[" + timestamp + "] Successfully created record set for " + vm_hostname + ".\n")
 
-                        status = json.loads(output)["ChangeInfo"]["Status"]
-
-                        time.sleep(10)
-
-                    created = True
-
-                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    with open("dns.log", "a") as logfile:
-                        logfile.write("[" + timestamp + "] Successfully created record set for " + vm_hostname + ".\n")
-
-                    print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
+                            print ("Created record set: " + vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
 
                 except: # If an exception is caught, then we'll try again.
                     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -125,48 +113,37 @@ def recreate_all_vm_dns(e):
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 with open("dns.log", "a") as logfile:
                     logfile.write("[" + timestamp + "] Requesting creation of " + vm_hostname + " CNAME.\n")
-
-                with open("skytapdns/recordset_CNAME.json", "r") as file:
-                    filedata = file.read()
-
-                filedata = filedata.replace("DNS_NAME", vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net")
-                filedata = filedata.replace("VALUE_NAME", vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net")
-
-                with open("skytapdns/recordset_CNAME_temp.json", "w") as file:
-                    file.write(filedata)
-
-                status, output = commands.getstatusoutput("aws route53 change-"
-                                                          "resource-record-sets"
-                                                          " --hosted-zone-id "
-                                                          "Z2M6JEL5C4DYRL "
-                                                          "--change-batch file://"
-                                                          "~/autodocs/skytapdns"
-                                                          "/recordset_CNAME_temp.json")
-
+                status, output = commands.getstatusoutput("cli53 rrcreate "
+                                                          "Z2M6JEL5C4DYRL \'"
+                                                          "" + vm_hostname + "-"
+                                                          "" + env_dns_alias + ""
+                                                          " 3600 CNAME "
+                                                          "" + vm_hostname + "-"
+                                                          "" + str(e.id) + "\'")
                 time.sleep(2)
-
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                with open("dns.log", "a") as logfile:
+                    logfile.write("[" + timestamp + "] Requesting list of all record sets to check for creation success.\n")
+                status, output = commands.getstatusoutput("aws route53 "
+                                                          "list-resource-record-sets "
+                                                          "--hosted-zone-id "
+                                                          "/hostedzone/Z2M6JEL5C4DYRL")
                 try:
                     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     with open("dns.log", "a") as logfile:
-                        logfile.write("[" + timestamp + "] Checking to see if record set status for " + vm_hostname + " is still pending.\n")
+                        logfile.write("[" + timestamp + "] Checking record set list for instance of " + vm_hostname + " CNAME.\n")
 
-                    status_id = json.loads(output)["ChangeInfo"]["Id"]
+                    data = json.loads(output)
+                    for rrs in data["ResourceRecordSets"]:
+                        if ((vm_hostname + "-" + str(e.id) + ".skytap.fulcrum.net").lower() in rrs["ResourceRecords"][0]["Value"] and
+                                (vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net").lower() in rrs["Name"]):
+                            created = True
 
-                    status = "blah"
-                    while (status != "INSYNC"):
-                        status, output = commands.getstatusoutput("aws route53 get-change --id " + status_id)
+                            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            with open("dns.log", "a") as logfile:
+                                logfile.write("[" + timestamp + "] Successfully created CNAME for " + vm_hostname + ".\n")
 
-                        status = json.loads(output)["ChangeInfo"]["Status"]
-
-                        time.sleep(10)
-
-                    created = True
-
-                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    with open("dns.log", "a") as logfile:
-                        logfile.write("[" + timestamp + "] Successfully created CNAME for " + vm_hostname + ".\n")
-
-                    print ("Created CNAME: " + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net")
+                            print ("Created CNAME: " + vm_hostname + "-" + env_dns_alias + ".skytap.fulcrum.net")
                 except:
                     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     with open("dns.log", "a") as logfile:
