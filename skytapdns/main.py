@@ -27,6 +27,8 @@ def recreate_all_vm_dns(e):
 
     for v in e.vms:
         for i in v.interfaces:
+            if (str(i.hostname) == "None" ):
+                continue
             vm_hostname = i.hostname
             int_data = json.loads(i.json())
             try:
