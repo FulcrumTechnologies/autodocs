@@ -440,6 +440,8 @@ def build_env(e):
         # Some information can only be retrieved from interfaces
         # This is how we determine if VPN is India or US
         for i in v.interfaces:
+            if (str(i.hostname) == "None" ):
+                continue
             vm_hostname = i.hostname
             int_data = json.loads(i.json())
             # VPN: India or US?
