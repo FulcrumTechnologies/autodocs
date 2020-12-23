@@ -3,6 +3,7 @@ import skytap
 import sys
 from update_scripts import update_aliases
 from update_scripts import update_india
+from update_scripts import update_write_SP
 from update_scripts import update_purge
 from update_scripts import update_services
 from update_scripts import update_public_ips
@@ -35,6 +36,13 @@ def purge(envs, config_data):
     os.system("clear")
     print ("Purging wiki pages for nonexistent environments.")
     update_purge.start(envs, config_data)
+
+
+def htmlout(envs, config_data):
+    """Begin process of updating India environments page PlainText."""
+    os.system("clear")
+    print ("Writing India Special TEXT page.")
+    update_write_SP.start(envs, config_data)
 
 
 def india(envs, config_data):
@@ -102,7 +110,7 @@ def start(args):
     # Welcome text, if user types "python update.py"
     if (len(args) == 1):
         args.append(None) # Putting a dummy element in args for later on
-        options = 8 # Number of options available here
+        options = 9 # Number of options available here
         os.system("clear")
         print ("Welcome to Autodocs!")
         print ("To run a function, please enter the appropriate number below.")
@@ -116,6 +124,7 @@ def start(args):
         print ("6 - Update public IPs wiki page")
         print ("7 - Update DNS aliases wiki page")
         print ("8 - Update shutdown times wiki pages")
+        print ("9 - Write HTML pages to post to SharePoint")
         print ("\n------------------\n")
 
         while not number:
@@ -145,6 +154,8 @@ def start(args):
         aliases(envs, config_data)
     elif (number == 8 or args[1] == "shutdown_times"):
         shutdown_times(envs, config_data)
+    elif (number == 9 or args[1] == "htmlout"):
+        htmlout(envs, config_data)
     else:
         print ("Command not recognized.")
 

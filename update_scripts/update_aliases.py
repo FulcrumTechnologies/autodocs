@@ -55,11 +55,11 @@ def start(envs, config_data):
             t = Template(f.read())
         content += t.render() + end_content
 
-    print content
+    print (content)
 
     if content.strip() == pyco.get_page_content(pyco.get_page_id("Environment DNS Aliases", space)).strip():
         print ("Content has not changed; skipping update.")
         return
     else:
-        print pyco.edit_page(pyco.get_page_id("Environment DNS Aliases", space), "Environment DNS Aliases", space, content)
+        print (pyco.edit_page(pyco.get_page_id("Environment DNS Aliases", space), "Environment DNS Aliases", space, content))
 

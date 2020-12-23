@@ -382,7 +382,7 @@ def build_env(e):
     war_build = "?"
 
     # This goes at the top of every environment page
-    comment = ("Maintained by AutoDocs; any changes made on this page will be "
+    comment = ("<h2>"+env_name+"</h2><p>Maintained by AutoDocs; any changes made on this page will be "
                "undone on the next iteration.")
 
     # Essentially dummy string variables for parts of the page
