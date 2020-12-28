@@ -38,11 +38,27 @@ def purge(envs, config_data):
     update_purge.start(envs, config_data)
 
 
-def htmlout(envs, config_data):
-    """Begin process of updating India environments page PlainText."""
+def htmlout(args, envs, config_data,number,name=None):
+    """Begin process of writing wiki pages."""
     os.system("clear")
-    print ("Writing India Special TEXT page.")
-    update_write_SP.start(envs, config_data)
+    if len(args) < 3:
+        if args[1] == "htmlout":
+            print ("Writing Individual wiki pages for upload to SharePoint.")
+            update_write_SP.start(envs, config_data)
+            return
+        elif number == 9:
+            name = raw_input("Enter a single word. All environments with this "
+                             "word in their title will be updated:")
+
+    # If a name was not given by the user, establish the input arg as the name.
+    if not name:
+        name = args[2]
+
+    print ("Writing HTML pages for all environments with \""
+           "" + name + "\" in the name.")
+    update_write_SP.start(envs, config_data, name)
+
+
 
 
 def india(envs, config_data):
@@ -155,7 +171,7 @@ def start(args):
     elif (number == 8 or args[1] == "shutdown_times"):
         shutdown_times(envs, config_data)
     elif (number == 9 or args[1] == "htmlout"):
-        htmlout(envs, config_data)
+        htmlout(args, envs, config_data, number)
     else:
         print ("Command not recognized.")
 
